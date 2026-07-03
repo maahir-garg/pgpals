@@ -16,29 +16,34 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-dvh w-full flex-col bg-background pb-20 md:pb-8">
-      <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/85">
+      <header className="sticky top-0 z-30 bg-primary text-primary-foreground shadow-sm">
         <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3 px-4 py-3 md:max-w-6xl">
           <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
             <span
-              className="grid size-8 shrink-0 place-items-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground"
+              className="grid size-8 shrink-0 place-items-center rounded-md bg-primary-foreground/15 text-sm font-extrabold text-primary-foreground"
               aria-hidden
             >
               PG
             </span>
-            <span className="text-lg font-extrabold tracking-tight text-primary">
+            <span className="text-lg font-extrabold tracking-tight text-primary-foreground">
               PGPals
             </span>
           </Link>
           <TopNav />
           <div className="flex shrink-0 items-center gap-2">
             {profile.team_id && (
-              <span className="flex items-center gap-1 rounded-md bg-secondary px-2.5 py-1.5 text-sm font-bold text-secondary-foreground">
+              <span className="flex items-center gap-1 rounded-md bg-primary-foreground/15 px-2.5 py-1.5 text-sm font-bold text-primary-foreground">
                 <Star className="size-3.5 fill-current" aria-hidden />
                 {score ?? 0} pts
               </span>
             )}
             {profile.role === "admin" && (
-              <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="hidden border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground sm:inline-flex"
+              >
                 <Link href="/admin">
                   <Shield className="size-3.5" aria-hidden />
                   Admin
@@ -49,7 +54,7 @@ export default async function AppLayout({
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-muted-foreground"
+                className="text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground"
               >
                 <LogOut className="size-3.5" aria-hidden />
                 Log out

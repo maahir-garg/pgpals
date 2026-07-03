@@ -1,4 +1,17 @@
 import Link from "next/link";
+import {
+  Camera,
+  CheckCircle2,
+  CircleHelp,
+  Clock3,
+  Handshake,
+  Medal,
+  Sparkles,
+  Target,
+  Trophy,
+  UsersRound,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -26,26 +39,35 @@ async function getPublicSettings(): Promise<EventSettings | null> {
 
 const STEPS = [
   {
-    emoji: "👯",
+    icon: UsersRound,
     title: "Find your pal",
     text: "You and your assigned buddy are a team of two. Sign up with your NUS email and you're linked automatically.",
+    links: ["NUS email signup", "Buddy assignment", "Team name setup"],
   },
   {
-    emoji: "🎯",
+    icon: Target,
     title: "Pick a task",
     text: "New tasks drop throughout the two weeks. Sunrise missions, food quests, mini games with other teams.",
+    links: ["Daily tasks", "Pair quests", "Early bonuses"],
   },
   {
-    emoji: "📸",
+    icon: Camera,
     title: "Snap your proof",
     text: "Do the thing, take a photo, add a caption and send it in. Straight from your phone, no printouts, no forms.",
+    links: ["Photo upload", "RA review", "Resubmission notes"],
   },
   {
-    emoji: "🏆",
+    icon: Trophy,
     title: "Climb the board",
     text: "RAs review your proof and award points. Watch your team rise on the live leaderboard.",
+    links: ["Live rankings", "Point history", "Final reveal"],
   },
-];
+] satisfies {
+  icon: LucideIcon;
+  title: string;
+  text: string;
+  links: string[];
+}[];
 
 const FAQS = [
   {
@@ -79,29 +101,32 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-background">
-      <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
+      <header className="sticky top-0 z-30 bg-primary text-primary-foreground shadow-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
-            <span
-              className="grid size-8 place-items-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground"
-              aria-hidden
-            >
-              PG
-            </span>
-            <span className="text-lg font-extrabold tracking-tight text-primary">
-              PGPals
-            </span>
+          <Link
+            href="/"
+            className="text-xl font-extrabold tracking-tight text-primary-foreground"
+          >
+            PGPals
           </Link>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-muted-foreground sm:flex">
-            <a href="#how" className="hover:text-foreground">
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-primary-foreground/75 sm:flex">
+            <a href="#how" className="hover:text-primary-foreground">
               How it works
             </a>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost">
+            <Button
+              asChild
+              variant="ghost"
+              className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+            >
               <Link href="/login">Log in</Link>
             </Button>
-            <Button asChild>
+            <Button
+              asChild
+              variant="secondary"
+              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+            >
               <Link href="/signup">Sign up</Link>
             </Button>
           </div>
@@ -110,21 +135,26 @@ export default async function LandingPage() {
 
       <main className="mx-auto max-w-5xl px-4">
         {/* hero */}
-        <section className="flex flex-col items-center py-12 text-center sm:py-16">
+        <section className="flex flex-col items-center py-12 text-center sm:py-14">
+          <span
+            className="mb-5 grid size-12 place-items-center rounded-lg bg-secondary text-primary shadow-sm ring-1 ring-border"
+            aria-hidden
+          >
+            <Sparkles className="size-6" />
+          </span>
           {settings && (
             <span className="mb-5 inline-flex rounded-md border bg-card px-4 py-1.5 text-sm font-semibold text-muted-foreground shadow-sm">
               {formatSGTDate(settings.start_at)} to{" "}
               {formatSGTDate(settings.end_at)} · PGP Residences
             </span>
           )}
-          <h1 className="max-w-2xl text-balance text-4xl font-extrabold tracking-tight sm:text-6xl">
-            Two weeks. One buddy.{" "}
-            <span className="text-primary">All the bragging rights.</span>
+          <h1 className="max-w-2xl text-balance text-5xl font-extrabold tracking-tight sm:text-6xl">
+            PGPals
           </h1>
           <p className="mt-5 max-w-xl text-pretty text-lg text-muted-foreground">
-            PGPals is PGPR&apos;s buddy challenge. Team up with your assigned
-            pal, complete photo tasks around campus, earn points and race the
-            other teams to the top of the board.
+            Two weeks, one buddy, and a campus full of photo quests. Complete
+            tasks around PGPR, earn points, and race other teams to the final
+            leaderboard reveal.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg" className="px-8 text-base">
@@ -144,7 +174,7 @@ export default async function LandingPage() {
               (chip) => (
                 <span
                   key={chip}
-                  className="rounded-md border bg-card px-3.5 py-1.5 shadow-sm"
+                  className="rounded-md border bg-card px-3.5 py-1.5 text-muted-foreground shadow-sm"
                 >
                   {chip}
                 </span>
@@ -158,25 +188,43 @@ export default async function LandingPage() {
           <h2 className="text-center text-3xl font-extrabold tracking-tight">
             How it works
           </h2>
-          <p className="mx-auto mt-2 max-w-md text-center text-muted-foreground">
-            Four steps between you and leaderboard glory.
+          <p className="mx-auto mt-2 max-w-lg text-center text-muted-foreground">
+            The whole game is four plain steps, with enough structure to know
+            what to do next.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
-            <Card key={s.title}>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-2">
-                    <span className="grid size-11 place-items-center rounded-md bg-primary/10 text-2xl">
-                      {s.emoji}
+              <Card
+                key={s.title}
+                className="transition-colors hover:bg-secondary/40"
+              >
+                <CardContent className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-md bg-secondary text-primary">
+                      <s.icon className="size-5" aria-hidden />
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      Step {i + 1}
-                    </span>
+                    <div className="min-w-0">
+                      <span className="text-xs font-bold uppercase text-muted-foreground">
+                        Step {i + 1}
+                      </span>
+                      <h3 className="mt-1 text-lg font-bold">{s.title}</h3>
+                    </div>
                   </div>
-                  <h3 className="mt-3 text-lg font-bold">{s.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    {s.text}
-                  </p>
+                  <p className="text-sm leading-6 text-muted-foreground">{s.text}</p>
+                  <ul className="space-y-2 border-t pt-3">
+                    {s.links.map((link) => (
+                      <li
+                        key={link}
+                        className="flex items-center gap-2 text-sm font-semibold"
+                      >
+                        <CheckCircle2
+                          className="size-4 shrink-0 text-primary"
+                          aria-hidden
+                        />
+                        {link}
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             ))}
@@ -186,64 +234,86 @@ export default async function LandingPage() {
         {/* points and the finale */}
         <section className="py-12">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-primary/30 bg-primary text-primary-foreground md:col-span-2">
-              <CardContent className="pt-6">
-                <h3 className="text-2xl font-extrabold">
-                  Points for everything
-                </h3>
-                <p className="mt-2 max-w-lg text-primary-foreground/90">
-                  Every task is worth points, and speed pays: some tasks give
-                  early-bird bonuses to the first few teams that finish. Pair
-                  tasks let you team up with another duo so both teams score.
-                  RAs can also hand out bonus points for great sportsmanship
-                  (and take them away for cheeky business).
-                </p>
+            <Card className="border-primary/20 bg-primary text-primary-foreground md:col-span-2">
+              <CardContent className="space-y-4">
+                <span
+                  className="grid size-10 place-items-center rounded-md bg-primary-foreground/15"
+                  aria-hidden
+                >
+                  <Medal className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-2xl font-extrabold">
+                    Points for everything
+                  </h3>
+                  <p className="mt-2 max-w-lg text-primary-foreground/85">
+                    Every task is worth points, and speed pays: some tasks give
+                    early-bird bonuses to the first few teams that finish. Pair
+                    tasks let you team up with another duo so both teams score.
+                    RAs can also hand out bonus points for standout team play.
+                  </p>
+                </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
-                <h3 className="text-2xl font-extrabold">Mystery finale</h3>
-                <p className="mt-2 text-muted-foreground">
-                  The leaderboard goes dark before the closing ceremony.
-                  Winners are revealed live, so it&apos;s anyone&apos;s game
-                  until the very end.
-                </p>
+              <CardContent className="space-y-4">
+                <span
+                  className="grid size-10 place-items-center rounded-md bg-accent text-accent-foreground"
+                  aria-hidden
+                >
+                  <Clock3 className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-2xl font-extrabold">Mystery finale</h3>
+                  <p className="mt-2 text-muted-foreground">
+                    The leaderboard goes dark before the closing ceremony.
+                    Winners are revealed live, so it&apos;s anyone&apos;s game
+                    until the very end.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
         </section>
 
-        {/* faq */}
-        <section id="faq" className="scroll-mt-20 py-12">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight">
-            Questions, answered
-          </h2>
-          <div className="mx-auto mt-8 max-w-2xl space-y-3">
+        {/* quick answers */}
+        <section id="answers" className="scroll-mt-20 py-12">
+          <div className="text-center">
+            <span
+              className="mx-auto grid size-10 place-items-center rounded-md bg-secondary text-primary"
+              aria-hidden
+            >
+              <CircleHelp className="size-5" />
+            </span>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
+              Quick answers
+            </h2>
+            <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
+              The important bits, without making you dig through instructions.
+            </p>
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
             {FAQS.map((f) => (
-              <details
-                key={f.q}
-                className="group rounded-lg border bg-card px-5 py-4 shadow-sm open:shadow"
-              >
-                <summary className="cursor-pointer list-none font-bold [&::-webkit-details-marker]:hidden">
-                  <span className="mr-2 inline-block transition-transform group-open:rotate-90">
-                    ▸
-                  </span>
-                  {f.q}
-                </summary>
-                <p className="mt-2 pl-6 text-sm text-muted-foreground">{f.a}</p>
-              </details>
+              <Card key={f.q}>
+                <CardContent className="space-y-2">
+                  <h3 className="font-bold">{f.q}</h3>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {f.a}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </section>
 
         {/* final cta */}
         <section className="py-16 text-center">
-          <div
-            className="mx-auto grid size-12 place-items-center rounded-lg bg-primary text-base font-extrabold text-primary-foreground"
+          <span
+            className="mx-auto grid size-12 place-items-center rounded-lg bg-secondary text-primary"
             aria-hidden
           >
-            PG
-          </div>
+            <Handshake className="size-6" />
+          </span>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
             Ready when you are
           </h2>

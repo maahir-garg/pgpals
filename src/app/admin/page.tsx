@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   Inbox,
   Megaphone,
+  ShieldCheck,
   Target,
   Users,
   type LucideIcon,
@@ -105,10 +106,11 @@ export default async function AdminOverviewPage() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-lg bg-foreground p-5 text-background shadow-sm md:p-6">
+      <div className="rounded-lg border border-primary/25 bg-foreground p-5 text-background shadow-sm md:p-6">
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <div>
-            <p className="text-xs font-bold uppercase text-background/60">
+            <p className="inline-flex items-center gap-2 rounded-md bg-background/10 px-2.5 py-1 text-xs font-bold uppercase text-background/70">
+              <ShieldCheck className="size-3.5" aria-hidden />
               RA operations
             </p>
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">
@@ -118,7 +120,11 @@ export default async function AdminOverviewPage() {
               Review queue health, live tasks, and team participation.
             </p>
           </div>
-          <Button asChild variant="secondary" className="justify-between md:min-w-48">
+          <Button
+            asChild
+            variant="secondary"
+            className="justify-between bg-background text-foreground hover:bg-background/90 md:min-w-48"
+          >
             <Link href="/admin/review">
               Open review queue
               <ArrowRight className="size-4" aria-hidden />
