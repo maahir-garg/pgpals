@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Camera,
+  Check,
   Gift,
   Trophy,
   UserPlus,
@@ -72,8 +73,8 @@ const STEPS: {
   },
   {
     icon: Trophy,
-    title: "Earn points",
-    text: "RAs review every submission. Approved tasks add points to your team total.",
+    title: "Earn PGP Coins",
+    text: "RAs review every submission. Approved tasks add PGP Coins to your team total.",
     color: "bg-accent text-accent-foreground",
   },
   {
@@ -88,13 +89,13 @@ const PERKS: { icon: LucideIcon; title: string; text: string; iconBg: string }[]
   {
     icon: Zap,
     title: "Speed pays",
-    text: "Some tasks pay early-bird bonuses to the first teams that finish, or extra points before a cutoff.",
+    text: "Some tasks pay early-bird bonuses to the first teams that finish, or extra coins before a cutoff.",
     iconBg: "bg-accent text-accent-foreground",
   },
   {
     icon: Users,
     title: "Pair tasks",
-    text: "Team up with another duo for joint challenges. One submission, points for both teams.",
+    text: "Team up with another duo for joint challenges. One submission, coins for both teams.",
     iconBg: "bg-secondary text-secondary-foreground",
   },
 ];
@@ -128,6 +129,10 @@ const FAQS = [
 
 export default async function LandingPage() {
   const settings = await getPublicSettings();
+  const prizeLines = (settings?.prizes ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-background">
@@ -269,9 +274,21 @@ export default async function LandingPage() {
               <p className="mt-3 text-base leading-7 text-primary-foreground/90 sm:text-lg">
                 The top teams win prizes at the closing ceremony — and because
                 the leaderboard goes dark for the final stretch, every team is
-                still in the running until the very end. Every point you bank
+                still in the running until the very end. Every coin you bank
                 counts.
               </p>
+              {prizeLines.length > 0 && (
+                <ul className="mt-5 space-y-2.5">
+                  {prizeLines.map((line) => (
+                    <li key={line} className="flex items-start gap-2.5">
+                      <span className="mt-0.5 grid size-5.5 shrink-0 place-items-center rounded-full border-2 border-foreground bg-mint">
+                        <Check className="size-3 text-foreground" strokeWidth={3} aria-hidden />
+                      </span>
+                      <span className="font-semibold">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </section>
@@ -337,7 +354,7 @@ export default async function LandingPage() {
             Ready when you are
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Your buddy is waiting, the early tasks are the easy points, and the
+            Your buddy is waiting, the early tasks are the easy coins, and the
             prize table won&apos;t fill itself.
           </p>
           <Button asChild size="lg" className="mt-7">

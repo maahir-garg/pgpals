@@ -58,7 +58,7 @@ export default async function AdminTasksPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Task</TableHead>
-              <TableHead>Pts</TableHead>
+              <TableHead>Coins</TableHead>
               <TableHead>Release (SGT)</TableHead>
               <TableHead>Deadline (SGT)</TableHead>
               <TableHead>State</TableHead>

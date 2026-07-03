@@ -1,4 +1,4 @@
-import { Check, Clock, RotateCcw, Star, Users, X, Zap } from "lucide-react";
+import { Check, Clock, Coins, RotateCcw, Users, X, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { SubmissionStatus } from "@/lib/types";
@@ -6,8 +6,11 @@ import { countdownTo } from "@/lib/datetime";
 
 export function PointsBadge({ points }: { points: number }) {
   return (
-    <Badge className="bg-accent text-accent-foreground hover:bg-accent">
-      <Star className="size-3 fill-current" aria-hidden /> {points} pts
+    <Badge
+      className="bg-accent text-accent-foreground hover:bg-accent"
+      title="PGP Coins"
+    >
+      <Coins className="size-3" strokeWidth={2.5} aria-hidden /> {points}
     </Badge>
   );
 }

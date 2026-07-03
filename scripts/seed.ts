@@ -130,6 +130,8 @@ async function main() {
         end_at: days(9),
         leaderboard_hide_at: days(6),
         allowed_email_domains: [],
+        prizes:
+          "🥇 1st: $150 dinner voucher per pal\n🥈 2nd: $80 GrabFood credit each\n🥉 3rd: PGPals hoodie + supper spread\n🎲 Lucky draw for every team that finishes 10+ tasks",
       })
       .eq("id", 1);
     if (error) die("event_settings", error);

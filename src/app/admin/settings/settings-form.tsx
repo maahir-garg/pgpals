@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { EventSettings, Profile } from "@/lib/types";
 
 export function SettingsForm({
@@ -27,6 +28,7 @@ export function SettingsForm({
   const [domains, setDomains] = useState(
     settings.allowed_email_domains.join(", ")
   );
+  const [prizes, setPrizes] = useState(settings.prizes ?? "");
   const [promoteEmail, setPromoteEmail] = useState("");
 
   function save() {
@@ -41,6 +43,7 @@ export function SettingsForm({
         endAtSgt: endAt,
         leaderboardHideAtSgt: hideAt,
         allowedDomains: domains,
+        prizes,
       });
       if (result.ok) toast.success(result.message);
       else toast.error(result.error);
@@ -90,6 +93,21 @@ export function SettingsForm({
             <p className="text-xs text-muted-foreground">
               From this moment participants see “results at the closing
               ceremony”. Admins always see the board. Enforced in the database.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="prizes">Prizes (shown to residents)</Label>
+            <Textarea
+              id="prizes"
+              value={prizes}
+              onChange={(e) => setPrizes(e.target.value)}
+              rows={4}
+              placeholder={"🥇 1st: dinner vouchers\n🥈 2nd: GrabFood credit"}
+            />
+            <p className="text-xs text-muted-foreground">
+              One prize per line. Appears on the public landing page and the
+              leaderboard. Leave empty to keep it a mystery (&quot;exciting
+              prizes&quot;).
             </p>
           </div>
           <div className="space-y-1.5">

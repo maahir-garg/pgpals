@@ -47,7 +47,7 @@ export function ReviewCard({
     }
     const override = Number(points);
     if (approve && (!Number.isInteger(override) || override < 0)) {
-      toast.error("Points must be a whole number ≥ 0.");
+      toast.error("Coins must be a whole number ≥ 0.");
       return;
     }
     startTransition(async () => {
@@ -115,7 +115,7 @@ export function ReviewCard({
             )}
             <div className="flex items-center gap-2">
               <label className="text-sm font-semibold" htmlFor={`pts-${submission.id}`}>
-                Points
+                Coins
               </label>
               <Input
                 id={`pts-${submission.id}`}
@@ -158,7 +158,7 @@ export function ReviewCard({
             <div className="text-sm">
               {submission.status === "approved" && (
                 <span className="font-bold text-primary">
-                  +{submission.points_awarded} pts
+                  +{submission.points_awarded} coins
                 </span>
               )}
               {submission.review_note && (

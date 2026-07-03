@@ -265,7 +265,17 @@ comes from shapes, chunky borders, and hard shadows around them.
   theme switcher.
 - Prizes are a core incentive: landing, dashboard leaderboard card, and the
   leaderboard page all remind residents that top teams win prizes at the
-  closing ceremony. Keep that messaging when editing those surfaces.
+  closing ceremony. The actual prize list lives in `event_settings.prizes`
+  (one per line, edited in Admin -> Settings, migration
+  `20260703000000_prizes.sql`); the landing spotlight and leaderboard banner
+  render it, falling back to generic copy when empty.
+- The user-facing currency is **PGP Coins** ("coins" on second mention, the
+  `Coins` lucide icon on chips/badges). Database columns, RPCs, and code
+  identifiers still say `points` - rename copy, never schema.
+- The dashboard is team-scoped: users without a team (including RAs who
+  aren't playing) get a simplified view with announcements and, for admins,
+  a pointer to the admin console. Don't add team-scoped widgets outside the
+  team branch.
 
 Workflow conventions:
 

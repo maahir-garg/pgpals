@@ -15,7 +15,8 @@ Storage) · Tailwind + shadcn/ui · Vercel. Fits free tiers for ~400 users.
   FAQ) with signup and login. Everything else needs an account.
 - **Participants** (phones, but the layout scales up to laptops too): sign up
   with their rostered email, get auto-linked to their pre-assigned team,
-  complete tasks, submit 1-5 photos plus a caption, earn points on approval.
+  complete tasks, submit 1-5 photos plus a caption, earn PGP Coins (the
+  event currency; the database still calls them points) on approval.
   Pair tasks let two teams submit jointly.
 - **Admins** (RAs, desktop): review queue (approve/reject with reason), task
   CRUD with scheduled release and bonus rules, CSV team import, manual bonus
@@ -147,8 +148,10 @@ Waffle Warriors,Chloe Lim,chloe.lim@u.nus.edu,Wei Ling Tan,wei.ling.tan@u.nus.ed
 
 *Admin → Settings*: event name, start/end, **leaderboard hide date**
 (enforced in the database: participants get an empty response after this
-moment, admins keep seeing it), and optional allowed email domains
-(lets anyone on that domain sign up team-less; leave empty for roster-only).
+moment, admins keep seeing it), the **prize list** (one prize per line,
+shown on the public landing page and the leaderboard; leave empty to keep
+it a mystery), and optional allowed email domains (lets anyone on that
+domain sign up team-less; leave empty for roster-only).
 
 *Admin → Tasks*: release/deadline datetimes (entered in SGT), standard or
 pair type, max approvals (e.g. 3 for a daily task), publish toggle

@@ -82,7 +82,7 @@ export function TaskForm({ task }: { task: Task | null }) {
     const maxSubs = Number(maxSubmissions);
     if (!title.trim()) return void toast.error("Title is required.");
     if (!Number.isInteger(pts) || pts < 0)
-      return void toast.error("Points must be a whole number ≥ 0.");
+      return void toast.error("Coins must be a whole number ≥ 0.");
     if (!releaseAt || !deadlineAt)
       return void toast.error("Set both release and deadline times.");
     if (new Date(deadlineAt) <= new Date(releaseAt))
@@ -162,7 +162,7 @@ export function TaskForm({ task }: { task: Task | null }) {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="space-y-1.5">
-            <Label htmlFor="points">Base points</Label>
+            <Label htmlFor="points">Base coins</Label>
             <Input
               id="points"
               type="number"
@@ -230,8 +230,8 @@ export function TaskForm({ task }: { task: Task | null }) {
           >
             <option value="none">No bonus</option>
             <option value="first_n">Early bird: first N approved get +X</option>
-            <option value="before">Before a cutoff: +X points</option>
-            <option value="multiplier_before">Before a cutoff: points ×M</option>
+            <option value="before">Before a cutoff: +X coins</option>
+            <option value="multiplier_before">Before a cutoff: coins ×M</option>
           </select>
 
           {bonusKind === "first_n" && (
@@ -242,7 +242,7 @@ export function TaskForm({ task }: { task: Task | null }) {
                   onChange={(e) => setBonusN(e.target.value)} className={inputCls} />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="bonus-pts">Bonus points</Label>
+                <Label htmlFor="bonus-pts">Bonus coins</Label>
                 <Input id="bonus-pts" type="number" min={1} value={bonusPoints}
                   onChange={(e) => setBonusPoints(e.target.value)} className={inputCls} />
               </div>
@@ -257,7 +257,7 @@ export function TaskForm({ task }: { task: Task | null }) {
               </div>
               {bonusKind === "before" ? (
                 <div className="space-y-1.5">
-                  <Label htmlFor="bonus-pts2">Bonus points</Label>
+                  <Label htmlFor="bonus-pts2">Bonus coins</Label>
                   <Input id="bonus-pts2" type="number" min={1} value={bonusPoints}
                     onChange={(e) => setBonusPoints(e.target.value)} className={inputCls} />
                 </div>

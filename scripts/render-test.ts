@@ -68,7 +68,7 @@ async function main() {
   r = await get("/dashboard", participant);
   check("dashboard shows team", r.body.includes("Waffle Warriors"), String(r.status));
   check("dashboard shows announcements", r.body.includes("Welcome to PGPals"));
-  check("dashboard shows points history", r.body.includes("Points history"));
+  check("dashboard shows coin history", r.body.includes("Coin history"));
   r = await get("/tasks", participant);
   check("tasks page groups", r.body.includes("Closing soon") && r.body.includes("Open"), String(r.status));
   check("tasks page shows released task", r.body.includes("Dinner date"));

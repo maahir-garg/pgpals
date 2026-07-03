@@ -83,7 +83,7 @@ export default async function AdminTeamPage({
       />
 
       <section className="space-y-2">
-        <h2 className="font-bold">Bonus points</h2>
+        <h2 className="font-bold">Bonus coins</h2>
         {bonuses.length === 0 ? (
           <p className="text-sm text-muted-foreground">No manual bonuses yet.</p>
         ) : (

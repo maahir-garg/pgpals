@@ -208,7 +208,7 @@ export default async function TaskDetailPage({
                 )}
                 {s.status === "approved" && s.points_awarded != null && (
                   <p className="text-sm font-bold text-primary">
-                    +{s.points_awarded} points awarded
+                    +{s.points_awarded} PGP Coins earned
                   </p>
                 )}
                 {s.status !== "pending" && s.review_note && (

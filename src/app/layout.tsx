@@ -16,7 +16,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: { default: "PGPals", template: "%s · PGPals" },
-  description: "PGPR's 2-week buddy challenge: complete tasks, earn points, top the board!",
+  description: "PGPR's 2-week buddy challenge: complete tasks, earn PGP Coins, top the board!",
 };
 
 export const viewport: Viewport = {

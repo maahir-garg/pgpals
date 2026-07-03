@@ -50,7 +50,7 @@ export default async function AdminTeamsPage() {
             <TableRow>
               <TableHead>Team</TableHead>
               <TableHead>Members</TableHead>
-              <TableHead className="text-right">Points</TableHead>
+              <TableHead className="text-right">Coins</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

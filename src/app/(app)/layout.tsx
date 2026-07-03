@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Shield, Star } from "lucide-react";
+import { Coins, LogOut, Shield } from "lucide-react";
 import { requireProfile } from "@/lib/data";
 import { signout } from "@/app/(auth)/actions";
 import { BottomNav } from "@/components/pgpals/bottom-nav";
@@ -28,8 +28,11 @@ export default async function AppLayout({
           <TopNav />
           <div className="flex shrink-0 items-center gap-1.5">
             {profile.team_id && (
-              <span className="flex items-center gap-1 rounded-full border-2 border-foreground bg-accent px-2.5 py-0.5 text-sm font-bold text-accent-foreground">
-                <Star className="size-3.5 fill-current" aria-hidden />
+              <span
+                className="flex items-center gap-1 rounded-full border-2 border-foreground bg-accent px-2.5 py-0.5 text-sm font-bold text-accent-foreground"
+                title="Your team's PGP Coins"
+              >
+                <Coins className="size-3.5" strokeWidth={2.5} aria-hidden />
                 {score ?? 0}
               </span>
             )}

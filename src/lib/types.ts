@@ -101,6 +101,7 @@ export interface EventSettings {
   end_at: string;
   leaderboard_hide_at: string;
   allowed_email_domains: string[];
+  prizes: string;
 }
 
 export interface LeaderboardRow {

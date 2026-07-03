@@ -16,6 +16,10 @@ export default async function LeaderboardPage() {
   // date, no matter what the client asks for.
   const { data } = await supabase.rpc("get_leaderboard");
   const rows = (data ?? []) as LeaderboardRow[];
+  const prizeLines = (settings.prizes ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   const hidden =
     rows.length === 0 &&
@@ -33,7 +37,7 @@ export default async function LeaderboardPage() {
             </span>
             <h2 className="text-xl font-extrabold">The board has gone dark!</h2>
             <p className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
-              The final stretch is a mystery. Keep banking points — the
+              The final stretch is a mystery. Keep banking coins — the
               winning teams and their prizes are revealed live at the closing
               ceremony.
             </p>
@@ -55,7 +59,7 @@ export default async function LeaderboardPage() {
             Leaderboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Team standings by approved points.
+            Team standings by PGP Coins earned.
           </p>
         </div>
         <span className="grid size-11 shrink-0 rotate-3 place-items-center rounded-xl border-2 border-foreground bg-accent shadow-pop-sm">
@@ -63,14 +67,25 @@ export default async function LeaderboardPage() {
         </span>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl border-2 border-foreground bg-secondary/25 px-4 py-3">
-        <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-foreground bg-secondary text-secondary-foreground">
-          <Gift className="size-4" strokeWidth={2.5} aria-hidden />
-        </span>
-        <p className="text-sm font-semibold">
-          Top teams win exciting prizes at the closing ceremony. The board
-          hides before the finale, so keep pushing!
-        </p>
+      <div className="rounded-xl border-2 border-foreground bg-secondary/25 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-foreground bg-secondary text-secondary-foreground">
+            <Gift className="size-4" strokeWidth={2.5} aria-hidden />
+          </span>
+          <p className="text-sm font-semibold">
+            Top teams win prizes at the closing ceremony. The board hides
+            before the finale, so keep pushing!
+          </p>
+        </div>
+        {prizeLines.length > 0 && (
+          <ul className="mt-3 space-y-1.5 border-t-2 border-dashed border-foreground/20 pt-3">
+            {prizeLines.map((line) => (
+              <li key={line} className="text-sm font-semibold">
+                {line}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {profile.role === "admin" &&
@@ -84,7 +99,7 @@ export default async function LeaderboardPage() {
       {rows.length === 0 ? (
         <Card>
           <CardContent className="text-center text-sm text-muted-foreground">
-            No points on the board yet. Get out there!
+            No coins on the board yet. Get out there!
           </CardContent>
         </Card>
       ) : (
@@ -106,7 +121,7 @@ export default async function LeaderboardPage() {
         <div className="fixed inset-x-0 bottom-16 z-30 mx-auto w-full max-w-lg px-4 pb-3 md:hidden">
           <div className="flex items-center justify-between rounded-xl border-2 border-foreground bg-primary px-4 py-3 text-primary-foreground shadow-pop">
             <span className="font-bold">Your team is #{mine.rank}</span>
-            <span className="font-heading font-extrabold">{mine.points} pts</span>
+            <span className="font-heading font-extrabold">{mine.points} coins</span>
           </div>
         </div>
       )}

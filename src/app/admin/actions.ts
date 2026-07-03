@@ -44,7 +44,7 @@ export async function reviewSubmission(input: {
   revalidatePath("/", "layout");
   return {
     ok: true,
-    message: input.approve ? `Approved for ${data} points.` : "Rejected.",
+    message: input.approve ? `Approved for ${data} PGP Coins.` : "Rejected.",
   };
 }
 
@@ -364,6 +364,7 @@ export async function updateSettings(input: {
   endAtSgt: string;
   leaderboardHideAtSgt: string;
   allowedDomains: string;
+  prizes: string;
 }): Promise<ActionResult> {
   const supabase = await adminClient();
   const domains = input.allowedDomains
@@ -378,6 +379,7 @@ export async function updateSettings(input: {
       end_at: sgtInputToUtc(input.endAtSgt),
       leaderboard_hide_at: sgtInputToUtc(input.leaderboardHideAtSgt),
       allowed_email_domains: domains,
+      prizes: input.prizes.trim(),
     })
     .eq("id", 1);
   if (error) return { ok: false, error: error.message };

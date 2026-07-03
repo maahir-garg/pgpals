@@ -149,7 +149,7 @@ export function TeamAdminPanel({
             onClick={() => {
               if (
                 confirm(
-                  `Delete team "${team.name}"? Their submissions and points will be gone. This cannot be undone.`
+                  `Delete team "${team.name}"? Their submissions and coins will be gone. This cannot be undone.`
                 )
               )
                 run(
@@ -166,7 +166,7 @@ export function TeamAdminPanel({
 
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="space-y-3">
-          <h3 className="font-bold">Grant bonus points</h3>
+          <h3 className="font-bold">Grant bonus coins</h3>
           <p className="text-sm text-muted-foreground">
             Ad-hoc points with a reason the team will see (use a negative number
             for a penalty).
