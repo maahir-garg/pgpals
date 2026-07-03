@@ -177,7 +177,7 @@ queue shows the auto amount and lets you override it.
   the residents, they see it verbatim.
 - Approve = points auto-computed (bonus included). Only override the number
   for special cases.
-- Misclicked? *Review → filter Approved/Rejected → Undo review* puts it back
+- Misclicked? *Review → Approved or Rejected tab → Undo review* puts it back
   to pending.
 - New tasks going live? Post an announcement (pin the important ones).
 
@@ -251,3 +251,8 @@ Design notes worth knowing before editing:
   RLS-checked read.
 - The landing page reads event dates with the service-role client (anon has
   no table access); it shows nothing sensitive.
+- **Design tokens live in `src/app/globals.css`**: navy ink, ice surfaces,
+  amber accent (the penguin palette), plus semantic `success`/`warning`
+  colors for submission states. Use tints (`bg-success/15 text-success`)
+  for badges, not new one-off colors. The font is Nunito via
+  `next/font`.

@@ -64,8 +64,9 @@ local, and Vercel agree.
   Product-specific reusable UI pieces.
 
 - `src/components/ui/`
-  shadcn/radix-style primitives. Prefer existing primitives before adding new
-  component patterns.
+  shadcn/radix-style primitives. Only the primitives actually in use are kept;
+  add new ones with the shadcn CLI when a screen needs them, and remove them
+  again if they stop being used.
 
 - `src/lib/supabase/`
   Supabase clients:
@@ -230,8 +231,35 @@ are not valid hosted Supabase Auth accounts.
 
 ## UI And Design Conventions
 
+Design system (all tokens in `src/app/globals.css`):
+
+- Palette: navy-ink foreground, ice-white background, deep indigo primary,
+  amber accent. It follows the penguin mascot in `src/app/icon.svg`; the
+  viewport `themeColor` in `src/app/layout.tsx` should stay in sync with
+  `--primary`.
+- Semantic state colors: `success` (approved), `warning` (pending/bonus),
+  `destructive` (rejected). Badges use tints, e.g. `bg-success/15
+  text-success`. Do not reintroduce per-screen ad-hoc colors.
+- Typography is Nunito via `next/font` (`--font-sans`). Headings are
+  `font-extrabold tracking-tight` at `text-2xl`/`text-3xl`; do not scale
+  hero text past `text-5xl` anywhere.
+- Chrome is light: headers and the admin sidebar are background/card with a
+  border, never solid primary blocks.
+- There is no dark mode. Do not add `.dark` styles without wiring a real
+  theme switcher.
+
+Workflow conventions:
+
 - Participants are mobile-first, but layouts should scale to desktop.
-- Admin views are desktop-oriented and should be dense, scannable, and practical.
+- The resident dashboard is a to-do list: rejected tasks first, then all open
+  tasks ordered by deadline, then submissions in review, then announcements.
+  Do not gate the to-do list on recency.
+- The tasks page groups Closing soon / Open / Done / Closed. "Done" means all
+  allowed approvals are used (`max_submissions`), so repeatable tasks stay
+  open.
+- Admin views are desktop-oriented and should be dense, scannable, and
+  practical. The review queue is the primary surface: status tabs with counts,
+  task/team filters preserved across tabs.
 - Keep using the existing shadcn/radix primitives in `src/components/ui`.
 - Keep domain components under `src/components/pgpals`.
 - Use server components for read-heavy pages when possible; use client
