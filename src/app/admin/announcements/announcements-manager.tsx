@@ -52,7 +52,7 @@ export function AnnouncementsManager({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <Card className="max-w-2xl">
         <CardContent className="space-y-3">
           <h2 className="font-bold">

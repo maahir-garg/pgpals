@@ -18,7 +18,7 @@ export default async function TasksPage() {
     const isAdmin = profile.role === "admin";
     return (
       <div className="mx-auto max-w-2xl space-y-4">
-        <section className="rounded-xl border-2 border-foreground bg-card p-5 shadow-sticker md:p-6">
+        <section className="rounded-xl border-2 border-foreground bg-card p-6 shadow-sticker">
           <div className="flex items-start gap-3">
             <span className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-foreground bg-primary text-primary-foreground">
               {isAdmin ? (
@@ -96,7 +96,7 @@ export default async function TasksPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 border-b-2 border-dashed border-foreground/25 pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 border-b-2 border-dashed border-foreground/25 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -123,7 +123,7 @@ export default async function TasksPage() {
             <h2 className="font-bold">{group.title}</h2>
             <Badge variant="outline">{group.tasks.length}</Badge>
           </div>
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4 xl:grid-cols-3">
             {group.tasks.map((task) => (
               <TaskCard
                 key={task.id}

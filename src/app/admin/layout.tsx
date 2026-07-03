@@ -15,7 +15,7 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-dvh overflow-x-clip bg-background">
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card px-3 py-5 md:flex">
+      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card px-3 py-6 md:flex">
         <Link href="/admin" className="flex items-center gap-2 px-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
@@ -42,7 +42,7 @@ export default async function AdminLayout({
       </aside>
       <div className="min-w-0 flex-1">
         {/* Mobile top bar */}
-        <div className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+        <div className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 px-4 py-4 backdrop-blur md:hidden">
           <div className="flex items-center justify-between gap-3">
             <Link
               href="/admin"
@@ -62,11 +62,11 @@ export default async function AdminLayout({
               </Link>
             </Button>
           </div>
-          <div className="mt-3">
+          <div className="mt-4">
             <AdminNav horizontal />
           </div>
         </div>
-        <main className="mx-auto max-w-6xl px-4 py-5 md:px-8 md:py-6">
+        <main className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-6">
           {children}
         </main>
       </div>

@@ -42,7 +42,7 @@ export function PairPanel({
   if (pairing?.status === "accepted") {
     return (
       <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-5">
+        <CardContent className="space-y-2">
           <p className="font-bold">Paired with {partnerName}</p>
           <p className="text-sm text-muted-foreground">
             Either team can submit, and you&apos;ll both get the points when it&apos;s
@@ -57,7 +57,7 @@ export function PairPanel({
     const iInvited = pairing.created_by_team === myTeamId;
     return (
       <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="space-y-3 pt-5">
+        <CardContent className="space-y-4">
           {iInvited ? (
             <>
               <p className="font-bold">Invite sent to {partnerName}</p>
@@ -118,7 +118,7 @@ export function PairPanel({
   if (closed) {
     return (
       <Card className="bg-muted">
-        <CardContent className="pt-5 text-sm text-muted-foreground">
+        <CardContent className="text-sm text-muted-foreground">
           This task closed before a pairing was made.
         </CardContent>
       </Card>
@@ -131,7 +131,7 @@ export function PairPanel({
 
   return (
     <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="space-y-4 pt-5">
+      <CardContent className="space-y-4">
         <div>
           <p className="font-bold">Choose a partner team</p>
           <p className="mt-1 text-sm text-muted-foreground">

@@ -137,7 +137,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-dvh overflow-x-clip bg-background">
       <header className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-3 sm:py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2 sm:gap-4">
           <Link href="/" className="flex min-w-0 items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon.svg" alt="" className="size-8 rounded-lg sm:size-9" />
@@ -145,7 +145,7 @@ export default async function LandingPage() {
               PGPals
             </span>
           </Link>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <Button asChild variant="outline" size="sm" className="px-3 sm:px-4">
               <Link href="/signup">Sign up</Link>
             </Button>
@@ -213,7 +213,7 @@ export default async function LandingPage() {
                 other teams to the top and the winners walk away with seriously
                 exciting prizes.
               </p>
-              <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:gap-3.5">
+              <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-4">
                 <Button asChild size="lg">
                   <Link href="/login">
                     I have an account
@@ -247,15 +247,15 @@ export default async function LandingPage() {
             </h2>
             <Squiggle className="mx-auto mt-3 h-3 w-36 text-primary" />
           </div>
-          <div className="mt-10 grid grid-cols-1 gap-5 gap-y-9 sm:mt-12 sm:grid-cols-2 sm:gap-6 sm:gap-y-10 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-1 gap-6 gap-y-10 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step, i) => (
               <div
                 key={step.title}
-                className="relative min-w-0 rounded-xl border-2 border-foreground bg-card px-4 pb-4 pt-8 shadow-sticker transition-bouncy hover:-rotate-1 hover:scale-[1.02] sm:px-5 sm:pb-5 sm:pt-9"
+                className="relative min-w-0 rounded-xl border-2 border-foreground bg-card px-4 pb-4 pt-8 shadow-sticker transition-bouncy hover:-rotate-1 hover:scale-[1.02] sm:px-6 sm:pb-6 sm:pt-10"
               >
                 {/* Icon circle sits half-in/half-out of the top border. */}
                 <span
-                  className={`absolute -top-5 left-4 grid size-11 place-items-center rounded-full border-2 border-foreground sm:-top-6 sm:left-5 sm:size-12 ${step.color}`}
+                  className={`absolute -top-5 left-4 grid size-11 place-items-center rounded-full border-2 border-foreground sm:-top-6 sm:left-6 sm:size-12 ${step.color}`}
                 >
                   <step.icon className="size-5.5" strokeWidth={2.5} aria-hidden />
                 </span>
@@ -273,7 +273,7 @@ export default async function LandingPage() {
 
         {/* Prize spotlight */}
         <section className="pb-12 sm:pb-20">
-          <div className="relative overflow-hidden rounded-2xl border-2 border-foreground bg-primary px-5 py-8 text-primary-foreground shadow-pop sm:px-12 sm:py-10">
+          <div className="relative overflow-hidden rounded-2xl border-2 border-foreground bg-primary px-6 py-8 text-primary-foreground shadow-pop sm:px-12 sm:py-10">
             <div aria-hidden className="bg-dots absolute inset-0 opacity-20" />
             <div
               aria-hidden
@@ -288,7 +288,7 @@ export default async function LandingPage() {
                 <Gift className="size-4" strokeWidth={2.5} aria-hidden />
                 EXCITING PRIZES
               </span>
-              <h2 className="mt-4 font-heading text-3xl font-extrabold tracking-tight sm:mt-5 sm:text-4xl">
+              <h2 className="mt-4 font-heading text-3xl font-extrabold tracking-tight sm:mt-6 sm:text-4xl">
                 Play for the podium
               </h2>
               <p className="mt-3 text-base leading-7 text-primary-foreground/90 sm:text-lg">
@@ -298,9 +298,9 @@ export default async function LandingPage() {
                 counts.
               </p>
               {prizeLines.length > 0 && (
-                <ul className="mt-5 space-y-2.5">
+                <ul className="mt-6 space-y-2">
                   {prizeLines.map((line) => (
-                    <li key={line} className="flex items-start gap-2.5">
+                    <li key={line} className="flex items-start gap-2">
                       <span className="mt-0.5 grid size-5.5 shrink-0 place-items-center rounded-full border-2 border-foreground bg-mint">
                         <Check className="size-3 text-foreground" strokeWidth={3} aria-hidden />
                       </span>
@@ -318,7 +318,7 @@ export default async function LandingPage() {
             {PERKS.map((perk) => (
               <div
                 key={perk.title}
-                className="flex min-w-0 items-start gap-3 rounded-xl border-2 border-foreground bg-card p-4 shadow-sticker transition-bouncy hover:rotate-1 hover:scale-[1.02] sm:gap-4 sm:p-5"
+                className="flex min-w-0 items-start gap-3 rounded-xl border-2 border-foreground bg-card p-4 shadow-sticker transition-bouncy hover:rotate-1 hover:scale-[1.02] sm:gap-4 sm:p-6"
               >
                 <span
                   className={`grid size-12 shrink-0 place-items-center rounded-full border-2 border-foreground ${perk.iconBg}`}
@@ -345,7 +345,7 @@ export default async function LandingPage() {
           </div>
           <div className="mx-auto mt-8 max-w-2xl divide-y-2 divide-dashed divide-border rounded-xl border-2 border-foreground bg-card px-4 shadow-sticker sm:mt-10 sm:px-6">
             {FAQS.map((f) => (
-              <div key={f.q} className="py-5">
+              <div key={f.q} className="py-6">
                 <h3 className="font-heading font-bold">{f.q}</h3>
                 <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
                   {f.a}
@@ -377,7 +377,7 @@ export default async function LandingPage() {
             Your buddy is waiting, the early tasks are the easy coins, and the
             prize table won&apos;t fill itself.
           </p>
-          <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
             <Button asChild size="lg">
               <Link href="/login">
                 Log in
@@ -396,7 +396,7 @@ export default async function LandingPage() {
       </main>
 
       <footer className="border-t-2 border-foreground bg-card">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-7 text-center text-sm text-muted-foreground sm:flex-row sm:justify-between sm:text-left">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-8 text-center text-sm text-muted-foreground sm:flex-row sm:justify-between sm:text-left">
           <p>
             Run by the PGPR Resident Assistants. Questions? Ask in your
             block&apos;s Telegram group or find any RA.

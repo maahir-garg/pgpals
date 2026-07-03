@@ -16,7 +16,7 @@ export function LoginForm() {
 
   return (
     <Card>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight">Log in</h2>
           <p className="mt-1 text-sm text-muted-foreground">

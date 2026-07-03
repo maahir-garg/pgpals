@@ -95,7 +95,7 @@ export default async function TaskDetailPage({
   const bonusText = describeBonus(task.bonus_config);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-3xl space-y-6">
       <Link
         href="/tasks"
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
@@ -104,7 +104,7 @@ export default async function TaskDetailPage({
         All tasks
       </Link>
 
-      <header className="space-y-3 border-b-2 border-dashed border-foreground/25 pb-5">
+      <header className="space-y-3 border-b-2 border-dashed border-foreground/25 pb-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-2xl font-extrabold leading-tight tracking-tight md:text-3xl">

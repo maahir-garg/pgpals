@@ -38,7 +38,7 @@ export default async function AdminTasksPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-5">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
           <p className="mt-1 text-sm text-muted-foreground">

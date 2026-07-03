@@ -65,7 +65,7 @@ export default async function AdminTeamPage({
   const signedUpEmails = new Set(profiles.map((p) => p.email));
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <Link
         href="/admin/teams"
         className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
@@ -90,7 +90,7 @@ export default async function AdminTeamPage({
           <Card>
             <CardContent className="divide-y">
               {bonuses.map((b) => (
-                <div key={b.id} className="flex items-center justify-between py-2.5 text-sm">
+                <div key={b.id} className="flex items-center justify-between py-2 text-sm">
                   <div>
                     <div className="font-semibold">{b.reason}</div>
                     <div className="text-xs text-muted-foreground">
@@ -116,7 +116,7 @@ export default async function AdminTeamPage({
           <Card>
             <CardContent className="divide-y">
               {submissions.map((s) => (
-                <div key={s.id} className="flex items-center justify-between gap-2 py-2.5">
+                <div key={s.id} className="flex items-center justify-between gap-2 py-2">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold">
                       {taskTitle.get(s.task_id) ?? "(task)"}

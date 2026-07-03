@@ -52,8 +52,8 @@ export default async function LeaderboardPage() {
   const rest = rows.slice(10);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
-      <div className="flex items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-5">
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="flex items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">
             Leaderboard
@@ -67,7 +67,7 @@ export default async function LeaderboardPage() {
         </span>
       </div>
 
-      <div className="rounded-xl border-2 border-foreground bg-secondary/25 px-4 py-3">
+      <div className="rounded-xl border-2 border-foreground bg-secondary/25 px-4 py-4">
         <div className="flex items-center gap-3">
           <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-foreground bg-secondary text-secondary-foreground">
             <Gift className="size-4" strokeWidth={2.5} aria-hidden />
@@ -78,7 +78,7 @@ export default async function LeaderboardPage() {
           </p>
         </div>
         {prizeLines.length > 0 && (
-          <ul className="mt-3 space-y-1.5 border-t-2 border-dashed border-foreground/20 pt-3">
+          <ul className="mt-4 space-y-2 border-t-2 border-dashed border-foreground/20 pt-4">
             {prizeLines.map((line) => (
               <li key={line} className="text-sm font-semibold">
                 {line}

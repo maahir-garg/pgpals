@@ -103,8 +103,8 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-5">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Overview</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -119,7 +119,7 @@ export default async function AdminOverviewPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link key={stat.label} href={stat.href}>
             <Card

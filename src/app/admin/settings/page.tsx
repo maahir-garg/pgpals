@@ -16,7 +16,7 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="border-b-2 border-dashed border-foreground/25 pb-5">
+      <div className="border-b-2 border-dashed border-foreground/25 pb-6">
         <h1 className="text-2xl font-extrabold tracking-tight">
           Event settings
         </h1>

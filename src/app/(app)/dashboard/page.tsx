@@ -110,7 +110,7 @@ export default async function DashboardPage() {
     const isAdmin = profile.role === "admin";
     return (
       <div className="mx-auto max-w-2xl space-y-6">
-        <section className="rounded-xl border-2 border-foreground bg-card p-5 shadow-sticker md:p-6">
+        <section className="rounded-xl border-2 border-foreground bg-card p-6 shadow-sticker">
           <h1 className="text-2xl font-extrabold tracking-tight">
             Hey, {profile.full_name.split(" ")[0]}!
           </h1>
@@ -220,8 +220,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border-2 border-foreground bg-card p-5 shadow-sticker md:p-6">
-        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+      <section className="rounded-xl border-2 border-foreground bg-card p-6 shadow-sticker">
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <div>
             <p className="text-sm font-semibold text-muted-foreground">
               Team dashboard
@@ -340,7 +340,7 @@ export default async function DashboardPage() {
                 {todo.length > 6 && (
                   <Link
                     href="/tasks"
-                    className="block rounded-lg border-2 border-dashed px-4 py-2.5 text-center text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
+                    className="block rounded-lg border-2 border-dashed px-4 py-2 text-center text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
                   >
                     {todo.length - 6} more open {todo.length - 6 === 1 ? "task" : "tasks"}
                   </Link>
@@ -436,7 +436,7 @@ function HistoryRow({
   item: { when: string; label: string; points: number };
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 py-2.5 text-sm">
+    <div className="flex items-center justify-between gap-2 py-2 text-sm">
       <div className="min-w-0">
         <div className="truncate font-semibold">{item.label}</div>
         <div className="text-xs text-muted-foreground">

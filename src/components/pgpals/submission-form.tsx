@@ -116,7 +116,7 @@ export function SubmissionForm({
 
   return (
     <Card className="border-primary/30 bg-primary/5">
-      <CardContent className="space-y-4 pt-5">
+      <CardContent className="space-y-4">
         <div>
           <h3 className="text-base font-bold">
             {resubmit ? "Fix and resubmit" : "Submit proof"}

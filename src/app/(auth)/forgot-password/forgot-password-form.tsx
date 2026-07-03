@@ -16,7 +16,7 @@ export function ForgotPasswordForm() {
 
   return (
     <Card>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         <div>
           <h2 className="text-xl font-extrabold tracking-tight">
             Reset password
