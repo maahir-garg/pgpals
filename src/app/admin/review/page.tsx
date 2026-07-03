@@ -148,7 +148,7 @@ export default async function ReviewPage({
 
   return (
     <div className="space-y-4">
-      <div className="border-b pb-5">
+      <div className="border-b-2 border-dashed border-foreground/25 pb-5">
         <h1 className="text-2xl font-extrabold tracking-tight">Review queue</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Oldest submissions first. Approvals award points immediately;
@@ -188,7 +188,7 @@ export default async function ReviewPage({
           <select
             name="task"
             defaultValue={params.task ?? ""}
-            className="h-9 max-w-52 rounded-md border bg-card px-3 text-sm font-semibold"
+            className="h-9 max-w-52 rounded-lg border-2 border-input bg-card px-3 text-sm font-semibold outline-none focus-visible:border-primary"
           >
             <option value="">All tasks</option>
             {tasks.map((t) => (
@@ -200,7 +200,7 @@ export default async function ReviewPage({
           <select
             name="team"
             defaultValue={params.team ?? ""}
-            className="h-9 max-w-52 rounded-md border bg-card px-3 text-sm font-semibold"
+            className="h-9 max-w-52 rounded-lg border-2 border-input bg-card px-3 text-sm font-semibold outline-none focus-visible:border-primary"
           >
             <option value="">All teams</option>
             {teams.map((t) => (
@@ -211,7 +211,7 @@ export default async function ReviewPage({
           </select>
           <button
             type="submit"
-            className="h-9 rounded-md border bg-card px-4 text-sm font-bold transition-colors hover:bg-muted"
+            className="h-9 rounded-full border-2 border-foreground bg-card px-4 text-sm font-bold transition-colors hover:bg-accent"
           >
             Apply
           </button>
@@ -219,7 +219,7 @@ export default async function ReviewPage({
       </div>
 
       {cards.length === 0 ? (
-        <div className="rounded-xl border bg-card p-10 text-center">
+        <div className="rounded-xl border-2 border-foreground bg-card p-10 shadow-sticker text-center">
           <ClipboardCheck className="mx-auto size-8 text-muted-foreground" aria-hidden />
           <p className="mt-2 font-semibold">
             {status === "pending" ? "Queue is clear. Nice work!" : "Nothing here."}

@@ -178,7 +178,7 @@ export function TaskForm({ task }: { task: Task | null }) {
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value as "standard" | "pair")}
-              className="h-10 w-full rounded-md border bg-card px-3 text-sm"
+              className="h-10 w-full rounded-lg border-2 border-input bg-card px-3 text-sm outline-none focus-visible:border-primary"
             >
               <option value="standard">Standard</option>
               <option value="pair">Pair (two teams)</option>
@@ -226,7 +226,7 @@ export function TaskForm({ task }: { task: Task | null }) {
             id="bonuskind"
             value={bonusKind}
             onChange={(e) => setBonusKind(e.target.value as BonusKind)}
-            className="h-10 w-full rounded-md border bg-card px-3 text-sm"
+            className="h-10 w-full rounded-lg border-2 border-input bg-card px-3 text-sm outline-none focus-visible:border-primary"
           >
             <option value="none">No bonus</option>
             <option value="first_n">Early bird: first N approved get +X</option>

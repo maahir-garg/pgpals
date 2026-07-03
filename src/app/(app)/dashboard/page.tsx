@@ -109,7 +109,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border bg-card p-5 shadow-sm md:p-6">
+      <section className="rounded-xl border-2 border-foreground bg-card p-5 shadow-sticker md:p-6">
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           {team ? (
             <div>
@@ -143,12 +143,12 @@ export default async function DashboardPage() {
           )}
 
           <div className="grid grid-cols-3 gap-2 text-center sm:min-w-80">
-            <div className="rounded-lg bg-accent p-3">
-              <Trophy className="mx-auto size-4 text-accent-foreground" aria-hidden />
-              <div className="mt-1 text-2xl font-extrabold text-accent-foreground">
+            <div className="rounded-lg border-2 border-foreground bg-accent p-3 shadow-pop-sm">
+              <Trophy className="mx-auto size-4 text-accent-foreground" strokeWidth={2.5} aria-hidden />
+              <div className="mt-1 font-heading text-2xl font-extrabold text-accent-foreground">
                 {score ?? 0}
               </div>
-              <div className="text-xs font-semibold text-accent-foreground/80">
+              <div className="text-xs font-bold text-accent-foreground/80">
                 points
               </div>
             </div>
@@ -221,7 +221,7 @@ export default async function DashboardPage() {
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+                    className="flex items-center justify-between gap-3 rounded-lg border-2 border-border bg-card px-4 py-3 transition-bouncy hover:border-foreground hover:shadow-pop-sm"
                   >
                     <span className="min-w-0 truncate text-sm font-semibold">
                       {t.title}
@@ -252,7 +252,7 @@ export default async function DashboardPage() {
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-semibold shadow-sm transition-colors hover:bg-muted"
+                    className="flex items-center justify-between gap-3 rounded-lg border-2 border-border bg-card px-4 py-3 text-sm font-semibold transition-bouncy hover:border-foreground hover:shadow-pop-sm"
                   >
                     <span className="min-w-0 truncate">{t.title}</span>
                     <Badge className="shrink-0 bg-warning/15 text-warning hover:bg-warning/15">
@@ -306,10 +306,12 @@ export default async function DashboardPage() {
                 <div>
                   <h2 className="font-bold">Leaderboard</h2>
                   <p className="text-sm text-muted-foreground">
-                    See where your team stands.
+                    Top teams win prizes at the closing ceremony.
                   </p>
                 </div>
-                <Trophy className="size-5 text-primary" aria-hidden />
+                <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-foreground bg-accent text-accent-foreground">
+                  <Trophy className="size-5" strokeWidth={2.5} aria-hidden />
+                </span>
               </div>
               <Link
                 href="/leaderboard"

@@ -231,22 +231,41 @@ are not valid hosted Supabase Auth accounts.
 
 ## UI And Design Conventions
 
-Design system (all tokens in `src/app/globals.css`):
+Design system: "Playful Geometric" (all tokens in `src/app/globals.css`).
+Stable grid, wild decoration: content sits in clean readable blocks; energy
+comes from shapes, chunky borders, and hard shadows around them.
 
-- Palette: navy-ink foreground, ice-white background, deep indigo primary,
-  amber accent. It follows the penguin mascot in `src/app/icon.svg`; the
-  viewport `themeColor` in `src/app/layout.tsx` should stay in sync with
-  `--primary`.
+- Palette: warm cream background (#FFFDF5), slate ink (#1E293B), vivid violet
+  primary (#8B5CF6). Hot pink (`secondary`), amber (`accent`), and mint
+  (`mint`) rotate for decorative shapes and icon circles - confetti, not
+  semantics. The viewport `themeColor` in `src/app/layout.tsx` stays in sync
+  with `--primary`.
 - Semantic state colors: `success` (approved), `warning` (pending/bonus),
-  `destructive` (rejected). Badges use tints, e.g. `bg-success/15
-  text-success`. Do not reintroduce per-screen ad-hoc colors.
-- Typography is Nunito via `next/font` (`--font-sans`). Headings are
-  `font-extrabold tracking-tight` at `text-2xl`/`text-3xl`; do not scale
-  hero text past `text-5xl` anywhere.
-- Chrome is light: headers and the admin sidebar are background/card with a
-  border, never solid primary blocks.
+  `destructive` (rejected) are darker, text-safe shades. Badges use tints,
+  e.g. `bg-success/15 text-success`. Do not reintroduce ad-hoc colors.
+- Signature effects (defined as utilities/tokens in globals.css):
+  `shadow-pop`/`-sm`/`-lg` (hard ink shadows for buttons and hero elements),
+  `shadow-sticker` (soft hard shadow for cards), `shadow-focus-pop` (input
+  focus), `bg-dots` (dot-grid texture), `transition-bouncy` (overshoot
+  easing), `animate-wiggle`. Borders on interactive/sticker elements are
+  `border-2 border-foreground`; section dividers are dashed
+  (`border-dashed border-foreground/25`).
+- Buttons are pills ("candy buttons"): dark 2px border + hard shadow that
+  lifts on hover and presses on click. Cards are "stickers": 2px ink border,
+  rounded-xl, sticker shadow, and may wiggle slightly on hover. Icons sit in
+  colored circles with `strokeWidth={2.5}`, never floating alone.
+- Typography: Outfit for headings (`--font-heading`, applied to h1-h4 in the
+  base layer), Plus Jakarta Sans for body (`--font-sans`), both via
+  `next/font`. Hero text caps at `text-6xl` on the landing page and
+  `text-2xl`/`text-3xl` in the app.
+- Decorative floating shapes are `aria-hidden` and hidden on phones so they
+  never crowd content. Motion effects use `motion-safe:` or the
+  reduced-motion overrides in globals.css.
 - There is no dark mode. Do not add `.dark` styles without wiring a real
   theme switcher.
+- Prizes are a core incentive: landing, dashboard leaderboard card, and the
+  leaderboard page all remind residents that top teams win prizes at the
+  closing ceremony. Keep that messaging when editing those surfaces.
 
 Workflow conventions:
 

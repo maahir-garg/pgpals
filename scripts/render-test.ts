@@ -62,7 +62,7 @@ async function main() {
   r = await get("/login");
   check("/login renders", r.status === 200 && r.body.includes("PGPals"), String(r.status));
   r = await get("/signup");
-  check("/signup renders", r.status === 200 && r.body.includes("registered you with"), String(r.status));
+  check("/signup renders", r.status === 200 && r.body.includes("email your RA registered"), String(r.status));
 
   console.log("— participant —");
   r = await get("/dashboard", participant);
@@ -70,7 +70,7 @@ async function main() {
   check("dashboard shows announcements", r.body.includes("Welcome to PGPals"));
   check("dashboard shows points history", r.body.includes("Points history"));
   r = await get("/tasks", participant);
-  check("tasks page groups", r.body.includes("Closing soon") && r.body.includes("Active"), String(r.status));
+  check("tasks page groups", r.body.includes("Closing soon") && r.body.includes("Open"), String(r.status));
   check("tasks page shows released task", r.body.includes("Dinner date"));
   check("tasks page hides scheduled task", !r.body.includes("Weekend mystery"));
   const dinnerHref = r.body.match(/href="\/tasks\/([a-f0-9-]+)"/g);
@@ -99,7 +99,7 @@ async function main() {
   check("admin tasks shows states", r.body.includes("Scheduled") && r.body.includes("Live") && r.body.includes("Closed"));
   r = await get("/admin/teams", admin);
   check("admin teams list", r.body.includes("Waffle Warriors"), String(r.status));
-  check("signup status shown", r.body.includes("⏳"));
+  check("signup status shown", r.body.includes("Roster") && r.body.includes("Signed"));
   r = await get("/admin/announcements", admin);
   check("announcements manager", r.body.includes("New announcement"), String(r.status));
   r = await get("/admin/settings", admin);

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lock, Trophy } from "lucide-react";
+import { Gift, Lock, Trophy } from "lucide-react";
 import { requireProfile, getEventSettings } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,13 +26,16 @@ export default async function LeaderboardPage() {
     return (
       <div className="mx-auto max-w-2xl space-y-4">
         <h1 className="text-2xl font-extrabold tracking-tight">Leaderboard</h1>
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="space-y-3 py-12 text-center">
-            <Lock className="mx-auto size-10 text-primary" aria-hidden />
-            <h2 className="text-xl font-extrabold">Leaderboard hidden!</h2>
-            <p className="mx-auto max-w-xs text-sm text-muted-foreground">
-              The final stretch is a mystery, so keep earning points! Final
-              results will be revealed at the closing ceremony.
+        <Card>
+          <CardContent className="space-y-4 py-12 text-center">
+            <span className="mx-auto grid size-16 rotate-[-3deg] place-items-center rounded-2xl border-2 border-foreground bg-accent shadow-pop">
+              <Lock className="size-7 text-accent-foreground" strokeWidth={2.5} aria-hidden />
+            </span>
+            <h2 className="text-xl font-extrabold">The board has gone dark!</h2>
+            <p className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
+              The final stretch is a mystery. Keep banking points — the
+              winning teams and their prizes are revealed live at the closing
+              ceremony.
             </p>
           </CardContent>
         </Card>
@@ -46,7 +49,7 @@ export default async function LeaderboardPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-5 pb-16">
-      <div className="flex items-end justify-between gap-3 border-b pb-5">
+      <div className="flex items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-5">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">
             Leaderboard
@@ -55,11 +58,24 @@ export default async function LeaderboardPage() {
             Team standings by approved points.
           </p>
         </div>
-        <Trophy className="size-6 text-primary" aria-hidden />
+        <span className="grid size-11 shrink-0 rotate-3 place-items-center rounded-xl border-2 border-foreground bg-accent shadow-pop-sm">
+          <Trophy className="size-5 text-accent-foreground" strokeWidth={2.5} aria-hidden />
+        </span>
       </div>
+
+      <div className="flex items-center gap-3 rounded-xl border-2 border-foreground bg-secondary/25 px-4 py-3">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-foreground bg-secondary text-secondary-foreground">
+          <Gift className="size-4" strokeWidth={2.5} aria-hidden />
+        </span>
+        <p className="text-sm font-semibold">
+          Top teams win exciting prizes at the closing ceremony. The board
+          hides before the finale, so keep pushing!
+        </p>
+      </div>
+
       {profile.role === "admin" &&
         new Date(settings.leaderboard_hide_at).getTime() <= Date.now() && (
-          <p className="rounded-md bg-secondary px-3 py-2 text-xs font-semibold text-secondary-foreground">
+          <p className="rounded-lg border-2 border-foreground bg-accent/40 px-3 py-2 text-xs font-bold">
             Admin view. Participants see the hidden state since{" "}
             {formatSGT(settings.leaderboard_hide_at)}.
           </p>
@@ -73,7 +89,7 @@ export default async function LeaderboardPage() {
         </Card>
       ) : (
         <Card>
-          <CardContent className="divide-y">
+          <CardContent className="divide-y-2 divide-dashed divide-border">
             {top10.map((row) => (
               <LeaderRow key={row.team_id} row={row} highlight />
             ))}
@@ -87,18 +103,18 @@ export default async function LeaderboardPage() {
       {/* Your rank, pinned above the bottom nav. Phone only: on desktop the
           whole list is visible and your row is already highlighted. */}
       {mine && (
-        <div className="fixed inset-x-0 bottom-16 z-30 mx-auto w-full max-w-lg px-4 pb-2 md:hidden">
-          <div className="flex items-center justify-between rounded-lg bg-foreground px-4 py-3 text-background shadow-lg">
-            <span className="font-bold">
-              Your team is #{mine.rank}
-            </span>
-            <span className="font-extrabold">{mine.points} pts</span>
+        <div className="fixed inset-x-0 bottom-16 z-30 mx-auto w-full max-w-lg px-4 pb-3 md:hidden">
+          <div className="flex items-center justify-between rounded-xl border-2 border-foreground bg-primary px-4 py-3 text-primary-foreground shadow-pop">
+            <span className="font-bold">Your team is #{mine.rank}</span>
+            <span className="font-heading font-extrabold">{mine.points} pts</span>
           </div>
         </div>
       )}
     </div>
   );
 }
+
+const MEDALS = ["bg-accent", "bg-secondary", "bg-mint"];
 
 function LeaderRow({
   row,
@@ -111,14 +127,14 @@ function LeaderRow({
     <div
       className={cn(
         "flex items-center gap-3 py-3",
-        row.is_mine && "-mx-2 rounded-md bg-primary/10 px-2"
+        row.is_mine && "-mx-2 rounded-lg bg-primary/10 px-2"
       )}
     >
       <span
         className={cn(
-          "grid size-8 shrink-0 place-items-center rounded-md text-sm font-extrabold",
+          "grid size-8 shrink-0 place-items-center rounded-full text-sm font-extrabold",
           highlight && row.rank <= 3
-            ? "bg-accent text-accent-foreground"
+            ? `border-2 border-foreground text-foreground ${MEDALS[row.rank - 1]}`
             : "bg-muted text-muted-foreground"
         )}
       >
@@ -127,14 +143,14 @@ function LeaderRow({
       <span
         className={cn(
           "flex-1 truncate",
-          highlight ? "font-bold" : "font-semibold text-sm",
+          highlight ? "font-bold" : "text-sm font-semibold",
           row.is_mine && "text-primary"
         )}
       >
         {row.team_name}
         {row.is_mine && " (you!)"}
       </span>
-      <span className="font-extrabold">{row.points}</span>
+      <span className="font-heading font-extrabold">{row.points}</span>
     </div>
   );
 }

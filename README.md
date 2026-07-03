@@ -251,8 +251,10 @@ Design notes worth knowing before editing:
   RLS-checked read.
 - The landing page reads event dates with the service-role client (anon has
   no table access); it shows nothing sensitive.
-- **Design tokens live in `src/app/globals.css`**: navy ink, ice surfaces,
-  amber accent (the penguin palette), plus semantic `success`/`warning`
-  colors for submission states. Use tints (`bg-success/15 text-success`)
-  for badges, not new one-off colors. The font is Nunito via
-  `next/font`.
+- **Design tokens live in `src/app/globals.css`** ("Playful Geometric"):
+  cream paper background, slate ink, violet primary, with pink/amber/mint
+  rotated for decoration. Hard offset shadows (`shadow-pop`,
+  `shadow-sticker`), chunky 2px ink borders, pill buttons, and dashed
+  dividers are the signature moves; semantic `success`/`warning` tints mark
+  submission states. Headings are Outfit, body is Plus Jakarta Sans (see
+  AGENTS.md for the full conventions).

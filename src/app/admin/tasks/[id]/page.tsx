@@ -29,7 +29,7 @@ export default async function EditTaskPage({
 
   return (
     <div className="space-y-4">
-      <div className="border-b pb-5">
+      <div className="border-b-2 border-dashed border-foreground/25 pb-5">
         <h1 className="text-2xl font-extrabold tracking-tight">Edit task</h1>
       </div>
       {(pending ?? 0) > 0 && (

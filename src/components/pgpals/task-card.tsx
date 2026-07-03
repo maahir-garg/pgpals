@@ -23,7 +23,7 @@ export function TaskCard({
     <Link href={`/tasks/${task.id}`} className="block">
       <Card
         className={
-          "min-h-36 gap-3 rounded-xl p-4 transition-colors hover:border-primary/40 hover:bg-primary/5 " +
+          "min-h-36 gap-3 rounded-xl p-4 transition-bouncy hover:-rotate-1 hover:scale-[1.02] " +
           (closed && status !== "approved" ? "opacity-70" : "")
         }
       >

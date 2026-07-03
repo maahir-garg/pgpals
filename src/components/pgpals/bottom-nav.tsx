@@ -8,7 +8,7 @@ import { NAV_TABS } from "@/components/pgpals/nav-tabs";
 export function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur supports-[backdrop-filter]:bg-card/85 md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-foreground bg-card md:hidden">
       <div className="mx-auto grid max-w-lg grid-cols-3 pb-[env(safe-area-inset-bottom)]">
         {NAV_TABS.map((tab) => {
           const active =
@@ -18,18 +18,18 @@ export function BottomNav() {
               key={tab.href}
               href={tab.href}
               className={cn(
-                "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-muted-foreground transition-colors",
+                "flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-bold text-muted-foreground transition-colors",
                 active && "text-primary"
               )}
             >
               <span
                 className={cn(
-                  "grid size-8 place-items-center rounded-md transition-colors",
-                  active && "bg-primary/10"
+                  "grid h-7 w-12 place-items-center rounded-full transition-bouncy",
+                  active && "border-2 border-foreground bg-primary text-primary-foreground"
                 )}
                 aria-hidden
               >
-                <tab.icon className="size-5" strokeWidth={active ? 2.5 : 2} />
+                <tab.icon className="size-4.5" strokeWidth={2.5} />
               </span>
               {tab.label}
             </Link>

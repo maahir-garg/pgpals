@@ -99,7 +99,7 @@ export default async function TaskDetailPage({
         All tasks
       </Link>
 
-      <header className="space-y-3 border-b pb-5">
+      <header className="space-y-3 border-b-2 border-dashed border-foreground/25 pb-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-2xl font-extrabold leading-tight tracking-tight md:text-3xl">

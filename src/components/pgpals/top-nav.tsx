@@ -18,8 +18,9 @@ export function TopNav() {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-              active && "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
+              "flex items-center gap-1.5 rounded-full border-2 border-transparent px-3.5 py-1 text-sm font-bold text-muted-foreground transition-bouncy hover:bg-muted hover:text-foreground",
+              active &&
+                "border-foreground bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
             )}
           >
             <tab.icon className="size-4" aria-hidden />

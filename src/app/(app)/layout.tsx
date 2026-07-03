@@ -16,19 +16,19 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-dvh w-full flex-col bg-background pb-20 md:pb-8">
-      <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3 px-4 py-2.5 md:max-w-6xl">
           <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
-            <span className="text-lg font-extrabold tracking-tight">
+            <span className="font-heading text-lg font-extrabold tracking-tight">
               PGPals
             </span>
           </Link>
           <TopNav />
           <div className="flex shrink-0 items-center gap-1.5">
             {profile.team_id && (
-              <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-sm font-bold text-accent-foreground">
+              <span className="flex items-center gap-1 rounded-full border-2 border-foreground bg-accent px-2.5 py-0.5 text-sm font-bold text-accent-foreground">
                 <Star className="size-3.5 fill-current" aria-hidden />
                 {score ?? 0}
               </span>

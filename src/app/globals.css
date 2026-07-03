@@ -6,14 +6,14 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-mint: var(--mint);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -26,43 +26,55 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2rem;
+  --radius-4xl: 2.5rem;
+  /* Hard "pop" shadows: no blur, sticker/cut-out paper feel. */
+  --shadow-pop-sm: 2px 2px 0 0 var(--foreground);
+  --shadow-pop: 4px 4px 0 0 var(--foreground);
+  --shadow-pop-lg: 6px 6px 0 0 var(--foreground);
+  --shadow-sticker: 6px 6px 0 0 var(--border);
+  --shadow-sticker-pink: 6px 6px 0 0 var(--secondary);
+  --shadow-sticker-yellow: 6px 6px 0 0 var(--accent);
+  --shadow-focus-pop: 3px 3px 0 0 var(--primary);
 }
 
 /*
- * PGPals palette. Penguin colours: deep navy ink, ice-white surfaces, and an
- * amber "beak" accent for points and highlights. Success/warning are semantic
- * tokens for submission states; use tints (e.g. bg-success/15 text-success)
- * rather than solid fills for badges.
+ * PGPals "Playful Geometric" palette: warm cream paper, slate ink, vivid
+ * violet as the brand action colour, and hot pink / amber / mint rotated
+ * for decorative confetti. Buttons and cards use chunky 2px ink borders
+ * with hard offset shadows (see --shadow-pop*).
+ *
+ * success/warning are text-safe darker cousins of mint/amber for badges:
+ * use tints, e.g. bg-success/15 text-success.
  */
 :root {
-  --background: oklch(0.977 0.005 250);
-  --foreground: oklch(0.27 0.032 262);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.27 0.032 262);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.27 0.032 262);
-  --primary: oklch(0.45 0.125 268);
-  --primary-foreground: oklch(0.985 0.004 250);
-  --secondary: oklch(0.936 0.024 265);
-  --secondary-foreground: oklch(0.36 0.075 267);
-  --muted: oklch(0.957 0.007 250);
-  --muted-foreground: oklch(0.5 0.022 260);
-  --accent: oklch(0.924 0.062 82);
-  --accent-foreground: oklch(0.44 0.095 68);
-  --destructive: oklch(0.577 0.245 27.325);
-  --success: oklch(0.545 0.125 155);
-  --warning: oklch(0.62 0.13 70);
-  --border: oklch(0.902 0.012 255);
-  --input: oklch(0.902 0.012 255);
-  --ring: oklch(0.45 0.125 268);
-  --radius: 0.65rem;
+  --background: #fffdf5;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #f472b6;
+  --secondary-foreground: #1e293b;
+  --accent: #fbbf24;
+  --accent-foreground: #1e293b;
+  --mint: #34d399;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --destructive: #e11d48;
+  --success: #059669;
+  --warning: #b45309;
+  --border: #e2e8f0;
+  --input: #cbd5e1;
+  --ring: #8b5cf6;
+  --radius: 1rem;
 }
 
 @layer base {
@@ -78,5 +90,56 @@
       var(--font-sans), ui-sans-serif, system-ui, -apple-system,
       BlinkMacSystemFont, "Segoe UI", sans-serif;
     text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family:
+      var(--font-heading), var(--font-sans), ui-sans-serif, system-ui,
+      sans-serif;
+  }
+}
+
+/* Dot-grid texture for section backgrounds (pure CSS, no image asset). */
+@utility bg-dots {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+}
+
+/* Bouncy hover transition (overshoot easing). */
+@utility transition-bouncy {
+  transition-property: transform, box-shadow, background-color, border-color;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
+}
+
+@utility animate-wiggle {
+  animation: wiggle 0.4s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transition-bouncy {
+    transition: none;
+  }
+  .animate-wiggle {
+    animation: none;
   }
 }

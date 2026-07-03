@@ -104,7 +104,7 @@ export default async function AdminOverviewPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b pb-5">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-5">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Overview</h1>
           <p className="mt-1 text-sm text-muted-foreground">

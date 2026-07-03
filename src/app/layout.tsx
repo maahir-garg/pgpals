@@ -1,11 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Nunito } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const nunito = Nunito({
+const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  variable: "--font-heading",
   subsets: ["latin"],
 });
 
@@ -15,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#41499b",
+  themeColor: "#8b5cf6",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -28,7 +33,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${nunito.variable} font-sans antialiased`}>
+      <body
+        className={`${jakarta.variable} ${outfit.variable} font-sans antialiased`}
+      >
         {children}
         <Toaster position="top-center" richColors />
         <Analytics />
