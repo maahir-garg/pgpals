@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { requireProfile } from "@/lib/data";
 import { isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
@@ -89,37 +90,49 @@ export default async function TaskDetailPage({
   const bonusText = describeBonus(task.bonus_config);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-5">
       <Link
         href="/tasks"
-        className="inline-block text-sm font-semibold text-muted-foreground"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
       >
-        ← All tasks
+        <ArrowLeft className="size-4" aria-hidden />
+        All tasks
       </Link>
 
-      <div className="space-y-2">
-        <h1 className="text-2xl font-extrabold leading-tight">{task.title}</h1>
-        <div className="flex flex-wrap items-center gap-1.5">
+      <header className="space-y-3 border-b pb-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold leading-tight tracking-tight md:text-3xl">
+              {task.title}
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Deadline: {formatSGT(task.deadline_at)} SGT
+            </p>
+          </div>
           <PointsBadge points={task.points} />
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
           {task.type === "pair" && <PairBadge />}
           {task.bonus_config && <BonusBadge />}
           <CountdownBadge deadline={task.deadline_at} />
+          {hasPending && <StatusBadge status="pending" />}
+          {approvedCount > 0 && <StatusBadge status="approved" />}
+          {wasRejected && !hasPending && approvedCount === 0 && (
+            <StatusBadge status="rejected" />
+          )}
         </div>
-        <p className="text-xs text-muted-foreground">
-          Deadline: {formatSGT(task.deadline_at)} SGT
-        </p>
-      </div>
+      </header>
 
       {bonusText && !closed && (
-        <Card className="rounded-2xl border-none bg-chart-3/20">
-          <CardContent className="pt-4 text-sm font-semibold">
+        <Card className="border-chart-3/40 bg-chart-3/15">
+          <CardContent className="text-sm font-semibold">
             {bonusText}
           </CardContent>
         </Card>
       )}
 
-      <Card className="rounded-2xl">
-        <CardContent className="pt-5">
+      <Card>
+        <CardContent>
           <Markdown>{task.description}</Markdown>
         </CardContent>
       </Card>
@@ -145,9 +158,9 @@ export default async function TaskDetailPage({
       )}
 
       {closed && approvedCount === 0 && !hasPending && (
-        <Card className="rounded-2xl bg-muted">
-          <CardContent className="pt-5 text-center text-sm text-muted-foreground">
-            This task has closed. 🌙
+        <Card className="bg-muted">
+          <CardContent className="text-center text-sm text-muted-foreground">
+            This task has closed.
           </CardContent>
         </Card>
       )}
@@ -155,10 +168,10 @@ export default async function TaskDetailPage({
       {/* Status timeline */}
       {submissions.length > 0 && (
         <div className="space-y-2">
-          <h3 className="px-1 font-bold">📜 Your submissions</h3>
+          <h2 className="font-extrabold">Your submissions</h2>
           {submissions.map((s) => (
-            <Card key={s.id} className="rounded-2xl">
-              <CardContent className="space-y-2.5 pt-5">
+            <Card key={s.id}>
+              <CardContent className="space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <StatusBadge status={s.status} />
                   <span className="text-xs text-muted-foreground">
@@ -173,7 +186,7 @@ export default async function TaskDetailPage({
                         <img
                           src={url}
                           alt={`Photo ${i + 1}`}
-                          className="h-24 w-24 shrink-0 rounded-xl object-cover"
+                          className="h-24 w-24 shrink-0 rounded-md object-cover"
                         />
                       </a>
                     ) : null
@@ -181,23 +194,23 @@ export default async function TaskDetailPage({
                 </div>
                 {s.text_content && (
                   <p className="text-sm text-muted-foreground">
-                    “{s.text_content}”
+                    &quot;{s.text_content}&quot;
                   </p>
                 )}
                 {s.status === "approved" && s.points_awarded != null && (
                   <p className="text-sm font-bold text-primary">
-                    +{s.points_awarded} points awarded 🎉
+                    +{s.points_awarded} points awarded
                   </p>
                 )}
                 {s.status !== "pending" && s.review_note && (
-                  <div className="rounded-xl bg-muted p-3 text-sm">
+                  <div className="rounded-md bg-muted p-3 text-sm">
                     <span className="font-semibold">RA note:</span>{" "}
                     {s.review_note}
                   </div>
                 )}
                 {s.status === "rejected" && !closed && (
                   <p className="text-sm font-semibold text-destructive">
-                    You can fix this and resubmit above until the deadline! 💪
+                    You can fix this and resubmit above until the deadline.
                   </p>
                 )}
               </CardContent>

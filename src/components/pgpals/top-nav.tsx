@@ -18,13 +18,11 @@ export function TopNav() {
             key={tab.href}
             href={tab.href}
             className={cn(
-              "rounded-full px-4 py-1.5 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
-              active && "bg-primary/10 text-primary hover:text-primary"
+              "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+              active && "bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary"
             )}
           >
-            <span className="mr-1" aria-hidden>
-              {tab.emoji}
-            </span>
+            <tab.icon className="size-4" aria-hidden />
             {tab.label}
           </Link>
         );

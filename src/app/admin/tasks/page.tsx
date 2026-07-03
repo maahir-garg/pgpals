@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Plus, Users, Zap } from "lucide-react";
 import { requireAdmin } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
 import { Button } from "@/components/ui/button";
@@ -37,14 +38,22 @@ export default async function AdminTasksPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold">Tasks</h1>
-        <Button asChild className="rounded-xl font-bold">
-          <Link href="/admin/tasks/new">+ New task</Link>
+      <div className="flex items-center justify-between gap-3 border-b pb-5">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Publish state, deadlines, and review counts.
+          </p>
+        </div>
+        <Button asChild className="font-bold">
+          <Link href="/admin/tasks/new">
+            <Plus className="size-4" aria-hidden />
+            New task
+          </Link>
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border bg-card">
+      <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -53,7 +62,7 @@ export default async function AdminTasksPage() {
               <TableHead>Release (SGT)</TableHead>
               <TableHead>Deadline (SGT)</TableHead>
               <TableHead>State</TableHead>
-              <TableHead className="text-right">Subs ✅/🕐</TableHead>
+              <TableHead className="text-right">Approved / pending</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -73,16 +82,28 @@ export default async function AdminTasksPage() {
                       href={`/admin/tasks/${task.id}`}
                       className="font-semibold text-primary underline-offset-2 hover:underline"
                     >
-                      {task.type === "pair" && "🤝 "}
                       {task.title}
                     </Link>
-                    {task.bonus_config && " ⚡"}
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {task.type === "pair" && (
+                        <Badge variant="outline">
+                          <Users className="size-3" aria-hidden />
+                          Pair
+                        </Badge>
+                      )}
+                      {task.bonus_config && (
+                        <Badge variant="outline">
+                          <Zap className="size-3" aria-hidden />
+                          Bonus
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="font-semibold">{task.points}</TableCell>
                   <TableCell className="text-sm">{formatSGT(task.release_at)}</TableCell>
                   <TableCell className="text-sm">{formatSGT(task.deadline_at)}</TableCell>
                   <TableCell>
-                    <Badge className={`rounded-full ${state.cls}`}>{state.label}</Badge>
+                    <Badge className={state.cls}>{state.label}</Badge>
                   </TableCell>
                   <TableCell className="text-right text-sm font-semibold">
                     {c.approved} / {c.pending}

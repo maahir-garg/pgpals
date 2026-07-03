@@ -15,7 +15,9 @@ export default async function AdminAnnouncementsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold">Announcements</h1>
+      <div className="border-b pb-5">
+        <h1 className="text-2xl font-extrabold tracking-tight">Announcements</h1>
+      </div>
       <AnnouncementsManager announcements={(data ?? []) as Announcement[]} />
     </div>
   );

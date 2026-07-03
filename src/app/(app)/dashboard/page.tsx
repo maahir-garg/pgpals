@@ -1,5 +1,15 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarDays,
+  Clock3,
+  ListChecks,
+  Pin,
+  Star,
+  Trophy,
+} from "lucide-react";
 import { requireProfile, getEventSettings } from "@/lib/data";
 import { taskStatusFor, isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
@@ -96,175 +106,252 @@ export default async function DashboardPage() {
     })),
   ].sort((a, b) => b.when.localeCompare(a.when));
 
+  const openTasks = allTasks.filter((t) => !isClosed(t.deadline_at)).length;
+  const approvedCount = allSubs.filter((s) => s.status === "approved").length;
+
   return (
-    <div className="space-y-4 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6 lg:space-y-0">
-      <div className="space-y-4 lg:col-span-2">
-      {/* Team hero card */}
-      <Card className="overflow-hidden rounded-3xl border-none bg-gradient-to-br from-primary to-chart-4 text-primary-foreground shadow-lg">
-        <CardContent className="pt-6">
+    <div className="space-y-6">
+      <section className="rounded-lg border bg-card p-5 shadow-sm md:p-6">
+        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           {team ? (
-            <>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-extrabold">{team.name}</h2>
-                <span className="[&_button]:text-primary-foreground/90">
-                  <TeamNameEditor currentName={team.name} />
-                </span>
+            <div>
+              <p className="text-sm font-semibold text-muted-foreground">
+                Team dashboard
+              </p>
+              <div className="mt-1 flex items-center gap-2">
+                <h1 className="min-w-0 text-2xl font-extrabold tracking-tight md:text-3xl">
+                  {team.name}
+                </h1>
+                <TeamNameEditor currentName={team.name} />
               </div>
-              <p className="mt-0.5 text-sm text-primary-foreground/85">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {profile.full_name}
                 {teammate
                   ? ` & ${teammate.full_name}`
                   : rosterPartner
-                    ? ` & ${rosterPartner.full_name} (not signed up yet 👀)`
+                    ? ` & ${rosterPartner.full_name} (not signed up yet)`
                     : ""}
               </p>
-              <div className="mt-4 flex items-end justify-between">
-                <div>
-                  <div className="text-4xl font-extrabold">⭐ {score ?? 0}</div>
-                  <div className="text-sm text-primary-foreground/85">
-                    points so far
-                  </div>
-                </div>
-                <Link
-                  href="/leaderboard"
-                  className="rounded-full bg-primary-foreground/20 px-4 py-2 text-sm font-bold backdrop-blur transition-colors hover:bg-primary-foreground/30"
-                >
-                  Leaderboard →
-                </Link>
-              </div>
-            </>
+            </div>
           ) : (
-            <p className="font-semibold">
-              You&apos;re not on a team yet. Ask your RA to add you! 🙋
-            </p>
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">
+                Team not assigned
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ask your RA to add you before the event starts.
+              </p>
+            </div>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Action needed */}
-      {actionNeeded.length > 0 && (
-        <Card className="rounded-2xl border-destructive/30 bg-destructive/5">
-          <CardContent className="space-y-2 pt-5">
-            <h3 className="font-bold text-destructive">❗ Action needed</h3>
-            {actionNeeded.map((t) => (
-              <Link
-                key={t.id}
-                href={`/tasks/${t.id}`}
-                className="block rounded-xl bg-card px-3 py-2 text-sm font-semibold shadow-sm"
-              >
-                {t.title}: rejected, fix &amp; resubmit →
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Waiting on review */}
-      {inReview.length > 0 && (
-        <Card className="rounded-2xl">
-          <CardContent className="space-y-2 pt-5">
-            <h3 className="font-bold">🕐 In review</h3>
-            {inReview.map((t) => (
-              <Link
-                key={t.id}
-                href={`/tasks/${t.id}`}
-                className="flex items-center justify-between rounded-xl bg-muted px-3 py-2 text-sm font-semibold"
-              >
-                <span>{t.title}</span>
-                <span className="text-xs font-semibold text-muted-foreground">
-                  RAs are on it
-                </span>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* New tasks */}
-      {newTasks.length > 0 && (
-        <Card className="rounded-2xl">
-          <CardContent className="space-y-2 pt-5">
-            <h3 className="font-bold">✨ New tasks</h3>
-            {newTasks.map((t) => (
-              <Link
-                key={t.id}
-                href={`/tasks/${t.id}`}
-                className="flex items-center justify-between rounded-xl bg-muted px-3 py-2 text-sm font-semibold"
-              >
-                <span>{t.title}</span>
-                <Badge className="rounded-full bg-secondary text-secondary-foreground">
-                  ⭐ {t.points}
-                </Badge>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Announcements */}
-      <div className="space-y-2">
-        <h3 className="px-1 font-bold">📣 Announcements</h3>
-        {(announcements ?? []).length === 0 && (
-          <Card className="rounded-2xl">
-            <CardContent className="pt-5 text-sm text-muted-foreground">
-              Nothing yet. Check back soon!
-            </CardContent>
-          </Card>
-        )}
-        {((announcements ?? []) as Announcement[]).map((a) => (
-          <Card key={a.id} className="rounded-2xl">
-            <CardContent className="pt-5">
-              <div className="flex items-start justify-between gap-2">
-                <h4 className="font-bold">
-                  {a.pinned && "📌 "}
-                  {a.title}
-                </h4>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {formatSGT(a.created_at)}
-                </span>
+          <div className="grid grid-cols-3 gap-2 text-center sm:min-w-80">
+            <div className="rounded-md bg-primary/10 p-3">
+              <Trophy className="mx-auto size-4 text-primary" aria-hidden />
+              <div className="mt-1 text-2xl font-extrabold">{score ?? 0}</div>
+              <div className="text-xs font-semibold text-muted-foreground">
+                points
               </div>
-              <div className="mt-1 text-muted-foreground">
-                <Markdown>{a.body}</Markdown>
+            </div>
+            <div className="rounded-md bg-muted p-3">
+              <ListChecks className="mx-auto size-4 text-muted-foreground" aria-hidden />
+              <div className="mt-1 text-2xl font-extrabold">{approvedCount}</div>
+              <div className="text-xs font-semibold text-muted-foreground">
+                approved
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      </div>
+            </div>
+            <div className="rounded-md bg-muted p-3">
+              <Clock3 className="mx-auto size-4 text-muted-foreground" aria-hidden />
+              <div className="mt-1 text-2xl font-extrabold">{openTasks}</div>
+              <div className="text-xs font-semibold text-muted-foreground">
+                open
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <div className="space-y-4">
-        {/* Points history */}
-        {history.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="px-1 font-bold">🧾 Points history</h3>
-            <Card className="rounded-2xl">
-              <CardContent className="divide-y pt-2">
-                {history.map((h) => (
-                  <div
-                    key={h.key}
-                    className="flex items-center justify-between gap-2 py-2.5 text-sm"
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div className="space-y-6">
+          {actionNeeded.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="size-5 text-destructive" aria-hidden />
+                <h2 className="text-lg font-extrabold text-destructive">
+                  Needs your attention
+                </h2>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {actionNeeded.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/tasks/${t.id}`}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm font-semibold transition-colors hover:bg-destructive/10"
                   >
-                    <div>
-                      <div className="font-semibold">{h.label}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {formatSGT(h.when)}
-                      </div>
+                    <span>{t.title}</span>
+                    <ArrowRight className="size-4 shrink-0" aria-hidden />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(newTasks.length > 0 || inReview.length > 0) && (
+            <section className="grid gap-3 md:grid-cols-2">
+              {newTasks.length > 0 && (
+                <Card>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-extrabold">New tasks</h2>
+                      <Badge variant="outline">{newTasks.length}</Badge>
                     </div>
-                    <span className="font-bold text-primary">
-                      {h.points < 0 ? h.points : `+${h.points}`}
+                    <div className="space-y-2">
+                      {newTasks.map((t) => (
+                        <Link
+                          key={t.id}
+                          href={`/tasks/${t.id}`}
+                          className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 text-sm font-semibold transition-colors hover:bg-primary/10 hover:text-primary"
+                        >
+                          <span className="min-w-0 truncate">{t.title}</span>
+                          <Badge className="bg-secondary text-secondary-foreground">
+                            <Star className="size-3 fill-current" aria-hidden />
+                            {t.points}
+                          </Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {inReview.length > 0 && (
+                <Card>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-extrabold">In review</h2>
+                      <Badge variant="outline">{inReview.length}</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      {inReview.map((t) => (
+                        <Link
+                          key={t.id}
+                          href={`/tasks/${t.id}`}
+                          className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 text-sm font-semibold transition-colors hover:bg-primary/10 hover:text-primary"
+                        >
+                          <span className="min-w-0 truncate">{t.title}</span>
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            pending
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </section>
+          )}
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-extrabold">Announcements</h2>
+            {(announcements ?? []).length === 0 && (
+              <Card>
+                <CardContent className="text-sm text-muted-foreground">
+                  Nothing posted yet.
+                </CardContent>
+              </Card>
+            )}
+            {((announcements ?? []) as Announcement[]).map((a) => (
+              <Card key={a.id}>
+                <CardContent>
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="flex min-w-0 items-center gap-1.5 font-bold">
+                      {a.pinned && (
+                        <Pin
+                          className="size-3.5 shrink-0 fill-current text-primary"
+                          aria-label="Pinned"
+                        />
+                      )}
+                      <span>{a.title}</span>
+                    </h3>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {formatSGT(a.created_at)}
                     </span>
                   </div>
-                ))}
+                  <div className="mt-2 text-muted-foreground">
+                    <Markdown>{a.body}</Markdown>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        </div>
+
+        <aside className="space-y-4">
+          <Card>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-extrabold">Leaderboard</h2>
+                  <p className="text-sm text-muted-foreground">
+                    See where your team stands.
+                  </p>
+                </div>
+                <Trophy className="size-5 text-primary" aria-hidden />
+              </div>
+              <Link
+                href="/leaderboard"
+                className="flex items-center justify-between rounded-md bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                Open leaderboard
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </CardContent>
+          </Card>
+
+          {history.length > 0 && (
+            <Card>
+              <CardContent className="space-y-3">
+                <h2 className="font-extrabold">Points history</h2>
+                <div className="divide-y">
+                  {history.map((h) => (
+                    <div
+                      key={h.key}
+                      className="flex items-center justify-between gap-2 py-2.5 text-sm"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate font-semibold">{h.label}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatSGT(h.when)}
+                        </div>
+                      </div>
+                      <span className="shrink-0 font-bold text-primary">
+                        {h.points < 0 ? h.points : `+${h.points}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
-          </div>
-        )}
+          )}
 
-        <p className="pb-2 text-center text-xs text-muted-foreground">
-          {settings.event_name} runs{" "}
-          {formatSGT(settings.start_at, { hour: undefined, minute: undefined })} to{" "}
-          {formatSGT(settings.end_at, { hour: undefined, minute: undefined })} · all times SGT
-        </p>
+          <Card className="bg-muted/50">
+            <CardContent className="flex gap-3 text-sm text-muted-foreground">
+              <CalendarDays className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <p>
+                {settings.event_name} runs{" "}
+                {formatSGT(settings.start_at, {
+                  hour: undefined,
+                  minute: undefined,
+                })}{" "}
+                to{" "}
+                {formatSGT(settings.end_at, {
+                  hour: undefined,
+                  minute: undefined,
+                })}
+                . All times SGT.
+              </p>
+            </CardContent>
+          </Card>
+        </aside>
       </div>
     </div>
   );

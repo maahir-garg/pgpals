@@ -15,13 +15,15 @@ export function SignupForm() {
   );
 
   return (
-    <Card className="rounded-3xl shadow-lg">
-      <CardContent className="pt-6">
-        <form action={action} className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Use the email your RA registered you with, and you&apos;ll be linked to
-            your team automatically. 🤝
+    <Card>
+      <CardContent className="space-y-5">
+        <div>
+          <h2 className="text-xl font-extrabold tracking-tight">Create account</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Use the email your RA registered.
           </p>
+        </div>
+        <form action={action} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -54,10 +56,17 @@ export function SignupForm() {
             />
           </div>
           {state?.error && (
-            <p className="text-sm font-medium text-destructive">{state.error}</p>
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+              {state.error}
+            </p>
           )}
-          <Button type="submit" className="w-full rounded-xl" disabled={pending}>
-            {pending ? "Creating account…" : "Join PGPals 🎉"}
+          {state?.message && (
+            <p className="rounded-md bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
+              {state.message}
+            </p>
+          )}
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? "Creating account..." : "Join PGPals"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             Already signed up?{" "}

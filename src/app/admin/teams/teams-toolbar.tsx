@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { FileUp, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { createTeam, importTeamsCsv } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -56,11 +57,12 @@ export function TeamsToolbar() {
         }}
       >
         <DialogTrigger asChild>
-          <Button variant="outline" className="rounded-xl font-semibold">
-            📄 Import CSV
+          <Button variant="outline" className="font-semibold">
+            <FileUp className="size-4" aria-hidden />
+            Import CSV
           </Button>
         </DialogTrigger>
-        <DialogContent className="rounded-2xl">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Import teams from CSV</DialogTitle>
             <DialogDescription asChild>
@@ -84,7 +86,7 @@ export function TeamsToolbar() {
             onChange={(e) => onFileChosen(e.target.files?.[0] ?? null)}
             className="text-sm"
           />
-          {pending && <p className="text-sm font-semibold">Importing…</p>}
+          {pending && <p className="text-sm font-semibold">Importing...</p>}
           {importReport && (
             <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg bg-muted p-3 text-xs">
               {importReport}
@@ -95,9 +97,12 @@ export function TeamsToolbar() {
 
       <Dialog open={newTeamOpen} onOpenChange={setNewTeamOpen}>
         <DialogTrigger asChild>
-          <Button className="rounded-xl font-bold">+ New team</Button>
+          <Button className="font-bold">
+            <Plus className="size-4" aria-hidden />
+            New team
+          </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-sm rounded-2xl">
+        <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>New team</DialogTitle>
           </DialogHeader>
@@ -106,7 +111,7 @@ export function TeamsToolbar() {
             onChange={(e) => setTeamName(e.target.value)}
             placeholder="Team name"
           />
-          <Button onClick={addTeam} disabled={pending} className="rounded-xl">
+          <Button onClick={addTeam} disabled={pending}>
             Create
           </Button>
         </DialogContent>

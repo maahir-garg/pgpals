@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { renameTeam } from "@/app/(app)/actions";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ export function TeamNameEditor({ currentName }: { currentName: string }) {
     startTransition(async () => {
       const result = await renameTeam(name);
       if (result.ok) {
-        toast.success("Team name updated! ✨");
+        toast.success("Team name updated.");
         setOpen(false);
       } else {
         toast.error(result.error);
@@ -34,13 +35,13 @@ export function TeamNameEditor({ currentName }: { currentName: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-          className="text-sm font-semibold text-primary underline underline-offset-2"
+          className="inline-flex size-8 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10"
           aria-label="Edit team name"
         >
-          ✏️ edit
+          <Pencil className="size-4" aria-hidden />
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm rounded-2xl">
+      <DialogContent className="max-w-sm rounded-lg">
         <DialogHeader>
           <DialogTitle>Name your team</DialogTitle>
         </DialogHeader>
@@ -50,8 +51,8 @@ export function TeamNameEditor({ currentName }: { currentName: string }) {
           maxLength={40}
           placeholder="The Dumpling Duo"
         />
-        <Button onClick={save} disabled={pending} className="rounded-xl">
-          {pending ? "Saving…" : "Save"}
+        <Button onClick={save} disabled={pending}>
+          {pending ? "Saving..." : "Save"}
         </Button>
       </DialogContent>
     </Dialog>

@@ -78,19 +78,17 @@ export default async function LandingPage() {
   const settings = await getPublicSettings();
 
   return (
-    <div className="relative min-h-dvh overflow-x-clip">
-      {/* background blobs */}
-      <div className="pointer-events-none absolute -top-32 -left-32 size-96 rounded-full bg-primary/15 blur-3xl" />
-      <div className="pointer-events-none absolute -right-24 top-96 size-80 rounded-full bg-accent blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/4 size-96 rounded-full bg-secondary blur-3xl" />
-
-      <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
+    <div className="min-h-dvh overflow-x-clip bg-background">
+      <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-1.5">
-            <span className="text-2xl" aria-hidden>
-              🐧
+          <Link href="/" className="flex items-center gap-2">
+            <span
+              className="grid size-8 place-items-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground"
+              aria-hidden
+            >
+              PG
             </span>
-            <span className="text-xl font-extrabold tracking-tight text-primary">
+            <span className="text-lg font-extrabold tracking-tight text-primary">
               PGPals
             </span>
           </Link>
@@ -98,27 +96,24 @@ export default async function LandingPage() {
             <a href="#how" className="hover:text-foreground">
               How it works
             </a>
-            <a href="#faq" className="hover:text-foreground">
-              FAQ
-            </a>
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" className="rounded-full">
+            <Button asChild variant="ghost">
               <Link href="/login">Log in</Link>
             </Button>
-            <Button asChild className="rounded-full">
+            <Button asChild>
               <Link href="/signup">Sign up</Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-4">
+      <main className="mx-auto max-w-5xl px-4">
         {/* hero */}
-        <section className="flex flex-col items-center py-16 text-center sm:py-24">
+        <section className="flex flex-col items-center py-12 text-center sm:py-16">
           {settings && (
-            <span className="mb-5 rounded-full border bg-card px-4 py-1.5 text-sm font-semibold text-muted-foreground shadow-sm">
-              📅 {formatSGTDate(settings.start_at)} to{" "}
+            <span className="mb-5 inline-flex rounded-md border bg-card px-4 py-1.5 text-sm font-semibold text-muted-foreground shadow-sm">
+              {formatSGTDate(settings.start_at)} to{" "}
               {formatSGTDate(settings.end_at)} · PGP Residences
             </span>
           )}
@@ -132,24 +127,24 @@ export default async function LandingPage() {
             other teams to the top of the board.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="rounded-full px-8 text-base">
+            <Button asChild size="lg" className="px-8 text-base">
               <Link href="/signup">Join with your NUS email</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="rounded-full px-8 text-base"
+              className="px-8 text-base"
             >
               <Link href="/login">I have an account</Link>
             </Button>
           </div>
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold">
-            {["🌅 Sunrise missions", "🍜 Food quests", "🎬 Pair challenges", "⭐ Bonus points", "🤫 Mystery finale"].map(
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-2 text-sm font-semibold">
+            {["Sunrise missions", "Food quests", "Pair challenges", "Bonus points", "Mystery finale"].map(
               (chip) => (
                 <span
                   key={chip}
-                  className="rounded-full border bg-card px-3.5 py-1.5 shadow-sm"
+                  className="rounded-md border bg-card px-3.5 py-1.5 shadow-sm"
                 >
                   {chip}
                 </span>
@@ -159,7 +154,7 @@ export default async function LandingPage() {
         </section>
 
         {/* how it works */}
-        <section id="how" className="scroll-mt-20 py-12">
+        <section id="how" className="scroll-mt-20 py-10">
           <h2 className="text-center text-3xl font-extrabold tracking-tight">
             How it works
           </h2>
@@ -168,10 +163,10 @@ export default async function LandingPage() {
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s, i) => (
-              <Card key={s.title} className="border-2">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-2">
-                    <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-2xl">
+            <Card key={s.title}>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2">
+                    <span className="grid size-11 place-items-center rounded-md bg-primary/10 text-2xl">
                       {s.emoji}
                     </span>
                     <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
@@ -191,10 +186,10 @@ export default async function LandingPage() {
         {/* points and the finale */}
         <section className="py-12">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="border-2 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground md:col-span-2">
+            <Card className="border-primary/30 bg-primary text-primary-foreground md:col-span-2">
               <CardContent className="pt-6">
                 <h3 className="text-2xl font-extrabold">
-                  Points for everything 🪙
+                  Points for everything
                 </h3>
                 <p className="mt-2 max-w-lg text-primary-foreground/90">
                   Every task is worth points, and speed pays: some tasks give
@@ -205,9 +200,9 @@ export default async function LandingPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-2">
+            <Card>
               <CardContent className="pt-6">
-                <h3 className="text-2xl font-extrabold">Mystery finale 🤫</h3>
+                <h3 className="text-2xl font-extrabold">Mystery finale</h3>
                 <p className="mt-2 text-muted-foreground">
                   The leaderboard goes dark before the closing ceremony.
                   Winners are revealed live, so it&apos;s anyone&apos;s game
@@ -227,7 +222,7 @@ export default async function LandingPage() {
             {FAQS.map((f) => (
               <details
                 key={f.q}
-                className="group rounded-2xl border-2 bg-card px-5 py-4 shadow-sm open:shadow"
+                className="group rounded-lg border bg-card px-5 py-4 shadow-sm open:shadow"
               >
                 <summary className="cursor-pointer list-none font-bold [&::-webkit-details-marker]:hidden">
                   <span className="mr-2 inline-block transition-transform group-open:rotate-90">
@@ -243,27 +238,32 @@ export default async function LandingPage() {
 
         {/* final cta */}
         <section className="py-16 text-center">
-          <div className="text-5xl">🐧</div>
+          <div
+            className="mx-auto grid size-12 place-items-center rounded-lg bg-primary text-base font-extrabold text-primary-foreground"
+            aria-hidden
+          >
+            PG
+          </div>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight">
             Ready when you are
           </h2>
           <p className="mx-auto mt-2 max-w-md text-muted-foreground">
             Your buddy is waiting, and the early tasks are the easy points.
           </p>
-          <Button asChild size="lg" className="mt-6 rounded-full px-10 text-base">
+          <Button asChild size="lg" className="mt-6 px-10 text-base">
             <Link href="/signup">Sign up now</Link>
           </Button>
         </section>
       </main>
 
-      <footer className="relative z-10 border-t bg-card/60">
+      <footer className="border-t bg-card/60">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-8 text-center text-sm text-muted-foreground sm:flex-row sm:justify-between sm:text-left">
           <p>
-            Run with ❤️ by the PGPR Resident Assistants.
+            Run by the PGPR Resident Assistants.
             <br className="sm:hidden" /> Questions? Ask in your block&apos;s
             Telegram group or find any RA.
           </p>
-          <p className="font-semibold">🐧 PGPals · PGP Residences, NUS</p>
+          <p className="font-semibold">PGPals · PGP Residences, NUS</p>
         </div>
       </footer>
     </div>

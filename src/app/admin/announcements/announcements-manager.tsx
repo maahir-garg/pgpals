@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Pencil, Pin, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deleteAnnouncement, saveAnnouncement, togglePin } from "../actions";
 import { formatSGT } from "@/lib/datetime";
@@ -52,10 +53,10 @@ export function AnnouncementsManager({
 
   return (
     <div className="space-y-5">
-      <Card className="max-w-2xl rounded-2xl">
-        <CardContent className="space-y-3 pt-5">
+      <Card className="max-w-2xl">
+        <CardContent className="space-y-3">
           <h2 className="font-bold">
-            {editingId ? "✏️ Edit announcement" : "📣 New announcement"}
+            {editingId ? "Edit announcement" : "New announcement"}
           </h2>
           <div className="space-y-1.5">
             <Label htmlFor="ann-title">Title</Label>
@@ -63,8 +64,8 @@ export function AnnouncementsManager({
               id="ann-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Week 2 tasks are live! 🎉"
-              className="h-10 rounded-xl"
+              placeholder="Week 2 tasks are live!"
+              className="h-10"
             />
           </div>
           <div className="space-y-1.5">
@@ -78,14 +79,14 @@ export function AnnouncementsManager({
           </div>
           <div className="flex items-center gap-2">
             <Switch id="ann-pinned" checked={pinned} onCheckedChange={setPinned} />
-            <Label htmlFor="ann-pinned">📌 Pin to top</Label>
+            <Label htmlFor="ann-pinned">Pin to top</Label>
           </div>
           <div className="flex gap-2">
-            <Button onClick={save} disabled={pending} className="rounded-xl font-bold">
+            <Button onClick={save} disabled={pending} className="font-bold">
               {editingId ? "Save changes" : "Post"}
             </Button>
             {editingId && (
-              <Button variant="outline" onClick={reset} className="rounded-xl">
+              <Button variant="outline" onClick={reset}>
                 Cancel
               </Button>
             )}
@@ -95,12 +96,14 @@ export function AnnouncementsManager({
 
       <div className="max-w-2xl space-y-2">
         {announcements.map((a) => (
-          <Card key={a.id} className="rounded-2xl">
-            <CardContent className="pt-5">
+          <Card key={a.id}>
+            <CardContent>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="font-bold">
-                    {a.pinned && "📌 "}
+                  <h3 className="flex items-center gap-1.5 font-bold">
+                    {a.pinned && (
+                      <Pin className="size-3.5 shrink-0 text-primary" aria-hidden />
+                    )}
                     {a.title}
                   </h3>
                   <p className="text-xs text-muted-foreground">
@@ -121,19 +124,19 @@ export function AnnouncementsManager({
                         if (!r.ok) toast.error(r.error);
                       })
                     }
-                    className="rounded-lg"
+                    aria-label={a.pinned ? "Unpin announcement" : "Pin announcement"}
                     title={a.pinned ? "Unpin" : "Pin"}
                   >
-                    📌
+                    <Pin className="size-4" aria-hidden />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => startEdit(a)}
-                    className="rounded-lg"
+                    aria-label="Edit announcement"
                     title="Edit"
                   >
-                    ✏️
+                    <Pencil className="size-4" aria-hidden />
                   </Button>
                   <Button
                     variant="ghost"
@@ -147,10 +150,11 @@ export function AnnouncementsManager({
                           else toast.error(r.error);
                         });
                     }}
-                    className="rounded-lg text-destructive hover:text-destructive"
+                    className="text-destructive hover:text-destructive"
+                    aria-label="Delete announcement"
                     title="Delete"
                   >
-                    🗑️
+                    <Trash2 className="size-4" aria-hidden />
                   </Button>
                 </div>
               </div>

@@ -16,7 +16,11 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold">Event settings</h1>
+      <div className="border-b pb-5">
+        <h1 className="text-2xl font-extrabold tracking-tight">
+          Event settings
+        </h1>
+      </div>
       <SettingsForm settings={settings} admins={(admins ?? []) as Profile[]} />
     </div>
   );

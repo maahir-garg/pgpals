@@ -50,8 +50,8 @@ export function TeamAdminPanel({
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card className="rounded-2xl">
-        <CardContent className="space-y-4 pt-5">
+      <Card>
+        <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="team-name">Team name</Label>
             <div className="flex gap-2">
@@ -59,12 +59,11 @@ export function TeamAdminPanel({
                 id="team-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-10 rounded-xl"
+                className="h-10"
               />
               <Button
                 disabled={pending || name.trim() === team.name}
                 onClick={() => run(() => renameTeamAdmin(team.id, name))}
-                className="rounded-xl"
               >
                 Rename
               </Button>
@@ -76,12 +75,19 @@ export function TeamAdminPanel({
             {roster.map((m) => (
               <div
                 key={m.id}
-                className="flex items-center justify-between rounded-xl bg-muted px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-md bg-muted px-3 py-2 text-sm"
               >
                 <div>
                   <span className="font-semibold">{m.full_name}</span>{" "}
-                  <span title={m.signedUp ? "Signed up" : "Not signed up yet"}>
-                    {m.signedUp ? "✅" : "⏳"}
+                  <span
+                    className={
+                      m.signedUp
+                        ? "rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary"
+                        : "rounded-md bg-card px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground"
+                    }
+                    title={m.signedUp ? "Signed up" : "Not signed up yet"}
+                  >
+                    {m.signedUp ? "Signed" : "Roster"}
                   </span>
                   <div className="text-xs text-muted-foreground">{m.email}</div>
                 </div>
@@ -93,7 +99,7 @@ export function TeamAdminPanel({
                     if (confirm(`Remove ${m.full_name} from this team's roster?`))
                       run(() => removeRosterMember(m.id));
                   }}
-                  className="rounded-lg text-destructive hover:text-destructive"
+                  className="text-destructive hover:text-destructive"
                 >
                   Remove
                 </Button>
@@ -104,13 +110,13 @@ export function TeamAdminPanel({
                 value={memberName}
                 onChange={(e) => setMemberName(e.target.value)}
                 placeholder="Full name"
-                className="h-9 flex-1 rounded-xl"
+                className="h-9 flex-1"
               />
               <Input
                 value={memberEmail}
                 onChange={(e) => setMemberEmail(e.target.value)}
                 placeholder="email@u.nus.edu"
-                className="h-9 flex-1 rounded-xl"
+                className="h-9 flex-1"
               />
               <Button
                 variant="outline"
@@ -130,7 +136,7 @@ export function TeamAdminPanel({
                     }
                   )
                 }
-                className="h-9 rounded-xl"
+                className="h-9"
               >
                 Add
               </Button>
@@ -151,16 +157,16 @@ export function TeamAdminPanel({
                   () => router.push("/admin/teams")
                 );
             }}
-            className="rounded-xl text-destructive hover:text-destructive"
+            className="text-destructive hover:text-destructive"
           >
             Delete team
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl border-primary/30 bg-primary/5">
-        <CardContent className="space-y-3 pt-5">
-          <h3 className="font-bold">🎁 Grant bonus points</h3>
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="space-y-3">
+          <h3 className="font-bold">Grant bonus points</h3>
           <p className="text-sm text-muted-foreground">
             Ad-hoc points with a reason the team will see (use a negative number
             for a penalty).
@@ -170,13 +176,13 @@ export function TeamAdminPanel({
               type="number"
               value={bonusPoints}
               onChange={(e) => setBonusPoints(e.target.value)}
-              className="h-10 w-24 rounded-xl"
+              className="h-10 w-24"
             />
             <Input
               value={bonusReason}
               onChange={(e) => setBonusReason(e.target.value)}
               placeholder="Reason (e.g. best costume at movie night)"
-              className="h-10 flex-1 rounded-xl"
+              className="h-10 flex-1"
             />
           </div>
           <Button
@@ -192,7 +198,7 @@ export function TeamAdminPanel({
                 () => setBonusReason("")
               )
             }
-            className="rounded-xl font-bold"
+            className="font-bold"
           >
             Grant
           </Button>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClipboardCheck } from "lucide-react";
 import { requireAdmin } from "@/lib/data";
 import { getSignedPhotoUrls } from "@/lib/photos";
 import { formatSGT } from "@/lib/datetime";
@@ -100,7 +101,7 @@ export default async function ReviewPage({
         preview: task ? previewPoints(task, s, approvedCountByTask) : 0,
         teamLabel:
           (teamName.get(s.team_id) ?? "?") +
-          (partnerTeamId ? ` 🤝 ${teamName.get(partnerTeamId) ?? "?"}` : ""),
+          (partnerTeamId ? ` + ${teamName.get(partnerTeamId) ?? "?"}` : ""),
         submittedAt: formatSGT(s.submitted_at),
         reviewedAt: s.reviewed_at ? formatSGT(s.reviewed_at) : null,
       };
@@ -109,14 +110,19 @@ export default async function ReviewPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold">Review queue</h1>
+      <div className="border-b pb-5">
+        <h1 className="text-2xl font-extrabold tracking-tight">Review queue</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Oldest submissions appear first.
+        </p>
+      </div>
 
       {/* Filters (plain GET form) */}
-      <form className="flex flex-wrap items-center gap-2" method="get">
+      <form className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3 shadow-sm" method="get">
         <select
           name="status"
           defaultValue={status}
-          className="h-9 rounded-xl border bg-card px-3 text-sm font-semibold"
+          className="h-9 rounded-md border bg-background px-3 text-sm font-semibold"
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -127,7 +133,7 @@ export default async function ReviewPage({
         <select
           name="task"
           defaultValue={params.task ?? ""}
-          className="h-9 max-w-56 rounded-xl border bg-card px-3 text-sm font-semibold"
+          className="h-9 max-w-56 rounded-md border bg-background px-3 text-sm font-semibold"
         >
           <option value="">All tasks</option>
           {tasks.map((t) => (
@@ -139,7 +145,7 @@ export default async function ReviewPage({
         <select
           name="team"
           defaultValue={params.team ?? ""}
-          className="h-9 max-w-56 rounded-xl border bg-card px-3 text-sm font-semibold"
+          className="h-9 max-w-56 rounded-md border bg-background px-3 text-sm font-semibold"
         >
           <option value="">All teams</option>
           {teams.map((t) => (
@@ -150,15 +156,15 @@ export default async function ReviewPage({
         </select>
         <button
           type="submit"
-          className="h-9 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
+          className="h-9 rounded-md bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           Filter
         </button>
       </form>
 
       {cards.length === 0 ? (
-        <div className="rounded-2xl bg-muted p-10 text-center">
-          <div className="text-4xl">🎉</div>
+        <div className="rounded-lg border bg-muted/50 p-10 text-center">
+          <ClipboardCheck className="mx-auto size-8 text-muted-foreground" aria-hidden />
           <p className="mt-2 font-semibold">
             {status === "pending" ? "Queue is clear. Nice work!" : "Nothing here."}
           </p>

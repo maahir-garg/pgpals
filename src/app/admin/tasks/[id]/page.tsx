@@ -29,10 +29,12 @@ export default async function EditTaskPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold">Edit task</h1>
+      <div className="border-b pb-5">
+        <h1 className="text-2xl font-extrabold tracking-tight">Edit task</h1>
+      </div>
       {(pending ?? 0) > 0 && (
-        <p className="max-w-2xl rounded-xl bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground">
-          🕐 {pending} submission{pending === 1 ? "" : "s"} waiting.{" "}
+        <p className="max-w-2xl rounded-md bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground">
+          {pending} submission{pending === 1 ? "" : "s"} waiting.{" "}
           <Link href={`/admin/review?task=${id}`} className="underline">
             review them
           </Link>

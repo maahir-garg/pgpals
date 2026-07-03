@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Check, Undo2, X } from "lucide-react";
 import { toast } from "sonner";
 import { reviewSubmission, revertReview } from "../actions";
 import { Button } from "@/components/ui/button";
@@ -70,8 +71,8 @@ export function ReviewCard({
   }
 
   return (
-    <Card className="rounded-2xl">
-      <CardContent className="space-y-3 pt-5">
+    <Card>
+      <CardContent className="space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
             <h3 className="font-bold leading-snug">{taskTitle}</h3>
@@ -92,7 +93,7 @@ export function ReviewCard({
                 <img
                   src={url}
                   alt={`Photo ${i + 1}`}
-                  className="h-28 w-28 shrink-0 rounded-xl object-cover transition-transform hover:scale-105"
+                  className="h-28 w-28 shrink-0 rounded-md object-cover transition-transform hover:scale-105"
                 />
               </button>
             ) : null
@@ -100,8 +101,8 @@ export function ReviewCard({
         </div>
 
         {submission.text_content && (
-          <p className="rounded-xl bg-muted p-3 text-sm">
-            “{submission.text_content}”
+          <p className="rounded-md bg-muted p-3 text-sm">
+            &quot;{submission.text_content}&quot;
           </p>
         )}
 
@@ -138,17 +139,17 @@ export function ReviewCard({
               <Button
                 onClick={() => decide(true)}
                 disabled={pending}
-                className="flex-1 rounded-xl font-bold"
+                className="flex-1 font-bold"
               >
-                ✅ Approve
+                <Check className="size-4" aria-hidden /> Approve
               </Button>
               <Button
                 onClick={() => decide(false)}
                 disabled={pending}
                 variant="outline"
-                className="flex-1 rounded-xl font-bold text-destructive hover:text-destructive"
+                className="flex-1 font-bold text-destructive hover:text-destructive"
               >
-                ❌ Reject
+                <X className="size-4" aria-hidden /> Reject
               </Button>
             </div>
           </>
@@ -163,7 +164,7 @@ export function ReviewCard({
               {submission.review_note && (
                 <span className="text-muted-foreground">
                   {" "}
-                  · “{submission.review_note}”
+                  · &quot;{submission.review_note}&quot;
                 </span>
               )}
             </div>
@@ -174,9 +175,9 @@ export function ReviewCard({
                 disabled={pending}
                 variant="ghost"
                 size="sm"
-                className="rounded-xl text-muted-foreground"
+                className="text-muted-foreground"
               >
-                ↩︎ Undo review
+                <Undo2 className="size-4" aria-hidden /> Undo review
               </Button>
             )}
           </div>

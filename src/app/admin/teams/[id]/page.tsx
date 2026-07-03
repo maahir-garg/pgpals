@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
 import { StatusBadge } from "@/components/pgpals/badges";
@@ -65,8 +66,12 @@ export default async function AdminTeamPage({
 
   return (
     <div className="space-y-5">
-      <Link href="/admin/teams" className="text-sm font-semibold text-muted-foreground">
-        ← All teams
+      <Link
+        href="/admin/teams"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        All teams
       </Link>
 
       <TeamAdminPanel
@@ -78,12 +83,12 @@ export default async function AdminTeamPage({
       />
 
       <section className="space-y-2">
-        <h2 className="font-bold">🧾 Bonus points</h2>
+        <h2 className="font-bold">Bonus points</h2>
         {bonuses.length === 0 ? (
           <p className="text-sm text-muted-foreground">No manual bonuses yet.</p>
         ) : (
-          <Card className="rounded-2xl">
-            <CardContent className="divide-y pt-2">
+          <Card>
+            <CardContent className="divide-y">
               {bonuses.map((b) => (
                 <div key={b.id} className="flex items-center justify-between py-2.5 text-sm">
                   <div>
@@ -104,12 +109,12 @@ export default async function AdminTeamPage({
       </section>
 
       <section className="space-y-2">
-        <h2 className="font-bold">📜 Submission history</h2>
+        <h2 className="font-bold">Submission history</h2>
         {submissions.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nothing submitted yet.</p>
         ) : (
-          <Card className="rounded-2xl">
-            <CardContent className="divide-y pt-2">
+          <Card>
+            <CardContent className="divide-y">
               {submissions.map((s) => (
                 <div key={s.id} className="flex items-center justify-between gap-2 py-2.5">
                   <div className="min-w-0">

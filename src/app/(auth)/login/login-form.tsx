@@ -15,8 +15,14 @@ export function LoginForm() {
   );
 
   return (
-    <Card className="rounded-3xl shadow-lg">
-      <CardContent className="pt-6">
+    <Card>
+      <CardContent className="space-y-5">
+        <div>
+          <h2 className="text-xl font-extrabold tracking-tight">Log in</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Continue to your team dashboard.
+          </p>
+        </div>
         <form action={action} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
@@ -30,7 +36,15 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                href="/forgot-password"
+                className="text-sm font-semibold text-primary underline"
+              >
+                Forgot?
+              </Link>
+            </div>
             <Input
               id="password"
               name="password"
@@ -40,10 +54,12 @@ export function LoginForm() {
             />
           </div>
           {state?.error && (
-            <p className="text-sm font-medium text-destructive">{state.error}</p>
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+              {state.error}
+            </p>
           )}
-          <Button type="submit" className="w-full rounded-xl" disabled={pending}>
-            {pending ? "Logging in…" : "Log in"}
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? "Logging in..." : "Log in"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             First time here?{" "}

@@ -61,13 +61,13 @@ export function SettingsForm({
     });
   }
 
-  const inputCls = "h-10 rounded-xl";
+  const inputCls = "h-10";
 
   return (
     <div className="grid max-w-4xl gap-4 lg:grid-cols-2">
-      <Card className="rounded-2xl">
-        <CardContent className="space-y-4 pt-5">
-          <h2 className="font-bold">🗓️ Event</h2>
+      <Card>
+        <CardContent className="space-y-4">
+          <h2 className="font-bold">Event</h2>
           <div className="space-y-1.5">
             <Label htmlFor="event-name">Event name</Label>
             <Input id="event-name" value={eventName}
@@ -103,18 +103,18 @@ export function SettingsForm({
               assigned later. Leave empty for roster-only.
             </p>
           </div>
-          <Button onClick={save} disabled={pending} className="rounded-xl font-bold">
+          <Button onClick={save} disabled={pending} className="font-bold">
             Save settings
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl">
-        <CardContent className="space-y-4 pt-5">
-          <h2 className="font-bold">👑 Admins</h2>
+      <Card>
+        <CardContent className="space-y-4">
+          <h2 className="font-bold">Admins</h2>
           <ul className="space-y-1.5">
             {admins.map((a) => (
-              <li key={a.id} className="rounded-xl bg-muted px-3 py-2 text-sm">
+              <li key={a.id} className="rounded-md bg-muted px-3 py-2 text-sm">
                 <span className="font-semibold">{a.full_name}</span>{" "}
                 <span className="text-muted-foreground">· {a.email}</span>
               </li>
@@ -128,7 +128,7 @@ export function SettingsForm({
                 placeholder="their@email.com" className={inputCls} />
               <Button onClick={promote} variant="outline"
                 disabled={pending || !promoteEmail.includes("@")}
-                className="rounded-xl">
+              >
                 Promote
               </Button>
             </div>

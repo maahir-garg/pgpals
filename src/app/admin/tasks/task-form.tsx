@@ -133,18 +133,18 @@ export function TaskForm({ task }: { task: Task | null }) {
     });
   }
 
-  const inputCls = "h-10 rounded-xl";
+  const inputCls = "h-10";
 
   return (
-    <Card className="max-w-2xl rounded-2xl">
-      <CardContent className="space-y-4 pt-6">
+    <Card className="max-w-2xl">
+      <CardContent className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="title">Title</Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Sunset selfie at the Mound 🌅"
+            placeholder="Sunset selfie at the Mound"
             className={inputCls}
           />
         </div>
@@ -156,7 +156,7 @@ export function TaskForm({ task }: { task: Task | null }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={5}
-            placeholder={"What to do, what counts as proof…"}
+            placeholder={"What to do, what counts as proof..."}
           />
         </div>
 
@@ -178,7 +178,7 @@ export function TaskForm({ task }: { task: Task | null }) {
               id="type"
               value={type}
               onChange={(e) => setType(e.target.value as "standard" | "pair")}
-              className="h-10 w-full rounded-xl border bg-card px-3 text-sm"
+              className="h-10 w-full rounded-md border bg-card px-3 text-sm"
             >
               <option value="standard">Standard</option>
               <option value="pair">Pair (two teams)</option>
@@ -220,13 +220,13 @@ export function TaskForm({ task }: { task: Task | null }) {
           </div>
         </div>
 
-        <div className="space-y-3 rounded-xl bg-muted p-4">
-          <Label htmlFor="bonuskind">⚡ Bonus (optional)</Label>
+        <div className="space-y-3 rounded-lg bg-muted p-4">
+          <Label htmlFor="bonuskind">Bonus (optional)</Label>
           <select
             id="bonuskind"
             value={bonusKind}
             onChange={(e) => setBonusKind(e.target.value as BonusKind)}
-            className="h-10 w-full rounded-xl border bg-card px-3 text-sm"
+            className="h-10 w-full rounded-md border bg-card px-3 text-sm"
           >
             <option value="none">No bonus</option>
             <option value="first_n">Early bird: first N approved get +X</option>
@@ -282,15 +282,15 @@ export function TaskForm({ task }: { task: Task | null }) {
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button onClick={save} disabled={pending} className="rounded-xl px-6 font-bold">
-            {pending ? "Saving…" : task ? "Save changes" : "Create task"}
+          <Button onClick={save} disabled={pending} className="px-6 font-bold">
+            {pending ? "Saving..." : task ? "Save changes" : "Create task"}
           </Button>
           {task && (
             <Button
               onClick={remove}
               disabled={pending}
               variant="outline"
-              className="rounded-xl text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive"
             >
               Delete
             </Button>

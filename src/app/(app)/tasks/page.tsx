@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Clock3, ListChecks } from "lucide-react";
 import { requireProfile } from "@/lib/data";
 import { taskStatusFor, isClosed } from "@/lib/status";
 import { isClosingSoon } from "@/lib/datetime";
 import { TaskCard } from "@/components/pgpals/task-card";
+import { Badge } from "@/components/ui/badge";
 import type { Submission, Task } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Tasks" };
@@ -29,22 +31,42 @@ export default async function TasksPage() {
     .sort((a, b) => b.deadline_at.localeCompare(a.deadline_at));
 
   const groups = [
-    { title: "🔥 Closing soon", tasks: closingSoon },
-    { title: "🎯 Active", tasks: active },
-    { title: "🌙 Closed", tasks: closed },
+    { title: "Closing soon", tasks: closingSoon },
+    { title: "Active", tasks: active },
+    { title: "Closed", tasks: closed },
   ].filter((g) => g.tasks.length > 0);
 
   return (
     <div className="space-y-6">
-      <h1 className="px-1 text-2xl font-extrabold">Tasks</h1>
+      <div className="flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your current challenge board.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Badge variant="outline" className="h-7">
+            <ListChecks className="size-3.5" aria-hidden />
+            {active.length + closingSoon.length} open
+          </Badge>
+          <Badge variant="outline" className="h-7">
+            <Clock3 className="size-3.5" aria-hidden />
+            {closingSoon.length} closing
+          </Badge>
+        </div>
+      </div>
       {groups.length === 0 && (
-        <p className="rounded-2xl bg-muted p-6 text-center text-sm text-muted-foreground">
-          No tasks released yet. The fun starts soon! 🐣
+        <p className="rounded-lg bg-muted p-6 text-center text-sm text-muted-foreground">
+          No tasks released yet. The fun starts soon.
         </p>
       )}
       {groups.map((group) => (
-        <section key={group.title} className="space-y-2">
-          <h2 className="px-1 font-bold text-muted-foreground">{group.title}</h2>
+        <section key={group.title} className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-extrabold">{group.title}</h2>
+            <Badge variant="outline">{group.tasks.length}</Badge>
+          </div>
           <div className="grid gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
             {group.tasks.map((task) => (
               <TaskCard

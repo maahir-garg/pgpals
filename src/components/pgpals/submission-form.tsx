@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { ImagePlus, Send, X } from "lucide-react";
 import imageCompression from "browser-image-compression";
 import { toast } from "sonner";
 import { submitTask } from "@/app/(app)/actions";
@@ -77,7 +78,7 @@ export function SubmissionForm({
 
   function submit() {
     if (previews.length === 0) {
-      toast.error("Add at least one photo! 📸");
+      toast.error("Add at least one photo.");
       return;
     }
     startTransition(async () => {
@@ -103,7 +104,7 @@ export function SubmissionForm({
           toast.error(result.error);
           return;
         }
-        toast.success("Submitted! Your RAs will review it soon 🎉");
+        toast.success("Submitted. Your RAs will review it soon!");
         previews.forEach((p) => URL.revokeObjectURL(p.url));
         setPreviews([]);
         setText("");
@@ -114,11 +115,16 @@ export function SubmissionForm({
   }
 
   return (
-    <Card className="rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5">
-      <CardContent className="space-y-3 pt-5">
-        <h3 className="font-bold">
-          {resubmit ? "Give it another shot 💪" : "Submit your proof 📸"}
-        </h3>
+    <Card className="border-primary/30 bg-primary/5">
+      <CardContent className="space-y-4 pt-5">
+        <div>
+          <h3 className="text-base font-bold">
+            {resubmit ? "Fix and resubmit" : "Submit proof"}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add clear photos first. A short note is optional.
+          </p>
+        </div>
 
         <div className="flex flex-wrap gap-2">
           {previews.map((p, i) => (
@@ -127,15 +133,15 @@ export function SubmissionForm({
               <img
                 src={p.url}
                 alt={`Photo ${i + 1}`}
-                className="size-20 rounded-xl object-cover"
+                className="size-20 rounded-md object-cover"
               />
               <button
                 type="button"
                 onClick={() => removePhoto(i)}
-                className="absolute -right-1.5 -top-1.5 grid size-5 place-items-center rounded-full bg-foreground text-[10px] text-background"
+                className="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-foreground text-background shadow-sm"
                 aria-label={`Remove photo ${i + 1}`}
               >
-                ✕
+                <X className="size-3.5" aria-hidden />
               </button>
             </div>
           ))}
@@ -144,9 +150,14 @@ export function SubmissionForm({
               type="button"
               onClick={() => fileInput.current?.click()}
               disabled={compressing}
-              className="grid size-20 place-items-center rounded-xl border-2 border-dashed border-muted-foreground/30 text-2xl text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              className="grid size-20 place-items-center rounded-md border border-dashed border-muted-foreground/40 bg-card text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              aria-label="Add photos"
             >
-              {compressing ? "…" : "+"}
+              {compressing ? (
+                <span className="text-sm font-semibold">...</span>
+              ) : (
+                <ImagePlus className="size-6" aria-hidden />
+              )}
             </button>
           )}
         </div>
@@ -173,9 +184,10 @@ export function SubmissionForm({
         <Button
           onClick={submit}
           disabled={pending || compressing || previews.length === 0}
-          className="w-full rounded-xl font-bold"
+          className="w-full font-bold"
         >
-          {pending ? "Uploading…" : resubmit ? "Resubmit" : "Submit"}
+          <Send className="size-4" aria-hidden />
+          {pending ? "Uploading..." : resubmit ? "Resubmit" : "Submit"}
         </Button>
       </CardContent>
     </Card>

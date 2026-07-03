@@ -34,14 +34,17 @@ export default async function AdminTeamsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold">
-          Teams <span className="text-base font-semibold text-muted-foreground">({teams.length})</span>
-        </h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-5">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight">Teams</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {teams.length} teams on the roster.
+          </p>
+        </div>
         <TeamsToolbar />
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border bg-card">
+      <div className="overflow-x-auto rounded-lg border bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -70,8 +73,15 @@ export default async function AdminTeamsPage() {
                     {members.map((m) => (
                       <span key={m.id} className="mr-3 whitespace-nowrap">
                         {m.full_name}{" "}
-                        <span title={signedUp.has(m.email) ? "Signed up" : "Not signed up yet"}>
-                          {signedUp.has(m.email) ? "✅" : "⏳"}
+                        <span
+                          className={
+                            signedUp.has(m.email)
+                              ? "rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary"
+                              : "rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground"
+                          }
+                          title={signedUp.has(m.email) ? "Signed up" : "Not signed up yet"}
+                        >
+                          {signedUp.has(m.email) ? "Signed" : "Roster"}
                         </span>
                       </span>
                     ))}
@@ -93,7 +103,8 @@ export default async function AdminTeamsPage() {
         </Table>
       </div>
       <p className="text-xs text-muted-foreground">
-        ✅ signed up · ⏳ on the roster but hasn&apos;t created an account yet
+        Signed means the resident has created an account. Roster means they have
+        not signed up yet.
       </p>
     </div>
   );
