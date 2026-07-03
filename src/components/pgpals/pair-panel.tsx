@@ -151,12 +151,15 @@ export function PairPanel({
           {filtered.slice(0, 30).map((t) => (
             <div
               key={t.id}
-              className="flex items-center justify-between gap-3 rounded-md bg-card px-3 py-2 shadow-sm ring-1 ring-border"
+              className="grid min-w-0 gap-2 rounded-md bg-card px-3 py-2 shadow-sm ring-1 ring-border sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3"
             >
-              <span className="text-sm font-semibold">{t.name}</span>
+              <span className="min-w-0 text-sm font-semibold leading-snug">
+                {t.name}
+              </span>
               <Button
                 size="sm"
                 variant="outline"
+                className="w-fit"
                 disabled={pending}
                 onClick={() =>
                   run(() => invitePartner(taskId, t.id), "Invite sent!")

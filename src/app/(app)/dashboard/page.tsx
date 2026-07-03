@@ -39,7 +39,7 @@ function AnnouncementsFeed({
   announcements: Announcement[];
 }) {
   return (
-    <section className="space-y-3">
+    <section className="min-w-0 space-y-3">
       <h2 className="text-lg font-bold">Announcements</h2>
       {announcements.length === 0 && (
         <Card>
@@ -51,7 +51,7 @@ function AnnouncementsFeed({
       {announcements.map((a) => (
         <Card key={a.id}>
           <CardContent>
-            <div className="flex items-start justify-between gap-3">
+            <div className="grid gap-1 sm:flex sm:items-start sm:justify-between sm:gap-3">
               <h3 className="flex min-w-0 items-center gap-1.5 font-bold">
                 {a.pinned && (
                   <Pin
@@ -59,9 +59,9 @@ function AnnouncementsFeed({
                     aria-label="Pinned"
                   />
                 )}
-                <span>{a.title}</span>
+                <span className="min-w-0 break-words">{a.title}</span>
               </h3>
-              <span className="shrink-0 text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground sm:shrink-0">
                 {formatSGT(a.created_at)}
               </span>
             </div>
@@ -277,8 +277,8 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+        <div className="min-w-0 space-y-6">
           {actionNeeded.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center gap-2">
@@ -287,14 +287,14 @@ export default async function DashboardPage() {
                   Needs a fix
                 </h2>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {actionNeeded.map((t) => (
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border-2 border-destructive/40 bg-destructive/5 p-4 text-sm font-semibold transition-colors hover:bg-destructive/10"
+                    className="flex min-w-0 items-center justify-between gap-3 rounded-lg border-2 border-destructive/40 bg-destructive/5 p-4 text-sm font-semibold transition-colors hover:bg-destructive/10"
                   >
-                    <span>{t.title}</span>
+                    <span className="min-w-0 leading-snug">{t.title}</span>
                     <ArrowRight className="size-4 shrink-0" aria-hidden />
                   </Link>
                 ))}
@@ -303,11 +303,11 @@ export default async function DashboardPage() {
           )}
 
           <section className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-bold">Up next</h2>
               <Link
                 href="/tasks"
-                className="text-sm font-semibold text-primary hover:underline"
+                className="shrink-0 text-sm font-semibold text-primary hover:underline"
               >
                 All tasks
               </Link>
@@ -326,12 +326,12 @@ export default async function DashboardPage() {
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border-2 border-border bg-card px-4 py-3 transition-bouncy hover:border-foreground hover:shadow-pop-sm"
+                    className="grid min-w-0 gap-2 rounded-lg border-2 border-border bg-card px-4 py-3 transition-bouncy hover:border-foreground hover:shadow-pop-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3"
                   >
-                    <span className="min-w-0 truncate text-sm font-semibold">
+                    <span className="min-w-0 text-sm font-semibold leading-snug">
                       {t.title}
                     </span>
-                    <span className="flex shrink-0 items-center gap-1.5">
+                    <span className="flex min-w-0 flex-wrap items-center gap-1.5 sm:justify-end">
                       <CountdownBadge deadline={t.deadline_at} />
                       <PointsBadge points={t.points} />
                     </span>
@@ -352,15 +352,15 @@ export default async function DashboardPage() {
           {inReview.length > 0 && (
             <section className="space-y-3">
               <h2 className="text-lg font-bold">Waiting on the RAs</h2>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {inReview.map((t) => (
                   <Link
                     key={t.id}
                     href={`/tasks/${t.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border-2 border-border bg-card px-4 py-3 text-sm font-semibold transition-bouncy hover:border-foreground hover:shadow-pop-sm"
+                    className="grid min-w-0 gap-2 rounded-lg border-2 border-border bg-card px-4 py-3 text-sm font-semibold transition-bouncy hover:border-foreground hover:shadow-pop-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3"
                   >
-                    <span className="min-w-0 truncate">{t.title}</span>
-                    <Badge className="shrink-0 bg-warning/15 text-warning hover:bg-warning/15">
+                    <span className="min-w-0 leading-snug">{t.title}</span>
+                    <Badge className="w-fit bg-warning/15 text-warning hover:bg-warning/15 sm:justify-self-end">
                       In review
                     </Badge>
                   </Link>
@@ -374,7 +374,7 @@ export default async function DashboardPage() {
           />
         </div>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <Card>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between gap-3">

@@ -20,14 +20,14 @@ export function TaskCard({
   closed: boolean;
 }) {
   return (
-    <Link href={`/tasks/${task.id}`} className="block">
+    <Link href={`/tasks/${task.id}`} className="block min-w-0">
       <Card
         className={
           "min-h-36 gap-3 rounded-xl p-4 transition-bouncy hover:-rotate-1 hover:scale-[1.02] " +
           (closed && status !== "approved" ? "opacity-70" : "")
         }
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <h3 className="min-w-0 text-base font-bold leading-snug">{task.title}</h3>
           <PointsBadge points={task.points} />
         </div>
@@ -38,8 +38,8 @@ export function TaskCard({
             <CountdownBadge deadline={task.deadline_at} />
             {status && <StatusBadge status={status} />}
           </div>
-          <div className="flex items-center justify-between border-t pt-3 text-xs font-semibold text-muted-foreground">
-            <span>
+          <div className="flex min-w-0 items-center justify-between gap-3 border-t pt-3 text-xs font-semibold text-muted-foreground">
+            <span className="min-w-0 leading-snug">
               {closed
                 ? "See what happened"
                 : status === "approved"
@@ -50,7 +50,7 @@ export function TaskCard({
                       ? "Waiting for review"
                       : "Open task"}
             </span>
-            <ArrowRight className="size-4" aria-hidden />
+            <ArrowRight className="size-4 shrink-0" aria-hidden />
           </div>
         </div>
       </Card>

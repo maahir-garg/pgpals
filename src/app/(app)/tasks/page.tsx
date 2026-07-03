@@ -103,7 +103,7 @@ export default async function TasksPage() {
             Your challenge board. Deadlines are SGT.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="h-7">
             {open.length} open
           </Badge>
@@ -123,7 +123,7 @@ export default async function TasksPage() {
             <h2 className="font-bold">{group.title}</h2>
             <Badge variant="outline">{group.tasks.length}</Badge>
           </div>
-          <div className="grid gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3">
             {group.tasks.map((task) => (
               <TaskCard
                 key={task.id}

@@ -14,7 +14,7 @@ export default async function AdminLayout({
   const { profile } = await requireAdmin();
 
   return (
-    <div className="flex min-h-dvh bg-background">
+    <div className="flex min-h-dvh overflow-x-clip bg-background">
       <aside className="hidden w-60 shrink-0 flex-col border-r bg-card px-3 py-5 md:flex">
         <Link href="/admin" className="flex items-center gap-2 px-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -42,26 +42,33 @@ export default async function AdminLayout({
       </aside>
       <div className="min-w-0 flex-1">
         {/* Mobile top bar */}
-        <div className="sticky top-0 z-30 border-b bg-background/95 px-4 py-2 backdrop-blur md:hidden">
-          <div className="flex items-center justify-between">
-            <Link href="/admin" className="flex items-center gap-2 font-extrabold">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon.svg" alt="" className="size-7 rounded-md" />
-              Admin
-            </Link>
+        <div className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+          <div className="flex items-center justify-between gap-3">
             <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-muted-foreground"
+              href="/admin"
+              className="flex min-w-0 items-center gap-2 font-extrabold"
             >
-              <ArrowLeft className="size-4" aria-hidden />
-              Participant view
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
+              <span className="min-w-0">Admin</span>
+              <span className="grid size-7 shrink-0 place-items-center rounded-full border-2 border-foreground bg-secondary text-secondary-foreground">
+                <Shield className="size-3.5" strokeWidth={2.5} aria-hidden />
+              </span>
             </Link>
+            <Button asChild variant="outline" size="sm" className="h-9 px-3">
+              <Link href="/dashboard">
+                <ArrowLeft className="size-4" aria-hidden />
+                App
+              </Link>
+            </Button>
           </div>
-          <div className="-mx-4 mt-2 overflow-x-auto px-4">
+          <div className="mt-3">
             <AdminNav horizontal />
           </div>
         </div>
-        <main className="mx-auto max-w-6xl px-4 py-6 md:px-8">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 py-5 md:px-8 md:py-6">
+          {children}
+        </main>
       </div>
     </div>
   );

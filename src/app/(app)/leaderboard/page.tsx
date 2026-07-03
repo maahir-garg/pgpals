@@ -52,7 +52,7 @@ export default async function LeaderboardPage() {
   const rest = rows.slice(10);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5 pb-16">
+    <div className="mx-auto max-w-2xl space-y-5">
       <div className="flex items-end justify-between gap-3 border-b-2 border-dashed border-foreground/25 pb-5">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">
@@ -96,6 +96,15 @@ export default async function LeaderboardPage() {
           </p>
         )}
 
+      {mine && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border-2 border-foreground bg-primary px-4 py-3 text-sm text-primary-foreground shadow-pop md:hidden">
+          <span className="font-bold">Your team is #{mine.rank}</span>
+          <span className="shrink-0 font-heading font-extrabold">
+            {mine.points} coins
+          </span>
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <Card>
           <CardContent className="text-center text-sm text-muted-foreground">
@@ -113,17 +122,6 @@ export default async function LeaderboardPage() {
             ))}
           </CardContent>
         </Card>
-      )}
-
-      {/* Your rank, pinned above the bottom nav. Phone only: on desktop the
-          whole list is visible and your row is already highlighted. */}
-      {mine && (
-        <div className="fixed inset-x-0 bottom-16 z-30 mx-auto w-full max-w-lg px-4 pb-3 md:hidden">
-          <div className="flex items-center justify-between rounded-xl border-2 border-foreground bg-primary px-4 py-3 text-primary-foreground shadow-pop">
-            <span className="font-bold">Your team is #{mine.rank}</span>
-            <span className="font-heading font-extrabold">{mine.points} coins</span>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -15,7 +15,7 @@ export default async function AppLayout({
   const { data: score } = await supabase.rpc("get_my_score");
 
   return (
-    <div className="flex min-h-dvh w-full flex-col bg-background pb-20 md:pb-8">
+    <div className="flex min-h-dvh w-full flex-col overflow-x-clip bg-background pb-20 md:pb-8">
       <header className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3 px-4 py-2.5 md:max-w-6xl">
           <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
@@ -37,17 +37,33 @@ export default async function AppLayout({
               </span>
             )}
             {profile.role === "admin" && (
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="hidden sm:inline-flex"
-              >
-                <Link href="/admin">
-                  <Shield className="size-3.5" aria-hidden />
-                  Admin
-                </Link>
-              </Button>
+              <>
+                <Button
+                  asChild
+                  size="icon-sm"
+                  variant="outline"
+                  className="sm:hidden"
+                >
+                  <Link
+                    href="/admin"
+                    aria-label="Open admin console"
+                    title="Admin console"
+                  >
+                    <Shield className="size-4" aria-hidden />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="hidden sm:inline-flex"
+                >
+                  <Link href="/admin">
+                    <Shield className="size-3.5" aria-hidden />
+                    Admin
+                  </Link>
+                </Button>
+              </>
             )}
             <form action={signout}>
               <Button
@@ -63,7 +79,7 @@ export default async function AppLayout({
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-5 md:max-w-6xl md:py-8">
+      <main className="mx-auto w-full max-w-lg min-w-0 flex-1 px-4 py-5 md:max-w-6xl md:py-8">
         {children}
       </main>
       <BottomNav />

@@ -137,28 +137,28 @@ export default async function LandingPage() {
   return (
     <div className="min-h-dvh overflow-x-clip bg-background">
       <header className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="flex items-center gap-2">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2.5 sm:gap-3 sm:py-3">
+          <Link href="/" className="flex min-w-0 items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon.svg" alt="" className="size-9 rounded-lg" />
-            <span className="font-heading text-xl font-extrabold tracking-tight">
+            <img src="/icon.svg" alt="" className="size-8 rounded-lg sm:size-9" />
+            <span className="font-heading text-lg font-extrabold tracking-tight sm:text-xl">
               PGPals
             </span>
           </Link>
-          <div className="flex items-center gap-2.5">
-            <Button asChild variant="ghost" className="hidden sm:inline-flex">
-              <Link href="/login">Log in</Link>
-            </Button>
-            <Button asChild>
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            <Button asChild variant="outline" size="sm" className="px-3 sm:px-4">
               <Link href="/signup">Sign up</Link>
+            </Button>
+            <Button asChild size="sm" className="px-4 sm:h-10 sm:px-5">
+              <Link href="/login">Log in</Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4">
+      <main className="mx-auto w-full max-w-6xl min-w-0 px-4">
         {/* Hero: content left, penguin sticker right, confetti behind. */}
-        <section className="relative py-14 sm:py-24">
+        <section className="relative py-8 sm:py-24">
           {/* Decorative shapes: hidden on phones so they never crowd text. */}
           <div
             aria-hidden
@@ -172,38 +172,58 @@ export default async function LandingPage() {
             aria-hidden
             className="absolute top-24 right-[38%] hidden size-4 rounded-full bg-mint lg:block"
           />
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div>
+          <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div className="min-w-0">
+              <div className="mb-4 flex items-center justify-between gap-3 lg:hidden">
+                {settings && (
+                  <span className="inline-flex min-w-0 rotate-[-1.5deg] items-center rounded-full border-2 border-foreground bg-card px-2.5 py-1.5 text-[10px] font-bold leading-snug shadow-pop-sm min-[360px]:text-[11px]">
+                    {formatSGTDate(settings.start_at)} –{" "}
+                    {formatSGTDate(settings.end_at)} · PGP Residences
+                  </span>
+                )}
+                <div className="relative ml-auto shrink-0">
+                  <div
+                    aria-hidden
+                    className="bg-dots absolute -inset-2 rounded-2xl opacity-70"
+                  />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/icon.svg"
+                    alt=""
+                    className="relative size-16 rotate-[-3deg] rounded-2xl border-2 border-foreground bg-primary p-1.5 shadow-pop sm:size-20"
+                  />
+                </div>
+              </div>
               {settings && (
-                <span className="inline-flex rotate-[-1.5deg] items-center rounded-full border-2 border-foreground bg-card px-4 py-1.5 text-sm font-bold shadow-pop-sm">
+                <span className="hidden max-w-full rotate-[-1.5deg] items-center rounded-full border-2 border-foreground bg-card px-4 py-1.5 text-sm font-bold leading-snug shadow-pop-sm lg:inline-flex">
                   {formatSGTDate(settings.start_at)} –{" "}
                   {formatSGTDate(settings.end_at)} · PGP Residences
                 </span>
               )}
-              <h1 className="mt-6 max-w-xl text-balance font-heading text-4xl font-extrabold tracking-tight sm:text-6xl">
+              <h1 className="mt-4 max-w-xl text-balance font-heading text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:mt-6 sm:text-6xl">
                 Two weeks. One buddy.{" "}
                 <span className="relative inline-block text-primary">
                   Real prizes.
                   <Squiggle className="absolute -bottom-3 left-0 h-3 w-full text-secondary" />
                 </span>
               </h1>
-              <p className="mt-6 max-w-lg text-pretty text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
+              <p className="mt-4 max-w-lg text-pretty text-base leading-6 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
                 PGPals is PGPR&apos;s buddy challenge. Team up with your
                 assigned pal, complete photo tasks around campus, and race the
-                other teams to the top — the winners walk away with seriously
+                other teams to the top and the winners walk away with seriously
                 exciting prizes.
               </p>
-              <div className="mt-8 flex flex-col gap-3.5 sm:flex-row">
+              <div className="mt-6 flex flex-col gap-2.5 sm:mt-8 sm:flex-row sm:gap-3.5">
                 <Button asChild size="lg">
-                  <Link href="/signup">
-                    Join with your NUS email
+                  <Link href="/login">
+                    I have an account
                     <span className="grid size-6 place-items-center rounded-full bg-primary-foreground text-primary">
                       <ArrowRight className="size-3.5" strokeWidth={2.5} aria-hidden />
                     </span>
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <Link href="/login">I have an account</Link>
+                  <Link href="/signup">Join with your NUS email</Link>
                 </Button>
               </div>
             </div>
@@ -220,22 +240,22 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section id="how" className="scroll-mt-24 border-t-2 border-dashed border-foreground/25 py-14 sm:py-20">
+        <section id="how" className="scroll-mt-24 border-t-2 border-dashed border-foreground/25 py-12 sm:py-20">
           <div className="text-center">
             <h2 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
               How it works
             </h2>
             <Squiggle className="mx-auto mt-3 h-3 w-36 text-primary" />
           </div>
-          <div className="mt-12 grid gap-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-1 gap-5 gap-y-9 sm:mt-12 sm:grid-cols-2 sm:gap-6 sm:gap-y-10 lg:grid-cols-4">
             {STEPS.map((step, i) => (
               <div
                 key={step.title}
-                className="relative rounded-xl border-2 border-foreground bg-card px-5 pb-5 pt-9 shadow-sticker transition-bouncy hover:-rotate-1 hover:scale-[1.02]"
+                className="relative min-w-0 rounded-xl border-2 border-foreground bg-card px-4 pb-4 pt-8 shadow-sticker transition-bouncy hover:-rotate-1 hover:scale-[1.02] sm:px-5 sm:pb-5 sm:pt-9"
               >
                 {/* Icon circle sits half-in/half-out of the top border. */}
                 <span
-                  className={`absolute -top-6 left-5 grid size-12 place-items-center rounded-full border-2 border-foreground ${step.color}`}
+                  className={`absolute -top-5 left-4 grid size-11 place-items-center rounded-full border-2 border-foreground sm:-top-6 sm:left-5 sm:size-12 ${step.color}`}
                 >
                   <step.icon className="size-5.5" strokeWidth={2.5} aria-hidden />
                 </span>
@@ -252,27 +272,27 @@ export default async function LandingPage() {
         </section>
 
         {/* Prize spotlight */}
-        <section className="pb-14 sm:pb-20">
-          <div className="relative overflow-hidden rounded-2xl border-2 border-foreground bg-primary px-6 py-10 text-primary-foreground shadow-pop sm:px-12">
+        <section className="pb-12 sm:pb-20">
+          <div className="relative overflow-hidden rounded-2xl border-2 border-foreground bg-primary px-5 py-8 text-primary-foreground shadow-pop sm:px-12 sm:py-10">
             <div aria-hidden className="bg-dots absolute inset-0 opacity-20" />
             <div
               aria-hidden
-              className="absolute -right-10 -top-10 size-40 rounded-full bg-accent/90"
+              className="absolute -right-10 -top-10 hidden size-40 rounded-full bg-accent/90 sm:block"
             />
             <div
               aria-hidden
               className="absolute -bottom-8 right-24 hidden size-20 rounded-full bg-secondary sm:block"
             />
             <div className="relative max-w-xl">
-              <span className="inline-flex rotate-[-2deg] items-center gap-1.5 rounded-full border-2 border-foreground bg-accent px-4 py-1.5 font-heading text-sm font-extrabold text-accent-foreground shadow-pop-sm">
+              <span className="inline-flex rotate-[-2deg] items-center gap-1.5 rounded-full border-2 border-foreground bg-accent px-3 py-1.5 font-heading text-xs font-extrabold text-accent-foreground shadow-pop-sm sm:px-4 sm:text-sm">
                 <Gift className="size-4" strokeWidth={2.5} aria-hidden />
                 EXCITING PRIZES
               </span>
-              <h2 className="mt-5 font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <h2 className="mt-4 font-heading text-3xl font-extrabold tracking-tight sm:mt-5 sm:text-4xl">
                 Play for the podium
               </h2>
               <p className="mt-3 text-base leading-7 text-primary-foreground/90 sm:text-lg">
-                The top teams win prizes at the closing ceremony — and because
+                The top teams win prizes at the closing ceremony and because
                 the leaderboard goes dark for the final stretch, every team is
                 still in the running until the very end. Every coin you bank
                 counts.
@@ -293,19 +313,19 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="pb-14 sm:pb-20">
-          <div className="grid gap-6 sm:grid-cols-2">
+        <section className="pb-12 sm:pb-20">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
             {PERKS.map((perk) => (
               <div
                 key={perk.title}
-                className="flex gap-4 rounded-xl border-2 border-foreground bg-card p-5 shadow-sticker transition-bouncy hover:rotate-1 hover:scale-[1.02]"
+                className="flex min-w-0 items-start gap-3 rounded-xl border-2 border-foreground bg-card p-4 shadow-sticker transition-bouncy hover:rotate-1 hover:scale-[1.02] sm:gap-4 sm:p-5"
               >
                 <span
                   className={`grid size-12 shrink-0 place-items-center rounded-full border-2 border-foreground ${perk.iconBg}`}
                 >
                   <perk.icon className="size-5.5" strokeWidth={2.5} aria-hidden />
                 </span>
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-heading text-lg font-bold">{perk.title}</h3>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">
                     {perk.text}
@@ -316,14 +336,14 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section id="faq" className="scroll-mt-24 border-t-2 border-dashed border-foreground/25 py-14 sm:py-20">
+        <section id="faq" className="scroll-mt-24 border-t-2 border-dashed border-foreground/25 py-12 sm:py-20">
           <div className="text-center">
             <h2 className="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl">
               Quick answers
             </h2>
             <Squiggle className="mx-auto mt-3 h-3 w-36 text-secondary" />
           </div>
-          <div className="mx-auto mt-10 max-w-2xl divide-y-2 divide-dashed divide-border rounded-xl border-2 border-foreground bg-card px-6 shadow-sticker">
+          <div className="mx-auto mt-8 max-w-2xl divide-y-2 divide-dashed divide-border rounded-xl border-2 border-foreground bg-card px-4 shadow-sticker sm:mt-10 sm:px-6">
             {FAQS.map((f) => (
               <div key={f.q} className="py-5">
                 <h3 className="font-heading font-bold">{f.q}</h3>
@@ -357,14 +377,21 @@ export default async function LandingPage() {
             Your buddy is waiting, the early tasks are the easy coins, and the
             prize table won&apos;t fill itself.
           </p>
-          <Button asChild size="lg" className="mt-7">
-            <Link href="/signup">
-              Sign up now
-              <span className="grid size-6 place-items-center rounded-full bg-primary-foreground text-primary">
-                <ArrowRight className="size-3.5" strokeWidth={2.5} aria-hidden />
-              </span>
-            </Link>
-          </Button>
+          <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+            <Button asChild size="lg">
+              <Link href="/login">
+                Log in
+                <span className="grid size-6 place-items-center rounded-full bg-primary-foreground text-primary">
+                  <ArrowRight className="size-3.5" strokeWidth={2.5} aria-hidden />
+                </span>
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/signup">
+                Sign up
+              </Link>
+            </Button>
+          </div>
         </section>
       </main>
 
