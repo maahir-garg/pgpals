@@ -167,7 +167,7 @@ export default async function DashboardPage() {
     supabase.from("submissions").select("*"),
     supabase.from("bonus_awards").select("*").order("created_at", { ascending: false }),
     supabase.rpc("get_my_score"),
-    getEventSettings(await Promise.resolve(supabase)),
+    getEventSettings(supabase),
   ]);
 
   const allTasks = (tasks ?? []) as Task[];

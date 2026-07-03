@@ -34,7 +34,7 @@ export function utcToSgtInput(iso: string): string {
   return d.toISOString().slice(0, 16);
 }
 
-export type Countdown = { label: string; urgent: boolean };
+type Countdown = { label: string; urgent: boolean };
 
 // Human countdown to a deadline, e.g. "2d 4h left", "35m left", "Closed".
 export function countdownTo(deadlineIso: string, now = new Date()): Countdown {

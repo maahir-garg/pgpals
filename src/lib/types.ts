@@ -1,10 +1,10 @@
 // Hand-written row types matching supabase/migrations/20260702000000_init.sql.
 // Kept deliberately simple. Update alongside any migration change.
 
-export type Role = "participant" | "admin";
-export type TaskType = "standard" | "pair";
+type Role = "participant" | "admin";
+type TaskType = "standard" | "pair";
 export type SubmissionStatus = "pending" | "approved" | "rejected" | "superseded";
-export type PairingStatus = "pending" | "accepted" | "declined";
+type PairingStatus = "pending" | "accepted" | "declined";
 
 export type BonusConfig =
   | { kind: "first_n"; n: number; bonus: number }

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sgtInputToUtc } from "@/lib/datetime";
 import type { BonusConfig } from "@/lib/types";
 
-export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
+type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
 // Every action runs with the admin's own session, so RLS + the admin-only
 // RPCs are the real enforcement; these functions are just plumbing.
