@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireProfile } from "@/lib/data";
@@ -26,6 +26,11 @@ export default async function TaskDetailPage({
 }) {
   const { id } = await params;
   const { supabase, profile } = await requireProfile();
+
+  if (!profile.team_id) {
+    if (profile.role === "admin") redirect(`/admin/tasks/${id}`);
+    redirect("/tasks");
+  }
 
   const { data: task } = await supabase
     .from("tasks")

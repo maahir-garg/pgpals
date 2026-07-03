@@ -199,7 +199,7 @@ async function main() {
     email: "ra@pgpals.test",
     password: PASSWORD,
     email_confirm: true,
-    user_metadata: { full_name: "Riya the RA" },
+    user_metadata: { full_name: "RA R3" },
   });
   if (adminError) die("admin user", adminError);
 

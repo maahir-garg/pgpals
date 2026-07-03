@@ -1,15 +1,61 @@
+import Link from "next/link";
 import type { Metadata } from "next";
+import { Shield, UserPlus } from "lucide-react";
 import { requireProfile } from "@/lib/data";
 import { taskStatusFor, isClosed } from "@/lib/status";
 import { isClosingSoon } from "@/lib/datetime";
 import { TaskCard } from "@/components/pgpals/task-card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Submission, Task } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Tasks" };
 
 export default async function TasksPage() {
-  const { supabase } = await requireProfile();
+  const { supabase, profile } = await requireProfile();
+
+  if (!profile.team_id) {
+    const isAdmin = profile.role === "admin";
+    return (
+      <div className="mx-auto max-w-2xl space-y-4">
+        <section className="rounded-xl border-2 border-foreground bg-card p-5 shadow-sticker md:p-6">
+          <div className="flex items-start gap-3">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-foreground bg-primary text-primary-foreground">
+              {isAdmin ? (
+                <Shield className="size-5" strokeWidth={2.5} aria-hidden />
+              ) : (
+                <UserPlus className="size-5" strokeWidth={2.5} aria-hidden />
+              )}
+            </span>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
+              {isAdmin ? (
+                <>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Participant tasks are team-scoped. Since you&apos;re not
+                    playing on a team, manage tasks from the admin console
+                    instead.
+                  </p>
+                  <Button asChild className="mt-4">
+                    <Link href="/admin/tasks">
+                      <Shield className="size-4" aria-hidden />
+                      Open admin tasks
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  You&apos;re not on a team yet, so tasks are locked for now.
+                  Ask your RA to add you to the roster and you&apos;ll see the
+                  challenge board here.
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   const [{ data: tasks }, { data: submissions }] = await Promise.all([
     supabase.from("tasks").select("*"),
