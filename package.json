@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
+    "seed:prod": "tsx scripts/seed.ts --prod",
+    "backup": "tsx scripts/backup.ts",
+    "backup:prod": "tsx scripts/backup.ts --prod",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

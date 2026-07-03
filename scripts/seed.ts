@@ -14,9 +14,15 @@ import sharp from "sharp";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// --- env (.env.local) ------------------------------------------------------
+// --- env -------------------------------------------------------------------
+// Default target is the LOCAL stack via .env.local, and anything that does
+// not look local is refused. `npm run seed:prod` (--prod) loads
+// .env.production.local instead, for deliberate dry-run reseeds of the live
+// project, with a 5-second abort window: this script WIPES its target.
+const PROD = process.argv.includes("--prod");
+const envFile = PROD ? ".env.production.local" : ".env.local";
 try {
-  const env = readFileSync(resolve(process.cwd(), ".env.local"), "utf8");
+  const env = readFileSync(resolve(process.cwd(), envFile), "utf8");
   for (const line of env.split("\n")) {
     const m = line.match(/^([A-Z_]+)=(.*)$/);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
@@ -28,8 +34,22 @@ try {
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !serviceKey) {
-  console.error("Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY");
+  console.error(`Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (${envFile})`);
   process.exit(1);
+}
+if (!PROD && !/^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(url)) {
+  console.error(
+    `${envFile} points at ${new URL(url).host}, which is not the local stack.\n` +
+      "The seed wipes its target. Use `npm run seed:prod` if you really mean it."
+  );
+  process.exit(1);
+}
+async function confirmProdWipe() {
+  if (!PROD) return;
+  console.log(
+    `⚠️  WIPING AND RESEEDING ${new URL(url!).host} in 5 seconds - Ctrl-C to abort.`
+  );
+  await new Promise((r) => setTimeout(r, 5000));
 }
 const db = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -117,7 +137,21 @@ async function wipe() {
 }
 
 async function main() {
+  await confirmProdWipe();
   await wipe();
+
+  // --wipe-only: clean build for the real event (see README "D-day").
+  // Leaves event_settings and real admin_allowlist emails in place, but
+  // removes the demo admin; RAs sign up again and configure via the UI.
+  if (process.argv.includes("--wipe-only")) {
+    await db.from("admin_allowlist").delete().eq("email", "ra@pgpals.test");
+    console.log(
+      "\nWiped clean (no demo data). Next: check admin_allowlist has the real",
+      "\nRA emails, have them sign up, set event dates + prizes in Settings,",
+      "\nthen import the real roster CSV. See README → D-day."
+    );
+    return;
+  }
 
   // Event window: started 5 days ago, ends in 9 days, board hides at end-3d.
   console.log("Event settings…");

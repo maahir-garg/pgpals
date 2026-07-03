@@ -47,3 +47,6 @@ pgpals-design-and-prompts.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database backups from scripts/backup.ts (may contain personal data)
+/backups/

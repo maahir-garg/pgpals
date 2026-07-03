@@ -124,6 +124,70 @@ SQL Editor → `update profiles set role = 'participant' where email = '...';`
 
 ---
 
+## Dry runs, backups, and D-day
+
+Two env files decide which database local commands touch. **`.env.local`**
+must always point at the local Docker stack; **`.env.production.local`**
+holds the production values. Both are gitignored. `npm run seed` refuses to
+run against anything that isn't the local stack.
+
+### Dry runs against production
+
+```bash
+npm run seed:prod        # wipe + reseed PRODUCTION with demo data (5s abort window)
+```
+
+Use this for dress rehearsals on the real URL before the event: RAs can
+click through review, tasks, and announcements with realistic data. Two
+warnings: it deletes **everything** first (including real accounts, so RAs
+re-sign-up afterwards), and the demo accounts all share the password
+documented in this README. That's fine while testing; they must be gone by
+D-day (see below).
+
+### Backups (do this daily during the event)
+
+```bash
+npm run backup:prod -- --photos    # full backup incl. submission photos
+npm run backup:prod                # tables + auth users only (fast)
+```
+
+Writes `backups/<host>/<timestamp>/` containing `tables.json` (every table,
+all rows), `auth-users.json`, and `photos/`. Passwords can't be exported, so
+a worst-case restore means users reset passwords; scores, submissions, and
+photos are all in the backup and final standings can be recomputed from
+`tables.json` alone.
+
+- During the event, run a photo backup **once a day** (set a phone
+  reminder) and before anything risky (schema change, bulk edit).
+- Copy the latest backup folder somewhere off the laptop (Google Drive,
+  etc.). The folder is gitignored; it contains resident names and emails,
+  so treat it as personal data.
+
+### D-day: clean build of production
+
+Run this once, shortly before the event goes live, **before** creating the
+real tasks (about 30 minutes end to end):
+
+1. `npm run backup:prod -- --photos` — keep the final dry-run state.
+2. `npx supabase db push` — apply any pending migrations.
+3. `npm run seed:prod -- --wipe-only` — deletes all demo data and **every
+   auth user**. Real RA emails in `admin_allowlist` survive.
+4. *Supabase → SQL Editor*: check `admin_allowlist` lists every real RA
+   email (`select * from admin_allowlist;`), add any missing ones.
+5. Every RA signs up in the app with that email (they become admins
+   automatically).
+6. *Admin → Settings*: real event dates, leaderboard hide date, prize list.
+7. *Admin → Teams*: import the real roster CSV.
+8. *Admin → Tasks*: create the real tasks (set release times; drafts are
+   invisible until published).
+9. *Admin → Announcements*: post the welcome message.
+10. Verify: log out and check the landing page shows the real dates; log
+    back in and check the review queue is empty.
+11. `npm run backup:prod` — a clean baseline backup.
+12. From this moment, **never run `npm run seed:prod` again**.
+
+---
+
 ## CSV team import
 
 *Admin → Teams → Import CSV.* One team per line, five columns
@@ -173,6 +237,7 @@ queue shows the auto amount and lets you override it.
 **Every morning (2 min)**
 - Open *Admin → Overview*: pending count, submissions today, participation %.
 - Check Supabase dashboard → *Storage* usage (see budget below).
+- `npm run backup:prod -- --photos` and copy the folder to the shared drive.
 
 **Through the day**
 - Clear the review queue a few times a day, so rejected teams have time to
@@ -227,7 +292,8 @@ event month, downgrade after. No code changes needed.
 
 ```
 supabase/migrations/   schema + RLS + RPCs (the security lives here)
-scripts/seed.ts        demo data (npm run seed)
+scripts/seed.ts        demo data (npm run seed / seed:prod, --wipe-only for D-day)
+scripts/backup.ts      point-in-time backup (npm run backup:prod -- --photos)
 scripts/smoke-test.ts  security checks against a live DB
 scripts/render-test.ts page render checks against a running dev server
 scripts/walkthrough.ts full-app screenshots for design review

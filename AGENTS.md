@@ -87,8 +87,14 @@ local, and Vercel agree.
   Security-sensitive changes almost always belong here first.
 
 - `scripts/seed.ts`
-  Destructive local demo seed. Never run against production unless explicitly
-  intended.
+  Destructive demo seed. `npm run seed` targets the local stack via
+  `.env.local` and refuses non-local URLs; `npm run seed:prod` deliberately
+  wipes and reseeds production via `.env.production.local` (5-second abort
+  window) for dry runs; `--wipe-only` is the D-day clean build (see README).
+
+- `scripts/backup.ts`
+  Read-only point-in-time backup (`npm run backup` / `backup:prod`,
+  `--photos` to include storage) into the gitignored `backups/` directory.
 
 - `scripts/smoke-test.ts`
   Security and rules checks against a seeded database.
@@ -323,8 +329,13 @@ Clean account leftovers:
 
 ## Things To Avoid
 
-- Do not run `npm run seed` against production.
-- Do not expose or commit `.env.local`.
+- Do not point `.env.local` at production. It must always hold the local
+  stack values; production credentials live in `.env.production.local` and
+  are only used by the explicit `:prod` scripts. (This went wrong once:
+  the seed wiped production because `.env.local` had been switched.)
+- Production reseeds happen only via `npm run seed:prod`, and never after
+  the D-day clean build (README → "Dry runs, backups, and D-day").
+- Do not expose or commit `.env.local` or `.env.production.local`.
 - Do not import the service-role admin client into client components.
 - Do not rely on UI checks for security. Put access rules in RLS/RPCs.
 - Do not delete user data casually. Verify target rows first, then delete.
