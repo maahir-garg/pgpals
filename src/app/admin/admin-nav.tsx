@@ -36,7 +36,7 @@ export function AdminNav({ horizontal = false }: { horizontal?: boolean }) {
             key={link.href}
             href={link.href}
             className={cn(
-              "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground",
+              "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
               horizontal && "shrink-0 whitespace-nowrap",
               active && "bg-primary/10 text-primary"
             )}

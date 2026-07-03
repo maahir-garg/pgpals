@@ -62,7 +62,8 @@ export default async function AdminTasksPage() {
               <TableHead>Release (SGT)</TableHead>
               <TableHead>Deadline (SGT)</TableHead>
               <TableHead>State</TableHead>
-              <TableHead className="text-right">Approved / pending</TableHead>
+              <TableHead className="text-right">Approved</TableHead>
+              <TableHead className="text-right">Pending</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,10 +72,10 @@ export default async function AdminTasksPage() {
               const state = !task.is_published
                 ? { label: "Draft", cls: "bg-muted text-muted-foreground" }
                 : new Date(task.release_at).getTime() > now
-                  ? { label: "Scheduled", cls: "bg-chart-3/25" }
+                  ? { label: "Scheduled", cls: "bg-warning/15 text-warning" }
                   : new Date(task.deadline_at).getTime() < now
                     ? { label: "Closed", cls: "bg-muted text-muted-foreground" }
-                    : { label: "Live", cls: "bg-chart-5/25" };
+                    : { label: "Live", cls: "bg-success/15 text-success" };
               return (
                 <TableRow key={task.id}>
                   <TableCell>
@@ -105,15 +106,32 @@ export default async function AdminTasksPage() {
                   <TableCell>
                     <Badge className={state.cls}>{state.label}</Badge>
                   </TableCell>
-                  <TableCell className="text-right text-sm font-semibold">
-                    {c.approved} / {c.pending}
+                  <TableCell className="text-right text-sm font-semibold text-success">
+                    {c.approved}
+                  </TableCell>
+                  <TableCell
+                    className={
+                      "text-right text-sm font-semibold " +
+                      (c.pending > 0 ? "text-warning" : "text-muted-foreground")
+                    }
+                  >
+                    {c.pending > 0 ? (
+                      <Link
+                        href={`/admin/review?task=${task.id}`}
+                        className="underline-offset-2 hover:underline"
+                      >
+                        {c.pending}
+                      </Link>
+                    ) : (
+                      c.pending
+                    )}
                   </TableCell>
                 </TableRow>
               );
             })}
             {tasks.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                   No tasks yet. Create the first one!
                 </TableCell>
               </TableRow>

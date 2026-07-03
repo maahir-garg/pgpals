@@ -14,16 +14,12 @@ export default async function AdminLayout({
   const { profile } = await requireAdmin();
 
   return (
-    <div className="flex min-h-dvh bg-muted/35">
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar px-3 py-5 md:flex">
+    <div className="flex min-h-dvh bg-background">
+      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card px-3 py-5 md:flex">
         <Link href="/admin" className="flex items-center gap-2 px-2">
-          <span
-            className="grid size-8 place-items-center rounded-md bg-primary text-sm font-extrabold text-primary-foreground"
-            aria-hidden
-          >
-            PG
-          </span>
-          <span className="text-lg font-extrabold text-primary">PGPals</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
+          <span className="text-lg font-extrabold tracking-tight">PGPals</span>
           <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase text-secondary-foreground">
             <Shield className="size-3" aria-hidden />
             Admin
@@ -48,8 +44,10 @@ export default async function AdminLayout({
         {/* Mobile top bar */}
         <div className="sticky top-0 z-30 border-b bg-background/95 px-4 py-2 backdrop-blur md:hidden">
           <div className="flex items-center justify-between">
-            <Link href="/admin" className="font-extrabold text-primary">
-              PGPals Admin
+            <Link href="/admin" className="flex items-center gap-2 font-extrabold">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon.svg" alt="" className="size-7 rounded-md" />
+              Admin
             </Link>
             <Link
               href="/dashboard"
