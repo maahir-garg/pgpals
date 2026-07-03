@@ -14,7 +14,7 @@ for (const line of env.split("\n")) {
   if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
 }
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 const BASE = "http://localhost:3000";
 
 let passed = 0, failed = 0;

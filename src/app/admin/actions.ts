@@ -307,7 +307,7 @@ export async function grantBonus(input: {
   if (error) return { ok: false, error: error.message };
   revalidateAdmin();
   revalidatePath("/", "layout");
-  return { ok: true, message: "Bonus granted! 🎁" };
+  return { ok: true, message: "Bonus granted." };
 }
 
 // -------------------------------------------------------- announcements ---
@@ -332,7 +332,7 @@ export async function saveAnnouncement(input: {
   if (error) return { ok: false, error: error.message };
   revalidateAdmin();
   revalidatePath("/dashboard");
-  return { ok: true, message: input.id ? "Updated." : "Posted! 📣" };
+  return { ok: true, message: input.id ? "Updated." : "Posted." };
 }
 
 export async function togglePin(id: string, pinned: boolean): Promise<ActionResult> {
@@ -401,5 +401,5 @@ export async function promoteToAdmin(email: string): Promise<ActionResult> {
     };
   }
   revalidateAdmin();
-  return { ok: true, message: "Promoted to admin. 👑" };
+  return { ok: true, message: "Promoted to admin." };
 }

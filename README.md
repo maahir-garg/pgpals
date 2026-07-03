@@ -27,10 +27,11 @@ Storage) · Tailwind + shadcn/ui · Vercel. Fits free tiers for ~400 users.
   date. `scripts/smoke-test.ts` proves all of this against a live database.
 - All times display in **Asia/Singapore**; storage is UTC.
 
-Demo data is seeded so you can click through everything immediately (see
-[Local development](#local-development)).
+Local demo data is seeded so you can click through everything immediately (see
+[Local development](#local-development)). These `.test` emails are for the
+local Supabase stack only; hosted Supabase Auth rejects `.test` addresses.
 
-| Demo login | Email | Password |
+| Local demo login | Email | Password |
 |---|---|---|
 | Admin (RA) | `ra@pgpals.test` | `pgpals123` |
 | Participant | `chloe.lim@u.nus.edu` | `pgpals123` |
@@ -100,9 +101,10 @@ In *Dashboard → SQL Editor*, run (with your email):
 insert into admin_allowlist (email) values ('your.email@u.nus.edu');
 ```
 
-Then **sign up in the app** with that email, and you'll be an admin. Promote
-other RAs later in *Admin → Settings* (they must sign up first). To demote
-someone: SQL Editor → `update profiles set role = 'participant' where email = '...';`
+Then **sign up in the app** with that real email, and you'll be an admin. Do
+not use the local `ra@pgpals.test` demo address in production. Promote other
+RAs later in *Admin → Settings* (they must sign up first). To demote someone:
+SQL Editor → `update profiles set role = 'participant' where email = '...';`
 
 ### 3. Vercel
 
@@ -114,7 +116,7 @@ someone: SQL Editor → `update profiles set role = 'participant' where email = 
    | Name | Value |
    |---|---|
    | `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | the `anon` `public` key |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | the publishable key (`sb_publishable_...`) |
    | `SUPABASE_SERVICE_ROLE_KEY` | the `service_role` key (⚠️ secret: server-only, never expose) |
 
 3. Deploy. Done. The URL is what you share with residents.
@@ -183,6 +185,7 @@ queue shows the auto amount and lets you override it.
 | Symptom | Fix |
 |---|---|
 | "My email isn't on the list" at signup | *Admin → Teams*: find their team, check the roster email matches exactly what they're typing; fix/add it, they retry |
+| "email rate limit exceeded" at signup | Make sure `SUPABASE_SERVICE_ROLE_KEY` is set in the app environment; signup uses it to create confirmed rostered users without sending confirmation emails. For password reset emails, wait for the quota window or configure SMTP in Supabase Auth. |
 | Resident on the wrong team | *Admin → Teams → (team)*: remove from wrong roster, add to right one; if already signed up, re-adding relinks them |
 | Team wants a name change | They can rename themselves on their dashboard (✏️ next to the name) |
 | Submitted the wrong photos | Reject with a note; they can resubmit until the deadline |

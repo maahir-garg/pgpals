@@ -6,11 +6,11 @@ export function describeBonus(config: BonusConfig | null): string | null {
   if (!config) return null;
   switch (config.kind) {
     case "first_n":
-      return `⚡ Early bird: the first ${config.n} approved submissions earn +${config.bonus} bonus points!`;
+      return `Early bird: the first ${config.n} approved submissions earn +${config.bonus} bonus points!`;
     case "before":
-      return `⚡ Submit before ${formatSGT(config.cutoff)} to earn +${config.bonus} bonus points!`;
+      return `Submit before ${formatSGT(config.cutoff)} to earn +${config.bonus} bonus points!`;
     case "multiplier_before":
-      return `⚡ Submit before ${formatSGT(config.cutoff)} for ${config.multiplier}× points!`;
+      return `Submit before ${formatSGT(config.cutoff)} for ${config.multiplier}× points!`;
     default:
       return null;
   }

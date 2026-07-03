@@ -18,7 +18,7 @@ try {
 } catch {}
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 let passed = 0;
@@ -186,11 +186,17 @@ async function main() {
     check("precheck rejects unknown email", precheckBad?.ok === false);
     const { data: precheckGood } = await anon.rpc("signup_precheck", { p_email: "hafiz.bin.salleh@u.nus.edu" });
     check("precheck accepts rostered email", precheckGood?.ok === true && !!precheckGood?.team_name);
-    const { error: strangerError } = await anon.auth.signUp({ email: "stranger@gmail.com", password: "password123" });
+    const { error: strangerError } = await admin.auth.admin.createUser({
+      email: "stranger@gmail.com",
+      password: "password123",
+      email_confirm: true,
+    });
     check("signup with unknown email blocked by trigger", !!strangerError, strangerError?.message);
-    const { data: signup, error: signupError } = await anon.auth.signUp({
-      email: "hafiz.bin.salleh@u.nus.edu", password: "pgpals123",
-      options: { data: { full_name: "Hafiz Bin Salleh" } },
+    const { data: signup, error: signupError } = await admin.auth.admin.createUser({
+      email: "hafiz.bin.salleh@u.nus.edu",
+      password: "pgpals123",
+      email_confirm: true,
+      user_metadata: { full_name: "Hafiz Bin Salleh" },
     });
     check("rostered signup works", !signupError && !!signup?.user, signupError?.message);
     if (signup?.user) {
