@@ -23,7 +23,7 @@ export function TaskCard({
     <Link href={`/tasks/${task.id}`} className="block">
       <Card
         className={
-          "min-h-36 gap-3 p-4 transition-colors hover:border-primary/40 hover:bg-primary/5 " +
+          "min-h-36 gap-3 rounded-xl p-4 transition-colors hover:border-primary/40 hover:bg-primary/5 " +
           (closed && status !== "approved" ? "opacity-70" : "")
         }
       >
@@ -39,7 +39,17 @@ export function TaskCard({
             {status && <StatusBadge status={status} />}
           </div>
           <div className="flex items-center justify-between border-t pt-3 text-xs font-semibold text-muted-foreground">
-            <span>{closed ? "Review past submissions" : "Open task"}</span>
+            <span>
+              {closed
+                ? "See what happened"
+                : status === "approved"
+                  ? "View submission"
+                  : status === "rejected"
+                    ? "Fix and resubmit"
+                    : status === "pending"
+                      ? "Waiting for review"
+                      : "Open task"}
+            </span>
             <ArrowRight className="size-4" aria-hidden />
           </div>
         </div>

@@ -16,25 +16,21 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-dvh w-full flex-col bg-background pb-20 md:pb-8">
-      <header className="sticky top-0 z-30 bg-primary text-primary-foreground shadow-sm">
-        <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3 px-4 py-3 md:max-w-6xl">
+      <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3 px-4 py-2.5 md:max-w-6xl">
           <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
-            <span
-              className="grid size-8 shrink-0 place-items-center rounded-md bg-primary-foreground/15 text-sm font-extrabold text-primary-foreground"
-              aria-hidden
-            >
-              PG
-            </span>
-            <span className="text-lg font-extrabold tracking-tight text-primary-foreground">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
+            <span className="text-lg font-extrabold tracking-tight">
               PGPals
             </span>
           </Link>
           <TopNav />
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5">
             {profile.team_id && (
-              <span className="flex items-center gap-1 rounded-md bg-primary-foreground/15 px-2.5 py-1.5 text-sm font-bold text-primary-foreground">
+              <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-sm font-bold text-accent-foreground">
                 <Star className="size-3.5 fill-current" aria-hidden />
-                {score ?? 0} pts
+                {score ?? 0}
               </span>
             )}
             {profile.role === "admin" && (
@@ -42,7 +38,7 @@ export default async function AppLayout({
                 asChild
                 size="sm"
                 variant="outline"
-                className="hidden border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground sm:inline-flex"
+                className="hidden sm:inline-flex"
               >
                 <Link href="/admin">
                   <Shield className="size-3.5" aria-hidden />
@@ -54,10 +50,11 @@ export default async function AppLayout({
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                className="text-muted-foreground"
+                aria-label="Log out"
               >
-                <LogOut className="size-3.5" aria-hidden />
-                Log out
+                <LogOut className="size-4" aria-hidden />
+                <span className="hidden sm:inline">Log out</span>
               </Button>
             </form>
           </div>

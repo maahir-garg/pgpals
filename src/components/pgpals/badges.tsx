@@ -6,7 +6,7 @@ import { countdownTo } from "@/lib/datetime";
 
 export function PointsBadge({ points }: { points: number }) {
   return (
-    <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary">
+    <Badge className="bg-accent text-accent-foreground hover:bg-accent">
       <Star className="size-3 fill-current" aria-hidden /> {points} pts
     </Badge>
   );
@@ -14,7 +14,7 @@ export function PointsBadge({ points }: { points: number }) {
 
 export function PairBadge() {
   return (
-    <Badge className="bg-accent text-accent-foreground hover:bg-accent">
+    <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary">
       <Users className="size-3" aria-hidden /> Pair task
     </Badge>
   );
@@ -22,8 +22,8 @@ export function PairBadge() {
 
 export function BonusBadge() {
   return (
-    <Badge className="bg-chart-3/25 text-foreground hover:bg-chart-3/25">
-      <Zap className="size-3" aria-hidden /> Bonus
+    <Badge className="bg-warning/15 text-warning hover:bg-warning/15">
+      <Zap className="size-3 fill-current" aria-hidden /> Bonus
     </Badge>
   );
 }
@@ -34,8 +34,7 @@ export function CountdownBadge({ deadline }: { deadline: string }) {
     <Badge
       variant="outline"
       className={cn(
-        "",
-        urgent && "border-primary/40 bg-primary/10 font-bold text-primary",
+        urgent && "border-destructive/30 bg-destructive/10 font-bold text-destructive",
         label === "Closed" && "text-muted-foreground"
       )}
     >
@@ -51,17 +50,17 @@ const STATUS_STYLES: Record<
   pending: {
     label: "In review",
     icon: Clock,
-    className: "bg-chart-3/25 text-foreground",
+    className: "bg-warning/15 text-warning",
   },
   approved: {
     label: "Approved",
     icon: Check,
-    className: "bg-chart-5/25 text-foreground",
+    className: "bg-success/15 text-success",
   },
   rejected: {
     label: "Needs a fix",
     icon: X,
-    className: "bg-destructive/15 text-destructive",
+    className: "bg-destructive/10 text-destructive",
   },
   superseded: {
     label: "Replaced",

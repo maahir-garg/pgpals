@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Clock3, ListChecks } from "lucide-react";
 import { requireProfile } from "@/lib/data";
 import { taskStatusFor, isClosed } from "@/lib/status";
 import { isClosingSoon } from "@/lib/datetime";
@@ -20,19 +19,32 @@ export default async function TasksPage() {
   const allTasks = (tasks ?? []) as Task[];
   const allSubs = (submissions ?? []) as Submission[];
 
-  const closingSoon = allTasks
-    .filter((t) => !isClosed(t.deadline_at) && isClosingSoon(t.deadline_at))
+  // "Done" means no more points available: every allowed approval is used.
+  // Repeatable tasks (max_submissions > 1) stay open until then.
+  const approvedCount = (t: Task) =>
+    allSubs.filter(
+      (s) => s.task_id === t.id && s.status === "approved"
+    ).length;
+  const isDone = (t: Task) => approvedCount(t) >= t.max_submissions;
+
+  const open = allTasks.filter((t) => !isClosed(t.deadline_at) && !isDone(t));
+  const closingSoon = open
+    .filter((t) => isClosingSoon(t.deadline_at))
     .sort((a, b) => a.deadline_at.localeCompare(b.deadline_at));
-  const active = allTasks
-    .filter((t) => !isClosed(t.deadline_at) && !isClosingSoon(t.deadline_at))
+  const active = open
+    .filter((t) => !isClosingSoon(t.deadline_at))
     .sort((a, b) => a.deadline_at.localeCompare(b.deadline_at));
+  const done = allTasks
+    .filter((t) => isDone(t))
+    .sort((a, b) => b.deadline_at.localeCompare(a.deadline_at));
   const closed = allTasks
-    .filter((t) => isClosed(t.deadline_at))
+    .filter((t) => isClosed(t.deadline_at) && !isDone(t))
     .sort((a, b) => b.deadline_at.localeCompare(a.deadline_at));
 
   const groups = [
     { title: "Closing soon", tasks: closingSoon },
-    { title: "Active", tasks: active },
+    { title: "Open", tasks: active },
+    { title: "Done", tasks: done },
     { title: "Closed", tasks: closed },
   ].filter((g) => g.tasks.length > 0);
 
@@ -42,17 +54,15 @@ export default async function TasksPage() {
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Tasks</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Your current challenge board.
+            Your challenge board. Deadlines are SGT.
           </p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="h-7">
-            <ListChecks className="size-3.5" aria-hidden />
-            {active.length + closingSoon.length} open
+            {open.length} open
           </Badge>
           <Badge variant="outline" className="h-7">
-            <Clock3 className="size-3.5" aria-hidden />
-            {closingSoon.length} closing
+            {done.length} done
           </Badge>
         </div>
       </div>
@@ -64,7 +74,7 @@ export default async function TasksPage() {
       {groups.map((group) => (
         <section key={group.title} className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-extrabold">{group.title}</h2>
+            <h2 className="font-bold">{group.title}</h2>
             <Badge variant="outline">{group.tasks.length}</Badge>
           </div>
           <div className="grid gap-2 md:grid-cols-2 md:gap-3 xl:grid-cols-3">

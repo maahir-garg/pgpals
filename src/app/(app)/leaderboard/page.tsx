@@ -118,7 +118,7 @@ function LeaderRow({
         className={cn(
           "grid size-8 shrink-0 place-items-center rounded-md text-sm font-extrabold",
           highlight && row.rank <= 3
-            ? "bg-secondary text-secondary-foreground"
+            ? "bg-accent text-accent-foreground"
             : "bg-muted text-muted-foreground"
         )}
       >

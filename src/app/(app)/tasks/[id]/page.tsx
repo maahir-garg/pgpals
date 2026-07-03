@@ -124,7 +124,7 @@ export default async function TaskDetailPage({
       </header>
 
       {bonusText && !closed && (
-        <Card className="border-chart-3/40 bg-chart-3/15">
+        <Card className="border-warning/30 bg-warning/10">
           <CardContent className="text-sm font-semibold">
             {bonusText}
           </CardContent>
@@ -155,6 +155,15 @@ export default async function TaskDetailPage({
           pairingId={task.type === "pair" ? (pairing?.id ?? null) : null}
           resubmit={wasRejected}
         />
+      )}
+
+      {hasPending && (
+        <Card className="border-warning/30 bg-warning/10">
+          <CardContent className="text-sm">
+            <span className="font-bold">Submitted!</span> Your photos are with
+            the RAs. You&apos;ll see the result here.
+          </CardContent>
+        </Card>
       )}
 
       {closed && approvedCount === 0 && !hasPending && (

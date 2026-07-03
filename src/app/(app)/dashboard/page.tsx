@@ -7,7 +7,6 @@ import {
   Clock3,
   ListChecks,
   Pin,
-  Star,
   Trophy,
 } from "lucide-react";
 import { requireProfile, getEventSettings } from "@/lib/data";
@@ -15,6 +14,7 @@ import { taskStatusFor, isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CountdownBadge, PointsBadge } from "@/components/pgpals/badges";
 import { Markdown } from "@/components/pgpals/markdown";
 import { TeamNameEditor } from "@/components/pgpals/team-name-editor";
 import type {
@@ -72,21 +72,20 @@ export default async function DashboardPage() {
     (r: RosterEntry) => r.email !== profile.email
   );
 
+  // The home screen is a to-do list: fix rejections first, then open tasks
+  // by deadline, then whatever is waiting on the RAs.
   const actionNeeded = allTasks.filter(
     (t) =>
       !isClosed(t.deadline_at) && taskStatusFor(t.id, allSubs) === "rejected"
   );
+  const todo = allTasks
+    .filter(
+      (t) => !isClosed(t.deadline_at) && taskStatusFor(t.id, allSubs) === null
+    )
+    .sort((a, b) => a.deadline_at.localeCompare(b.deadline_at));
   const inReview = allTasks.filter(
     (t) => taskStatusFor(t.id, allSubs) === "pending"
   );
-  const newTasks = allTasks
-    .filter(
-      (t) =>
-        !isClosed(t.deadline_at) &&
-        taskStatusFor(t.id, allSubs) === null &&
-        Date.now() - new Date(t.release_at).getTime() < 48 * 60 * 60 * 1000
-    )
-    .sort((a, b) => b.release_at.localeCompare(a.release_at));
 
   const taskTitle = new Map(allTasks.map((t) => [t.id, t.title]));
   const history: { key: string; when: string; label: string; points: number }[] = [
@@ -106,12 +105,11 @@ export default async function DashboardPage() {
     })),
   ].sort((a, b) => b.when.localeCompare(a.when));
 
-  const openTasks = allTasks.filter((t) => !isClosed(t.deadline_at)).length;
   const approvedCount = allSubs.filter((s) => s.status === "approved").length;
 
   return (
     <div className="space-y-6">
-      <section className="rounded-lg border bg-card p-5 shadow-sm md:p-6">
+      <section className="rounded-xl border bg-card p-5 shadow-sm md:p-6">
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           {team ? (
             <div>
@@ -145,25 +143,29 @@ export default async function DashboardPage() {
           )}
 
           <div className="grid grid-cols-3 gap-2 text-center sm:min-w-80">
-            <div className="rounded-md bg-primary/10 p-3">
-              <Trophy className="mx-auto size-4 text-primary" aria-hidden />
-              <div className="mt-1 text-2xl font-extrabold">{score ?? 0}</div>
-              <div className="text-xs font-semibold text-muted-foreground">
+            <div className="rounded-lg bg-accent p-3">
+              <Trophy className="mx-auto size-4 text-accent-foreground" aria-hidden />
+              <div className="mt-1 text-2xl font-extrabold text-accent-foreground">
+                {score ?? 0}
+              </div>
+              <div className="text-xs font-semibold text-accent-foreground/80">
                 points
               </div>
             </div>
-            <div className="rounded-md bg-muted p-3">
+            <div className="rounded-lg bg-muted p-3">
               <ListChecks className="mx-auto size-4 text-muted-foreground" aria-hidden />
               <div className="mt-1 text-2xl font-extrabold">{approvedCount}</div>
               <div className="text-xs font-semibold text-muted-foreground">
                 approved
               </div>
             </div>
-            <div className="rounded-md bg-muted p-3">
+            <div className="rounded-lg bg-muted p-3">
               <Clock3 className="mx-auto size-4 text-muted-foreground" aria-hidden />
-              <div className="mt-1 text-2xl font-extrabold">{openTasks}</div>
+              <div className="mt-1 text-2xl font-extrabold">
+                {todo.length + actionNeeded.length}
+              </div>
               <div className="text-xs font-semibold text-muted-foreground">
-                open
+                to do
               </div>
             </div>
           </div>
@@ -175,9 +177,9 @@ export default async function DashboardPage() {
           {actionNeeded.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="size-5 text-destructive" aria-hidden />
-                <h2 className="text-lg font-extrabold text-destructive">
-                  Needs your attention
+                <AlertTriangle className="size-4.5 text-destructive" aria-hidden />
+                <h2 className="text-lg font-bold text-destructive">
+                  Needs a fix
                 </h2>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -195,63 +197,75 @@ export default async function DashboardPage() {
             </section>
           )}
 
-          {(newTasks.length > 0 || inReview.length > 0) && (
-            <section className="grid gap-3 md:grid-cols-2">
-              {newTasks.length > 0 && (
-                <Card>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-extrabold">New tasks</h2>
-                      <Badge variant="outline">{newTasks.length}</Badge>
-                    </div>
-                    <div className="space-y-2">
-                      {newTasks.map((t) => (
-                        <Link
-                          key={t.id}
-                          href={`/tasks/${t.id}`}
-                          className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 text-sm font-semibold transition-colors hover:bg-primary/10 hover:text-primary"
-                        >
-                          <span className="min-w-0 truncate">{t.title}</span>
-                          <Badge className="bg-secondary text-secondary-foreground">
-                            <Star className="size-3 fill-current" aria-hidden />
-                            {t.points}
-                          </Badge>
-                        </Link>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">Up next</h2>
+              <Link
+                href="/tasks"
+                className="text-sm font-semibold text-primary hover:underline"
+              >
+                All tasks
+              </Link>
+            </div>
+            {todo.length === 0 ? (
+              <Card>
+                <CardContent className="text-sm text-muted-foreground">
+                  {allTasks.length === 0
+                    ? "No tasks released yet. The fun starts soon."
+                    : "All caught up! Check back when new tasks drop."}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                {todo.slice(0, 6).map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/tasks/${t.id}`}
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <span className="min-w-0 truncate text-sm font-semibold">
+                      {t.title}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <CountdownBadge deadline={t.deadline_at} />
+                      <PointsBadge points={t.points} />
+                    </span>
+                  </Link>
+                ))}
+                {todo.length > 6 && (
+                  <Link
+                    href="/tasks"
+                    className="block rounded-lg border border-dashed px-4 py-2.5 text-center text-sm font-semibold text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    {todo.length - 6} more open {todo.length - 6 === 1 ? "task" : "tasks"}
+                  </Link>
+                )}
+              </div>
+            )}
+          </section>
 
-              {inReview.length > 0 && (
-                <Card>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-extrabold">In review</h2>
-                      <Badge variant="outline">{inReview.length}</Badge>
-                    </div>
-                    <div className="space-y-2">
-                      {inReview.map((t) => (
-                        <Link
-                          key={t.id}
-                          href={`/tasks/${t.id}`}
-                          className="flex items-center justify-between gap-3 rounded-md bg-muted px-3 py-2 text-sm font-semibold transition-colors hover:bg-primary/10 hover:text-primary"
-                        >
-                          <span className="min-w-0 truncate">{t.title}</span>
-                          <span className="shrink-0 text-xs text-muted-foreground">
-                            pending
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+          {inReview.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="text-lg font-bold">Waiting on the RAs</h2>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {inReview.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/tasks/${t.id}`}
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 text-sm font-semibold shadow-sm transition-colors hover:bg-muted"
+                  >
+                    <span className="min-w-0 truncate">{t.title}</span>
+                    <Badge className="shrink-0 bg-warning/15 text-warning hover:bg-warning/15">
+                      In review
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
             </section>
           )}
 
           <section className="space-y-3">
-            <h2 className="text-lg font-extrabold">Announcements</h2>
+            <h2 className="text-lg font-bold">Announcements</h2>
             {(announcements ?? []).length === 0 && (
               <Card>
                 <CardContent className="text-sm text-muted-foreground">
@@ -290,7 +304,7 @@ export default async function DashboardPage() {
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="font-extrabold">Leaderboard</h2>
+                  <h2 className="font-bold">Leaderboard</h2>
                   <p className="text-sm text-muted-foreground">
                     See where your team stands.
                   </p>
@@ -299,7 +313,7 @@ export default async function DashboardPage() {
               </div>
               <Link
                 href="/leaderboard"
-                className="flex items-center justify-between rounded-md bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+                className="flex items-center justify-between rounded-lg bg-primary px-3 py-2 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 Open leaderboard
                 <ArrowRight className="size-4" aria-hidden />
@@ -310,7 +324,7 @@ export default async function DashboardPage() {
           {history.length > 0 && (
             <Card>
               <CardContent className="space-y-3">
-                <h2 className="font-extrabold">Points history</h2>
+                <h2 className="font-bold">Points history</h2>
                 <div className="divide-y">
                   {history.map((h) => (
                     <div
@@ -323,7 +337,12 @@ export default async function DashboardPage() {
                           {formatSGT(h.when)}
                         </div>
                       </div>
-                      <span className="shrink-0 font-bold text-primary">
+                      <span
+                        className={
+                          "shrink-0 font-bold " +
+                          (h.points < 0 ? "text-destructive" : "text-success")
+                        }
+                      >
                         {h.points < 0 ? h.points : `+${h.points}`}
                       </span>
                     </div>
