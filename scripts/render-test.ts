@@ -104,7 +104,7 @@ async function main() {
   check("announcements manager", r.body.includes("New announcement"), String(r.status));
   r = await get("/admin/settings", admin);
   check("settings page", r.body.includes("Leaderboard hides"), String(r.status));
-  check("admins listed", r.body.includes("Riya the RA"));
+  check("admins listed", r.body.includes("RA R3"));
   r = await get("/leaderboard", admin);
   check("admin sees leaderboard page", r.status === 200);
 

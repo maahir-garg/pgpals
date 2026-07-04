@@ -32,24 +32,14 @@ export default async function AdminOverviewPage() {
   ).toISOString();
 
   const [
-    { count: pendingCount },
-    { count: todayCount },
-    { count: teamCount },
-    { data: submittingTeams },
+    { data: statsData },
     { data: tasks },
     { data: oldestPending },
     { data: teams },
   ] = await Promise.all([
-    supabase
-      .from("submissions")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "pending"),
-    supabase
-      .from("submissions")
-      .select("*", { count: "exact", head: true })
-      .gte("submitted_at", sgtMidnightUtc),
-    supabase.from("teams").select("*", { count: "exact", head: true }),
-    supabase.from("submissions").select("team_id"),
+    supabase.rpc("admin_overview_stats", {
+      p_today_start: sgtMidnightUtc,
+    }),
     supabase.from("tasks").select("id, title, is_published, release_at, deadline_at"),
     supabase
       .from("submissions")
@@ -60,18 +50,14 @@ export default async function AdminOverviewPage() {
     supabase.from("teams").select("id, name"),
   ]);
 
-  const uniqueSubmitters = new Set((submittingTeams ?? []).map((s) => s.team_id))
-    .size;
+  const overview = statsData?.[0];
+  const pendingCount = Number(overview?.pending_count ?? 0);
+  const todayCount = Number(overview?.today_count ?? 0);
+  const teamCount = Number(overview?.team_count ?? 0);
+  const uniqueSubmitters = Number(overview?.unique_submitters ?? 0);
   const participation =
-    teamCount && teamCount > 0
-      ? Math.round((uniqueSubmitters / teamCount) * 100)
-      : 0;
-  const liveTasks = (tasks ?? []).filter(
-    (t) =>
-      t.is_published &&
-      new Date(t.release_at) <= now &&
-      new Date(t.deadline_at) > now
-  ).length;
+    teamCount > 0 ? Math.round((uniqueSubmitters / teamCount) * 100) : 0;
+  const liveTasks = Number(overview?.live_tasks ?? 0);
 
   const taskTitle = new Map((tasks ?? []).map((t) => [t.id, t.title]));
   const teamName = new Map(

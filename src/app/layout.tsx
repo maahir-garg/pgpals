@@ -14,6 +14,8 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
+export const preferredRegion = "sin1";
+
 export const metadata: Metadata = {
   title: { default: "PGPals", template: "%s · PGPals" },
   description: "PGPR's 2-week buddy challenge: complete tasks, earn PGP Coins, top the board!",

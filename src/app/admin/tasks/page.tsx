@@ -13,25 +13,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Submission, Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Tasks" };
 
 export default async function AdminTasksPage() {
   const { supabase } = await requireAdmin();
-  const [{ data: tasksData }, { data: subsData }] = await Promise.all([
+  const [{ data: tasksData }, { data: countsData }] = await Promise.all([
     supabase.from("tasks").select("*").order("release_at", { ascending: false }),
-    supabase.from("submissions").select("task_id, status"),
+    supabase.rpc("admin_submission_counts_by_task"),
   ]);
   const tasks = (tasksData ?? []) as Task[];
-  const subs = (subsData ?? []) as Pick<Submission, "task_id" | "status">[];
-
   const counts = new Map<string, { pending: number; approved: number }>();
-  for (const s of subs) {
-    const c = counts.get(s.task_id) ?? { pending: 0, approved: 0 };
-    if (s.status === "pending") c.pending++;
-    if (s.status === "approved") c.approved++;
-    counts.set(s.task_id, c);
+  for (const row of countsData ?? []) {
+    counts.set(row.task_id, {
+      pending: Number(row.pending_count),
+      approved: Number(row.approved_count),
+    });
   }
 
   const now = Date.now();

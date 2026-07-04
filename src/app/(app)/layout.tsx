@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Coins, LogOut, Shield } from "lucide-react";
-import { requireProfile } from "@/lib/data";
+import { getMyScore, requireProfile } from "@/lib/data";
 import { signout } from "@/app/(auth)/actions";
 import { BottomNav } from "@/components/pgpals/bottom-nav";
 import { TopNav } from "@/components/pgpals/top-nav";
@@ -12,7 +12,7 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const { supabase, profile } = await requireProfile();
-  const { data: score } = await supabase.rpc("get_my_score");
+  const score = profile.team_id ? await getMyScore(supabase) : 0;
 
   return (
     <div className="flex min-h-dvh w-full flex-col overflow-x-clip bg-background pb-20 md:pb-8">
@@ -33,7 +33,7 @@ export default async function AppLayout({
                 title="Your team's PGP Coins"
               >
                 <Coins className="size-3.5" strokeWidth={2.5} aria-hidden />
-                {score ?? 0}
+                {score}
               </span>
             )}
             {profile.role === "admin" && (

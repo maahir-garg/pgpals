@@ -1,33 +1,27 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { EventSettings, Profile } from "@/lib/types";
 
 // Loads the logged-in user's profile or bounces to /login.
-export async function requireProfile() {
+export const requireProfile = cache(async function requireProfile() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
   const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
+    .rpc("get_my_profile")
     .single<Profile>();
   if (!profile) redirect("/login");
 
   return { supabase, profile };
-}
+});
 
-export async function requireAdmin() {
+export const requireAdmin = cache(async function requireAdmin() {
   const result = await requireProfile();
   if (result.profile.role !== "admin") redirect("/dashboard");
   return result;
-}
+});
 
-export async function getEventSettings(
+export const getEventSettings = cache(async function getEventSettings(
   supabase: Awaited<ReturnType<typeof createClient>>
 ): Promise<EventSettings> {
   const { data } = await supabase
@@ -36,4 +30,11 @@ export async function getEventSettings(
     .eq("id", 1)
     .single<EventSettings>();
   return data!;
-}
+});
+
+export const getMyScore = cache(async function getMyScore(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<number> {
+  const { data } = await supabase.rpc("get_my_score");
+  return data ?? 0;
+});

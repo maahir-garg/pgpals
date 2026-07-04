@@ -31,6 +31,12 @@ export default async function AdminTeamsPage() {
     ((boardData ?? []) as LeaderboardRow[]).map((r) => [r.team_id, r.points])
   );
   const signedUp = new Set(profiles.map((p) => p.email));
+  const rosterByTeam = new Map<string, RosterEntry[]>();
+  for (const member of roster) {
+    const members = rosterByTeam.get(member.team_id) ?? [];
+    members.push(member);
+    rosterByTeam.set(member.team_id, members);
+  }
 
   return (
     <div className="space-y-4">
@@ -55,7 +61,7 @@ export default async function AdminTeamsPage() {
           </TableHeader>
           <TableBody>
             {teams.map((team) => {
-              const members = roster.filter((r) => r.team_id === team.id);
+              const members = rosterByTeam.get(team.id) ?? [];
               return (
                 <TableRow key={team.id}>
                   <TableCell>

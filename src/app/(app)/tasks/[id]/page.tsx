@@ -5,7 +5,7 @@ import { requireProfile } from "@/lib/data";
 import { isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
 import { describeBonus } from "@/lib/bonus";
-import { getSignedPhotoUrls } from "@/lib/photos";
+import { getSignedPhotoUrlMap } from "@/lib/photos";
 import { Card, CardContent } from "@/components/ui/card";
 import { Markdown } from "@/components/pgpals/markdown";
 import {
@@ -87,10 +87,15 @@ export default async function TaskDetailPage({
     approvedCount < task.max_submissions &&
     (task.type === "standard" || pairing?.status === "accepted");
 
-  const photoUrlsBySubmission = new Map<string, string[]>();
-  for (const s of submissions) {
-    photoUrlsBySubmission.set(s.id, await getSignedPhotoUrls(s.photo_paths));
-  }
+  const photoUrlByPath = await getSignedPhotoUrlMap(
+    submissions.flatMap((s) => s.photo_paths)
+  );
+  const photoUrlsBySubmission = new Map(
+    submissions.map((s) => [
+      s.id,
+      s.photo_paths.map((path) => photoUrlByPath.get(path) ?? ""),
+    ])
+  );
 
   const bonusText = describeBonus(task.bonus_config);
 

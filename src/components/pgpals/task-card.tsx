@@ -10,12 +10,17 @@ import {
   StatusBadge,
 } from "@/components/pgpals/badges";
 
+export type TaskCardTask = Pick<
+  Task,
+  "id" | "title" | "points" | "type" | "deadline_at" | "bonus_config"
+>;
+
 export function TaskCard({
   task,
   status,
   closed,
 }: {
-  task: Task;
+  task: TaskCardTask;
   status: SubmissionStatus | null;
   closed: boolean;
 }) {

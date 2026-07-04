@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Shield, UserPlus } from "lucide-react";
 import { requireProfile } from "@/lib/data";
-import { taskStatusFor, isClosed } from "@/lib/status";
+import { approvedCountMap, taskStatusMap, isClosed } from "@/lib/status";
 import { isClosingSoon } from "@/lib/datetime";
-import { TaskCard } from "@/components/pgpals/task-card";
+import { TaskCard, type TaskCardTask } from "@/components/pgpals/task-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Submission, Task } from "@/lib/types";
@@ -58,20 +58,22 @@ export default async function TasksPage() {
   }
 
   const [{ data: tasks }, { data: submissions }] = await Promise.all([
-    supabase.from("tasks").select("*"),
-    supabase.from("submissions").select("*"),
+    supabase
+      .from("tasks")
+      .select("id, title, points, type, deadline_at, bonus_config, max_submissions"),
+    supabase.from("submissions").select("task_id, status"),
   ]);
 
-  const allTasks = (tasks ?? []) as Task[];
-  const allSubs = (submissions ?? []) as Submission[];
+  type TaskListTask = TaskCardTask & Pick<Task, "max_submissions">;
+  const allTasks = (tasks ?? []) as TaskListTask[];
+  const allSubs = (submissions ?? []) as Pick<Submission, "task_id" | "status">[];
+  const statusByTask = taskStatusMap(allSubs);
+  const approvedByTask = approvedCountMap(allSubs);
 
   // "Done" means no more points available: every allowed approval is used.
   // Repeatable tasks (max_submissions > 1) stay open until then.
-  const approvedCount = (t: Task) =>
-    allSubs.filter(
-      (s) => s.task_id === t.id && s.status === "approved"
-    ).length;
-  const isDone = (t: Task) => approvedCount(t) >= t.max_submissions;
+  const isDone = (t: TaskListTask) =>
+    (approvedByTask.get(t.id) ?? 0) >= t.max_submissions;
 
   const open = allTasks.filter((t) => !isClosed(t.deadline_at) && !isDone(t));
   const closingSoon = open
@@ -128,7 +130,7 @@ export default async function TasksPage() {
               <TaskCard
                 key={task.id}
                 task={task}
-                status={taskStatusFor(task.id, allSubs)}
+                status={statusByTask.get(task.id) ?? null}
                 closed={isClosed(task.deadline_at)}
               />
             ))}

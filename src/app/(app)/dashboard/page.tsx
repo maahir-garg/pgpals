@@ -11,8 +11,8 @@ import {
   Shield,
   Trophy,
 } from "lucide-react";
-import { requireProfile, getEventSettings } from "@/lib/data";
-import { taskStatusFor, isClosed } from "@/lib/status";
+import { requireProfile, getEventSettings, getMyScore } from "@/lib/data";
+import { taskStatusMap, isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,10 +26,24 @@ import type {
   EventSettings,
   Profile,
   RosterEntry,
-  Submission,
   Task,
   Team,
 } from "@/lib/types";
+
+type DashboardTask = Pick<
+  Task,
+  "id" | "title" | "points" | "deadline_at"
+>;
+type DashboardSubmission = Pick<
+  import("@/lib/types").Submission,
+  "id" | "task_id" | "status" | "points_awarded" | "submitted_at" | "reviewed_at"
+>;
+type DashboardTeammate = Pick<Profile, "full_name" | "team_id">;
+type DashboardRosterEntry = Pick<RosterEntry, "email" | "full_name">;
+type DashboardBonus = Pick<
+  BonusAward,
+  "id" | "points" | "reason" | "created_at"
+>;
 
 export const metadata: Metadata = { title: "Home" };
 
@@ -151,49 +165,55 @@ export default async function DashboardPage() {
     { data: tasks },
     { data: submissions },
     { data: bonuses },
-    { data: score },
+    score,
     settings,
   ] = await Promise.all([
-    supabase.from("teams").select("*").eq("id", profile.team_id).single<Team>(),
-    supabase.from("profiles").select("*").neq("id", profile.id),
-    supabase.from("roster").select("*"),
+    supabase.from("teams").select("id, name").eq("id", profile.team_id).single<Pick<Team, "id" | "name">>(),
+    supabase.from("profiles").select("full_name, team_id").neq("id", profile.id),
+    supabase.from("roster").select("email, full_name"),
     supabase
       .from("announcements")
       .select("*")
       .order("pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(10),
-    supabase.from("tasks").select("*"),
-    supabase.from("submissions").select("*"),
-    supabase.from("bonus_awards").select("*").order("created_at", { ascending: false }),
-    supabase.rpc("get_my_score"),
+    supabase.from("tasks").select("id, title, points, deadline_at"),
+    supabase
+      .from("submissions")
+      .select("id, task_id, status, points_awarded, submitted_at, reviewed_at"),
+    supabase
+      .from("bonus_awards")
+      .select("id, points, reason, created_at")
+      .order("created_at", { ascending: false }),
+    getMyScore(supabase),
     getEventSettings(supabase),
   ]);
 
-  const allTasks = (tasks ?? []) as Task[];
-  const allSubs = (submissions ?? []) as Submission[];
+  const allTasks = (tasks ?? []) as DashboardTask[];
+  const allSubs = (submissions ?? []) as DashboardSubmission[];
+  const statusByTask = taskStatusMap(allSubs);
 
   // Partner: signed-up teammate, else roster entry who hasn't joined yet.
-  const teammate = (teammates ?? []).find(
-    (p: Profile) => p.team_id === profile.team_id
+  const teammate = ((teammates ?? []) as DashboardTeammate[]).find(
+    (p) => p.team_id === profile.team_id
   );
-  const rosterPartner = (roster ?? []).find(
-    (r: RosterEntry) => r.email !== profile.email
+  const rosterPartner = ((roster ?? []) as DashboardRosterEntry[]).find(
+    (r) => r.email !== profile.email
   );
 
   // The home screen is a to-do list: fix rejections first, then open tasks
   // by deadline, then whatever is waiting on the RAs.
   const actionNeeded = allTasks.filter(
     (t) =>
-      !isClosed(t.deadline_at) && taskStatusFor(t.id, allSubs) === "rejected"
+      !isClosed(t.deadline_at) && statusByTask.get(t.id) === "rejected"
   );
   const todo = allTasks
     .filter(
-      (t) => !isClosed(t.deadline_at) && taskStatusFor(t.id, allSubs) === null
+      (t) => !isClosed(t.deadline_at) && !statusByTask.has(t.id)
     )
     .sort((a, b) => a.deadline_at.localeCompare(b.deadline_at));
   const inReview = allTasks.filter(
-    (t) => taskStatusFor(t.id, allSubs) === "pending"
+    (t) => statusByTask.get(t.id) === "pending"
   );
 
   const taskTitle = new Map(allTasks.map((t) => [t.id, t.title]));
@@ -206,7 +226,7 @@ export default async function DashboardPage() {
         label: taskTitle.get(s.task_id) ?? "Task",
         points: s.points_awarded!,
       })),
-    ...(bonuses ?? []).map((b: BonusAward) => ({
+    ...((bonuses ?? []) as DashboardBonus[]).map((b) => ({
       key: `b-${b.id}`,
       when: b.created_at,
       label: `Bonus: ${b.reason}`,

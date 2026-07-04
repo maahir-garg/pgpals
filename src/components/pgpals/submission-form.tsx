@@ -82,8 +82,14 @@ export function SubmissionForm({
       return;
     }
     startTransition(async () => {
+      const uploadedPaths: string[] = [];
+      const supabase = createClient();
+      async function cleanupUploads() {
+        if (uploadedPaths.length === 0) return;
+        await supabase.storage.from("submissions").remove(uploadedPaths);
+      }
+
       try {
-        const supabase = createClient();
         const folder = crypto.randomUUID();
         const paths: string[] = [];
         for (let i = 0; i < previews.length; i++) {
@@ -93,6 +99,7 @@ export function SubmissionForm({
             .upload(path, previews[i].file, { contentType: "image/jpeg" });
           if (error) throw new Error("Photo upload failed. Check your connection and try again.");
           paths.push(path);
+          uploadedPaths.push(path);
         }
         const result = await submitTask({
           taskId,
@@ -101,6 +108,7 @@ export function SubmissionForm({
           pairingId,
         });
         if (!result.ok) {
+          await cleanupUploads().catch(() => {});
           toast.error(result.error);
           return;
         }
@@ -109,6 +117,7 @@ export function SubmissionForm({
         setPreviews([]);
         setText("");
       } catch (e) {
+        await cleanupUploads().catch(() => {});
         toast.error(e instanceof Error ? e.message : "Something went wrong.");
       }
     });
