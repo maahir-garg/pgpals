@@ -6,6 +6,8 @@ leaderboard (until it goes dark before the closing ceremony).
 
 **Stack:** Next.js 15 (App Router, TypeScript) · Supabase (Postgres, Auth,
 Storage) · Tailwind + shadcn/ui · Vercel. Fits free tiers for ~400 users.
+Server functions are pinned to Vercel `sin1` so app clicks stay close to the
+Singapore Supabase database.
 
 ---
 
@@ -20,7 +22,9 @@ Storage) · Tailwind + shadcn/ui · Vercel. Fits free tiers for ~400 users.
   Pair tasks let two teams submit jointly.
 - **Admins** (RAs, desktop): review queue (approve/reject with reason), task
   CRUD with scheduled release and bonus rules, CSV team import, manual bonus
-  points, announcements, event settings.
+  points, announcements, event settings. The review queue shows 50 cards per
+  page with Previous/Next pagination so photo-heavy backlogs do not lock up
+  the page.
 - **Security is in the database, not the UI.** Row Level Security and SQL
   functions enforce: unreleased tasks invisible, submissions visible only to
   the owning team (plus pair partner and admins), no submissions after the
@@ -86,6 +90,9 @@ the demo state. Never point it at production unless you mean it.
    ```
    (`<your-project-ref>` is in the dashboard URL. This runs the migration in
    `supabase/migrations/`: tables, security policies, storage bucket, all of it.)
+   If direct port `5432` is blocked, load `.env.production.local` and push via
+   the Supabase pooler on `6543`; do not print the URL because it contains the
+   database password.
 3. **Disable email confirmation** (required, not optional):
    *Dashboard → Authentication → Sign In / Providers → Email → turn OFF
    "Confirm email".*
@@ -143,6 +150,11 @@ warnings: it deletes **everything** first (including real accounts, so RAs
 re-sign-up afterwards), and the demo accounts all share the password
 documented in this README. That's fine while testing; they must be gone by
 D-day (see below).
+
+Before any production reseed, take `npm run backup:prod -- --photos` unless
+you have explicitly decided to lose the current production photos and rows.
+The backup folder contains resident names, emails, and photos; keep it out of
+Git and move it only to an approved private location.
 
 ### Backups (do this daily during the event)
 
@@ -243,6 +255,8 @@ queue shows the auto amount and lets you override it.
 - Clear the review queue a few times a day, so rejected teams have time to
   resubmit before the deadline. Rejections **require a reason**; write it to
   the residents, they see it verbatim.
+- The review queue shows 50 submissions per page. Use Next/Previous to move
+  through a backlog; 50 is a rendering guardrail, not a task/submission cap.
 - Approve = points auto-computed (bonus included). Only override the number
   for special cases.
 - Misclicked? *Review → Approved or Rejected tab → Undo review* puts it back
@@ -266,6 +280,11 @@ Photos are compressed on-device to ~200 KB. Free tier = 1 GB storage,
 photos you may approach it. If the dashboard graph is trending past ~80% in
 week 1: *Supabase → Billing → upgrade to Pro ($25/month, 100 GB)* for the
 event month, downgrade after. No code changes needed.
+
+For larger runs, the math moves fast: 100 tasks × 200 teams × 2 photos is
+about 40,000 photos, roughly 8 GB before egress. The app avoids loading those
+photos during normal navigation, but Supabase free-tier storage is not enough
+for that volume.
 
 **Also good to know**
 - Free Supabase projects pause after about a week with no traffic (outside
@@ -309,15 +328,24 @@ Design notes worth knowing before editing:
 - **Participants never write to `submissions`/`pairings` directly**; RLS
   blocks it. All writes go through SQL functions (`create_submission`,
   `create_pair_invite`, `respond_pair_invite`, `review_submission`, ...) that
-  re-check every rule. If you add a rule, add it there, not in the UI.
-- **Scores are computed, never stored**: `team_score()` sums approved
-  submissions (incl. joint pair credits) plus bonus awards, so totals can't
-  drift. The leaderboard RPC wraps it with the hide-date check.
+  re-check every rule. The scalability migration adds transaction-scoped
+  advisory locks around submission/review/pairing scopes, so simultaneous
+  clicks cannot over-submit, over-approve, or double-pair. If you add a rule,
+  add it there, not in the UI.
+- **Scores are computed, never stored**: `team_score()` still gives one-team
+  totals, while `get_leaderboard()` uses a set-based aggregate over approved
+  submissions and bonus awards so the leaderboard does not call `team_score()`
+  once per team. The leaderboard RPC wraps this with the hide-date check.
+- **Performance-sensitive reads stay narrow**: app pages load profile via
+  `get_my_profile()`, admin count cards use aggregate RPCs, and review/task
+  photo URLs are signed in batches. Do not reintroduce broad `select("*")`
+  calls on hot routes unless the UI truly needs every column.
 - **Times**: stored UTC, displayed via `formatSGT()`; admin datetime inputs
   are interpreted as SGT (+08:00 fixed; Singapore has no DST).
 - Photos live in the private `submissions` bucket at `<team_id>/<uuid>/n.jpg`;
   the UI shows them via 1-hour signed URLs generated server-side after an
-  RLS-checked read.
+  RLS-checked read. If the submission RPC rejects after upload, the client
+  removes the just-uploaded objects so failed attempts do not leak storage.
 - The landing page reads event dates with the service-role client (anon has
   no table access); it shows nothing sensitive.
 - **Design tokens live in `src/app/globals.css`** ("Playful Geometric"):

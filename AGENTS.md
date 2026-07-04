@@ -28,6 +28,9 @@ boundary. The UI should be ergonomic, but it is not trusted.
 - Vercel project: `maahir-gargs-projects/pgpals`
 - Vercel Web Analytics is enabled and `<Analytics />` is mounted in
   `src/app/layout.tsx`.
+- Runtime route region is pinned with `preferredRegion = "sin1"` in
+  `src/app/layout.tsx` so server-rendered app clicks stay close to the
+  Singapore Supabase database.
 - Production env vars on Vercel:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
@@ -85,6 +88,12 @@ local, and Vercel agree.
 - `supabase/migrations/20260702000000_init.sql`
   The database schema, RLS policies, triggers, RPCs, storage bucket, and grants.
   Security-sensitive changes almost always belong here first.
+
+- `supabase/migrations/20260704000000_scalability_hardening.sql`
+  Performance and concurrency hardening: hot-path indexes, advisory locks for
+  submission/review/pairing scopes, live-pairing guard trigger, set-based
+  leaderboard, `get_my_profile()`, and admin aggregate RPCs. Keep future
+  performance-sensitive DB changes in migrations, not only in UI code.
 
 - `scripts/seed.ts`
   Destructive demo seed. `npm run seed` targets the local stack via
@@ -147,12 +156,20 @@ Treat Postgres as the source of truth and security layer.
   such as `create_submission`, `create_pair_invite`, and
   `respond_pair_invite`.
 - Admin review uses `review_submission`; bonus points are computed in the
-  database at review time.
-- Scores are computed, not stored. `team_score()` and `get_leaderboard()` derive
-  standings from approved submissions and manual bonuses.
+  database at review time. Submission creation/review and pair invites use
+  transaction-scoped advisory locks so concurrent clicks cannot over-submit,
+  over-approve, or double-pair.
+- Scores are computed, not stored. `team_score()` derives one team's score;
+  `get_leaderboard()` uses a set-based aggregate over approved submissions and
+  manual bonuses so standings do not require one score query per team.
 - The leaderboard hide date is enforced by `get_leaderboard()`, not just the UI.
 - Private submission photos live in the `submissions` storage bucket. UI access
   goes through server-generated signed URLs after an RLS-checked read.
+- Hot server routes should keep payloads narrow. Use `get_my_profile()` for
+  request profile loading, aggregate RPCs for admin counts, and batched signed
+  URLs (`getSignedPhotoUrlMap`) for photo-heavy pages. Do not reintroduce broad
+  `select("*")` calls on dashboard/tasks/review pages unless every column is
+  needed.
 
 When changing rules, update the migration/RPCs first, then update UI affordances.
 
@@ -217,6 +234,10 @@ npx supabase db push
 If port `5432` is blocked from the current network, use the pooler on `6543`
 with a `--db-url` built from `SUPABASE_DB_PASSWORD`. Do not print that URL,
 because it contains the database password.
+
+Apply database migrations before deploying app code that depends on new RPCs.
+For example, the performance changes require `get_my_profile()` and admin
+aggregate RPCs to exist before the matching Next.js deployment serves traffic.
 
 ## Local Development
 
@@ -294,7 +315,9 @@ Workflow conventions:
   open.
 - Admin views are desktop-oriented and should be dense, scannable, and
   practical. The review queue is the primary surface: status tabs with counts,
-  task/team filters preserved across tabs.
+  task/team filters preserved across tabs, and 50 review cards per page with
+  Previous/Next pagination. The 50-card limit is a render guardrail, not a
+  cap on tasks or submissions.
 - Keep using the existing shadcn/radix primitives in `src/components/ui`.
 - Keep domain components under `src/components/pgpals`.
 - Use server components for read-heavy pages when possible; use client
@@ -335,6 +358,10 @@ Clean account leftovers:
   the seed wiped production because `.env.local` had been switched.)
 - Production reseeds happen only via `npm run seed:prod`, and never after
   the D-day clean build (README → "Dry runs, backups, and D-day").
+- Production reseeds wipe auth users, event rows, submissions, storage photos,
+  and demo/recreated data. Take `npm run backup:prod -- --photos` first unless
+  the user explicitly accepts losing current production data; backups contain
+  resident names, emails, and photos, so treat them as private data.
 - Do not expose or commit `.env.local` or `.env.production.local`.
 - Do not import the service-role admin client into client components.
 - Do not rely on UI checks for security. Put access rules in RLS/RPCs.
@@ -374,4 +401,3 @@ npx tsx scripts/walkthrough.ts
 ```
 
 Document any check that could not be run.
-
