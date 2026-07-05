@@ -151,11 +151,13 @@ Use this for dress rehearsals on the real URL before the event: RAs can
 click through review, tasks, and announcements with realistic data. Two
 warnings: it deletes **everything** first (including real accounts, so RAs
 re-sign-up afterwards), and the demo accounts all share the password
-documented in this README. That's fine while testing; they must be gone by
+documented in this README. Production dry runs use
+`ra.dryrun@u.nus.edu / pgpals123` for the demo RA instead of the local-only
+`.test` address. That's fine while testing; all demo accounts must be gone by
 D-day (see below). The seed sets the 2026 SGT defaults (31 August to
-13 September, leaderboard dark around 8 September) and demo announcements
-that advertise the S$5,000+ prize pool, top-8 tech prizes, participation
-goodie bags, and AirPods lucky draw.
+13 September, leaderboard dark around 8 September) and demo announcements that
+advertise the S$5,000+ prize pool, top-8 tech prizes, participation goodie
+bags, and AirPods lucky draw.
 
 Before any production reseed, take `npm run backup:prod -- --photos` unless
 you have explicitly decided to lose the current production photos and rows.

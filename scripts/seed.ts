@@ -1,6 +1,6 @@
 /**
  * Seeds the database with realistic demo data:
- *  - 1 admin + 20 teams (40 rostered residents, most signed up)
+ *  - 1 dry-run admin + 20 teams (40 rostered residents, most signed up)
  *  - tasks in every state (live, closing soon, closed, scheduled, draft,
  *    pair, every bonus type, multi-submission)
  *  - submissions in every status incl. a rejected→resubmitted chain
@@ -65,6 +65,9 @@ const db = createClient(url, serviceKey, {
 });
 
 const PASSWORD = "pgpals123";
+const LOCAL_ADMIN_EMAIL = "ra@pgpals.test";
+const PROD_ADMIN_EMAIL = "ra.dryrun@u.nus.edu";
+const ADMIN_EMAIL = PROD ? PROD_ADMIN_EMAIL : LOCAL_ADMIN_EMAIL;
 const hours = (n: number) => new Date(Date.now() + n * 3600_000).toISOString();
 const days = (n: number) => hours(n * 24);
 
@@ -162,7 +165,10 @@ async function main() {
   // Leaves event_settings and real admin_allowlist emails in place, but
   // removes the demo admin; RAs sign up again and configure via the UI.
   if (process.argv.includes("--wipe-only")) {
-    await db.from("admin_allowlist").delete().eq("email", "ra@pgpals.test");
+    await db
+      .from("admin_allowlist")
+      .delete()
+      .in("email", [LOCAL_ADMIN_EMAIL, PROD_ADMIN_EMAIL]);
     console.log(
       "\nWiped clean (no demo data). Next: check Admin → Settings lists the",
       "\nreal RA emails, have them sign up, confirm the event dates, then",
@@ -209,10 +215,10 @@ async function main() {
   console.log("Users (this takes ~30s)…");
   const { error: allowError } = await db
     .from("admin_allowlist")
-    .upsert({ email: "ra@pgpals.test" });
+    .upsert({ email: ADMIN_EMAIL });
   if (allowError) die("admin_allowlist", allowError);
   const { error: adminError } = await db.auth.admin.createUser({
-    email: "ra@pgpals.test",
+    email: ADMIN_EMAIL,
     password: PASSWORD,
     email_confirm: true,
     user_metadata: { full_name: "RA R3" },
@@ -235,7 +241,7 @@ async function main() {
   const { data: adminProfile } = await db
     .from("profiles")
     .select("id")
-    .eq("email", "ra@pgpals.test")
+    .eq("email", ADMIN_EMAIL)
     .single();
   const adminId = adminProfile!.id;
 
@@ -487,7 +493,7 @@ async function main() {
   console.log(`
 ✅ Seed complete!
 
-  Admin:        ra@pgpals.test / ${PASSWORD}
+  Admin:        ${ADMIN_EMAIL} / ${PASSWORD}
   Participant:  ${residentEmail(0)} / ${PASSWORD}   (team "${TEAM_NAMES[0]}")
   Participant:  ${residentEmail(24)} / ${PASSWORD}   (team "${TEAM_NAMES[12]}", has a resubmission)
   Not signed up yet (to demo signup): ${residentEmail(15)}

@@ -111,7 +111,8 @@ local, and Vercel agree.
   `.env.local` and refuses non-local URLs; `npm run seed:prod` deliberately
   wipes and reseeds production via `.env.production.local` (5-second abort
   window) for dry runs; it sets the 2026 SGT event dates and prize-pool demo
-  announcements; `--wipe-only` is the D-day clean build (see README).
+  announcements, using `ra.dryrun@u.nus.edu` instead of local-only
+  `ra@pgpals.test`; `--wipe-only` is the D-day clean build (see README).
 
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
