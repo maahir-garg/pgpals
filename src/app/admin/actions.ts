@@ -257,13 +257,31 @@ export async function addRosterMember(input: {
           : error.message,
     };
   }
-  // If they already signed up (e.g. via allowed domain), link them now.
+  // If a legacy/teamless profile already exists, link it now.
   await supabase
     .from("profiles")
     .update({ team_id: input.teamId })
     .eq("email", email);
   revalidateAdmin();
   return { ok: true, message: "Member added." };
+}
+
+// Regrouping (e.g. two residents who aren't getting along): the RPC moves the
+// roster entry and any signed-up profile together in one transaction.
+export async function moveRosterMember(input: {
+  rosterId: string;
+  toTeamId: string;
+}): Promise<ActionResult> {
+  if (!input.toTeamId) return { ok: false, error: "Pick a destination team." };
+  const supabase = await adminClient();
+  const { error } = await supabase.rpc("move_roster_member", {
+    p_roster: input.rosterId,
+    p_team: input.toTeamId,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidateAdmin();
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Member moved." };
 }
 
 export async function removeRosterMember(rosterId: string): Promise<ActionResult> {
@@ -363,14 +381,8 @@ export async function updateSettings(input: {
   startAtSgt: string;
   endAtSgt: string;
   leaderboardHideAtSgt: string;
-  allowedDomains: string;
-  prizes: string;
 }): Promise<ActionResult> {
   const supabase = await adminClient();
-  const domains = input.allowedDomains
-    .split(",")
-    .map((d) => d.trim().toLowerCase().replace(/^@/, ""))
-    .filter(Boolean);
   const { error } = await supabase
     .from("event_settings")
     .update({
@@ -378,8 +390,6 @@ export async function updateSettings(input: {
       start_at: sgtInputToUtc(input.startAtSgt),
       end_at: sgtInputToUtc(input.endAtSgt),
       leaderboard_hide_at: sgtInputToUtc(input.leaderboardHideAtSgt),
-      allowed_email_domains: domains,
-      prizes: input.prizes.trim(),
     })
     .eq("id", 1);
   if (error) return { ok: false, error: error.message };
@@ -388,20 +398,47 @@ export async function updateSettings(input: {
   return { ok: true, message: "Settings saved." };
 }
 
-export async function promoteToAdmin(email: string): Promise<ActionResult> {
+// The allowlist is the single admin path: an email added here becomes an
+// admin at signup (handle_new_user). Adding an email that already has an
+// account promotes it immediately, so RAs never wait on a second step.
+export async function addAdminEmail(email: string): Promise<ActionResult> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized.includes("@")) return { ok: false, error: "Enter a valid email." };
   const supabase = await adminClient();
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({ role: "admin" })
-    .eq("email", email.trim().toLowerCase())
-    .select("id");
-  if (error) return { ok: false, error: error.message };
-  if (!data || data.length === 0) {
+  const { error } = await supabase
+    .from("admin_allowlist")
+    .insert({ email: normalized });
+  if (error) {
     return {
       ok: false,
-      error: "No account with that email. They need to sign up first.",
+      error:
+        error.code === "23505"
+          ? "That email is already on the list."
+          : error.message,
     };
   }
+  const { data: promoted } = await supabase
+    .from("profiles")
+    .update({ role: "admin" })
+    .eq("email", normalized)
+    .select("id");
   revalidateAdmin();
-  return { ok: true, message: "Promoted to admin." };
+  return {
+    ok: true,
+    message:
+      promoted && promoted.length > 0
+        ? "Added, and their existing account is now an admin."
+        : "Added. They become an admin when they sign up.",
+  };
+}
+
+export async function removeAdminEmail(email: string): Promise<ActionResult> {
+  const supabase = await adminClient();
+  const { error } = await supabase
+    .from("admin_allowlist")
+    .delete()
+    .eq("email", email);
+  if (error) return { ok: false, error: error.message };
+  revalidateAdmin();
+  return { ok: true, message: "Removed from the list." };
 }

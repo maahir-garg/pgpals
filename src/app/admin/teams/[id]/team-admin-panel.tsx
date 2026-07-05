@@ -7,11 +7,19 @@ import {
   addRosterMember,
   deleteTeam,
   grantBonus,
+  moveRosterMember,
   removeRosterMember,
   renameTeamAdmin,
 } from "../../actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { RosterEntry, Team } from "@/lib/types";
@@ -21,9 +29,11 @@ type RosterWithStatus = RosterEntry & { signedUp: boolean };
 export function TeamAdminPanel({
   team,
   roster,
+  otherTeams,
 }: {
   team: Team;
   roster: RosterWithStatus[];
+  otherTeams: Pick<Team, "id" | "name">[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -32,6 +42,8 @@ export function TeamAdminPanel({
   const [memberEmail, setMemberEmail] = useState("");
   const [bonusPoints, setBonusPoints] = useState("5");
   const [bonusReason, setBonusReason] = useState("");
+  const [movingMember, setMovingMember] = useState<RosterWithStatus | null>(null);
+  const [moveTarget, setMoveTarget] = useState("");
 
   function run(
     fn: () => Promise<{ ok: boolean; message?: string; error?: string }>,
@@ -91,18 +103,31 @@ export function TeamAdminPanel({
                   </span>
                   <div className="text-xs text-muted-foreground">{m.email}</div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={pending}
-                  onClick={() => {
-                    if (confirm(`Remove ${m.full_name} from this team's roster?`))
-                      run(() => removeRosterMember(m.id));
-                  }}
-                  className="text-destructive hover:text-destructive"
-                >
-                  Remove
-                </Button>
+                <div className="flex shrink-0 items-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pending || otherTeams.length === 0}
+                    onClick={() => {
+                      setMoveTarget("");
+                      setMovingMember(m);
+                    }}
+                  >
+                    Move
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={pending}
+                    onClick={() => {
+                      if (confirm(`Remove ${m.full_name} from this team's roster?`))
+                        run(() => removeRosterMember(m.id));
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    Remove
+                  </Button>
+                </div>
               </div>
             ))}
             <div className="flex flex-wrap gap-2">
@@ -204,6 +229,55 @@ export function TeamAdminPanel({
           </Button>
         </CardContent>
       </Card>
+
+      <Dialog
+        open={movingMember !== null}
+        onOpenChange={(open) => {
+          if (!open) setMovingMember(null);
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Move {movingMember?.full_name}</DialogTitle>
+            <DialogDescription>
+              Regroup them onto another team. Coins and submissions already
+              earned stay with {team.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label htmlFor="move-target">Destination team</Label>
+            <select
+              id="move-target"
+              value={moveTarget}
+              onChange={(e) => setMoveTarget(e.target.value)}
+              className="h-10 w-full rounded-lg border-2 border-input bg-card px-3 text-sm outline-none focus-visible:border-primary"
+            >
+              <option value="">Pick a team...</option>
+              {otherTeams.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button
+            disabled={pending || !moveTarget || !movingMember}
+            onClick={() =>
+              run(
+                () =>
+                  moveRosterMember({
+                    rosterId: movingMember!.id,
+                    toTeamId: moveTarget,
+                  }),
+                () => setMovingMember(null)
+              )
+            }
+            className="font-bold"
+          >
+            Move member
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

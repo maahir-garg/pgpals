@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import { Gift, Lock, Trophy } from "lucide-react";
 import { requireProfile, getEventSettings } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
+import {
+  PARTICIPATION_REWARD,
+  PRIZE_CEREMONY_LABEL,
+  PRIZE_REVEAL_TEASER,
+  PRIZE_TIERS,
+  PRIZE_WINNER_COUNT,
+} from "@/lib/prizes";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { LeaderboardRow } from "@/lib/types";
@@ -16,10 +23,6 @@ export default async function LeaderboardPage() {
   // date, no matter what the client asks for.
   const { data } = await supabase.rpc("get_leaderboard");
   const rows = (data ?? []) as LeaderboardRow[];
-  const prizeLines = (settings.prizes ?? "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
 
   const hidden =
     rows.length === 0 &&
@@ -37,9 +40,9 @@ export default async function LeaderboardPage() {
             </span>
             <h2 className="text-xl font-extrabold">The board has gone dark!</h2>
             <p className="mx-auto max-w-xs text-sm leading-6 text-muted-foreground">
-              The final stretch is a mystery. Keep banking coins — the
-              winning teams and their prizes are revealed live at the closing
-              ceremony.
+              The final stretch is a mystery. Keep banking coins: the top{" "}
+              {PRIZE_WINNER_COUNT} teams are crowned live at the prize ceremony
+              on {PRIZE_CEREMONY_LABEL}.
             </p>
           </CardContent>
         </Card>
@@ -48,8 +51,8 @@ export default async function LeaderboardPage() {
   }
 
   const mine = rows.find((r) => r.is_mine);
-  const top10 = rows.slice(0, 10);
-  const rest = rows.slice(10);
+  const prizeRows = rows.slice(0, PRIZE_WINNER_COUNT);
+  const rest = rows.slice(PRIZE_WINNER_COUNT);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -73,19 +76,24 @@ export default async function LeaderboardPage() {
             <Gift className="size-4" strokeWidth={2.5} aria-hidden />
           </span>
           <p className="text-sm font-semibold">
-            Top teams win prizes at the closing ceremony. The board hides
-            before the finale, so keep pushing!
+            Top {PRIZE_WINNER_COUNT} teams win from a tech prize pool at the
+            ceremony on {PRIZE_CEREMONY_LABEL}. The board hides before the
+            finale, so keep pushing!
           </p>
         </div>
-        {prizeLines.length > 0 && (
-          <ul className="mt-4 space-y-2 border-t-2 border-dashed border-foreground/20 pt-4">
-            {prizeLines.map((line) => (
-              <li key={line} className="text-sm font-semibold">
-                {line}
-              </li>
-            ))}
-          </ul>
-        )}
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          {PRIZE_REVEAL_TEASER}
+        </p>
+        <ul className="mt-4 space-y-2 border-t-2 border-dashed border-foreground/20 pt-4">
+          {PRIZE_TIERS.map((tier) => (
+            <li key={tier.place} className="text-sm font-semibold">
+              {tier.place} place: {tier.prize}
+            </li>
+          ))}
+          <li className="text-sm font-semibold">
+            Participation: {PARTICIPATION_REWARD.prize}
+          </li>
+        </ul>
       </div>
 
       {profile.role === "admin" &&
@@ -114,7 +122,7 @@ export default async function LeaderboardPage() {
       ) : (
         <Card>
           <CardContent className="divide-y-2 divide-dashed divide-border">
-            {top10.map((row) => (
+            {prizeRows.map((row) => (
               <LeaderRow key={row.team_id} row={row} highlight />
             ))}
             {rest.map((row) => (

@@ -2,8 +2,8 @@ import Link from "next/link";
 import {
   ArrowRight,
   Camera,
-  Check,
   Gift,
+  Sparkles,
   Trophy,
   UserPlus,
   Users,
@@ -13,6 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSGTDate } from "@/lib/datetime";
+import {
+  PARTICIPATION_REWARD,
+  PRIZE_CEREMONY_LABEL,
+  PRIZE_REVEAL_TEASER,
+  PRIZE_TIERS,
+  PRIZE_WINNER_COUNT,
+} from "@/lib/prizes";
 import type { EventSettings } from "@/lib/types";
 
 export const revalidate = 300;
@@ -80,7 +87,7 @@ const STEPS: {
   {
     icon: Gift,
     title: "Win prizes",
-    text: "The board goes dark near the end, and the top teams take home prizes at the closing ceremony.",
+    text: `Top ${PRIZE_WINNER_COUNT} teams win from a tech prize pool, and every participant gets a goodie bag.`,
     color: "bg-mint text-foreground",
   },
 ];
@@ -107,7 +114,7 @@ const FAQS = [
   },
   {
     q: "What can we win?",
-    a: "Seriously exciting prizes for the top teams, handed out at the closing ceremony. The exact loot stays secret until then, which is half the fun.",
+    a: `Top ${PRIZE_WINNER_COUNT} teams win from a pool with iPads, monitors, AirPods, projectors and more. Exact rank prizes are saved for the finale reveal on ${PRIZE_CEREMONY_LABEL}. Everyone who participates gets a goodie bag too.`,
   },
   {
     q: "What if my email isn't recognised at signup?",
@@ -119,7 +126,7 @@ const FAQS = [
   },
   {
     q: "Why does the leaderboard disappear near the end?",
-    a: "The final stretch is played blind. Rankings vanish a few days before the closing ceremony, so nobody knows who's winning until the prizes come out.",
+    a: "The final stretch is played blind. Rankings vanish a few days before the finale, so nobody knows who's winning until the prizes come out.",
   },
   {
     q: "Do I need to install anything?",
@@ -129,10 +136,6 @@ const FAQS = [
 
 export default async function LandingPage() {
   const settings = await getPublicSettings();
-  const prizeLines = (settings?.prizes ?? "")
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-background">
@@ -210,8 +213,9 @@ export default async function LandingPage() {
               <p className="mt-4 max-w-lg text-pretty text-base leading-6 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
                 PGPals is PGPR&apos;s buddy challenge. Team up with your
                 assigned pal, complete photo tasks around campus, and race the
-                other teams to the top and the winners walk away with seriously
-                exciting prizes.
+                other teams to the top. The prize pool goes{" "}
+                {PRIZE_WINNER_COUNT} teams deep with iPads, monitors, AirPods,
+                projectors and more in play.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-4">
                 <Button asChild size="lg">
@@ -271,7 +275,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Prize spotlight */}
+        {/* Prize spotlight: the messaging is hardcoded in src/lib/prizes.ts. */}
         <section className="pb-12 sm:pb-20">
           <div className="relative overflow-hidden rounded-2xl border-2 border-foreground bg-primary px-6 py-8 text-primary-foreground shadow-pop sm:px-12 sm:py-10">
             <div aria-hidden className="bg-dots absolute inset-0 opacity-20" />
@@ -283,32 +287,53 @@ export default async function LandingPage() {
               aria-hidden
               className="absolute -bottom-8 right-24 hidden size-20 rounded-full bg-secondary sm:block"
             />
-            <div className="relative max-w-xl">
+            <div className="relative">
               <span className="inline-flex rotate-[-2deg] items-center gap-1.5 rounded-full border-2 border-foreground bg-accent px-3 py-1.5 font-heading text-xs font-extrabold text-accent-foreground shadow-pop-sm sm:px-4 sm:text-sm">
                 <Gift className="size-4" strokeWidth={2.5} aria-hidden />
-                EXCITING PRIZES
+                PRIZE CEREMONY · {PRIZE_CEREMONY_LABEL.toUpperCase()}
               </span>
               <h2 className="mt-4 font-heading text-3xl font-extrabold tracking-tight sm:mt-6 sm:text-4xl">
-                Play for the podium
+                The prize pool goes {PRIZE_WINNER_COUNT} teams deep
               </h2>
-              <p className="mt-3 text-base leading-7 text-primary-foreground/90 sm:text-lg">
-                The top teams win prizes at the closing ceremony and because
-                the leaderboard goes dark for the final stretch, every team is
-                still in the running until the very end. Every coin you bank
-                counts.
+              <p className="mt-3 max-w-xl text-base leading-7 text-primary-foreground/90 sm:text-lg">
+                The leaderboard goes dark for the final stretch, so the final
+                push stays electric. Keep climbing even if you are outside the
+                podium: prizes stretch all the way to 8th.
               </p>
-              {prizeLines.length > 0 && (
-                <ul className="mt-6 space-y-2">
-                  {prizeLines.map((line) => (
-                    <li key={line} className="flex items-start gap-2">
-                      <span className="mt-0.5 grid size-5.5 shrink-0 place-items-center rounded-full border-2 border-foreground bg-mint">
-                        <Check className="size-3 text-foreground" strokeWidth={3} aria-hidden />
-                      </span>
-                      <span className="font-semibold">{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <p className="mt-3 max-w-xl text-sm font-semibold leading-6 text-primary-foreground/85 sm:text-base">
+                {PRIZE_REVEAL_TEASER}
+              </p>
+              <div className="mt-8 grid gap-4 gap-y-6 sm:grid-cols-3">
+                {PRIZE_TIERS.map((tier, i) => (
+                  <div
+                    key={tier.place}
+                    className={`min-w-0 rounded-xl border-2 border-foreground p-5 shadow-pop-sm transition-bouncy hover:scale-[1.02] ${tier.color} ${
+                      i === 0 ? "sm:-rotate-1" : i === 2 ? "sm:rotate-1" : ""
+                    }`}
+                  >
+                    <span className="inline-flex rounded-full border-2 border-foreground bg-card px-2.5 py-0.5 font-heading text-xs font-extrabold text-foreground">
+                      {tier.place} place
+                    </span>
+                    <div className="mt-3 font-heading text-2xl font-extrabold">
+                      {tier.prize}
+                    </div>
+                    <p className="mt-1 text-sm font-semibold leading-5 opacity-85">
+                      {tier.blurb}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex items-start gap-3 rounded-xl border-2 border-dashed border-primary-foreground/50 bg-primary-foreground/10 p-4">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-foreground bg-mint text-foreground">
+                  <Sparkles className="size-4" strokeWidth={2.5} aria-hidden />
+                </span>
+                <p className="text-sm font-semibold leading-6">
+                  <span className="font-heading font-extrabold">
+                    {PARTICIPATION_REWARD.prize}.
+                  </span>{" "}
+                  {PARTICIPATION_REWARD.blurb}
+                </p>
+              </div>
             </div>
           </div>
         </section>

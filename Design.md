@@ -124,8 +124,9 @@ Supabase owns:
 
 ## 5. Data Model
 
-The source of truth is `supabase/migrations/20260702000000_init.sql`, plus
-`20260703000000_prizes.sql`.
+The source of truth is `supabase/migrations/20260702000000_init.sql`, plus the
+later migrations in the same directory (scalability hardening, roster-only
+signup, member regrouping).
 
 Core tables:
 
@@ -139,8 +140,8 @@ Core tables:
 | `submissions` | Team proof submissions, photo storage paths, review state, points awarded. |
 | `bonus_awards` | Manual admin-granted point adjustments with a reason. |
 | `announcements` | Admin-posted resident announcements. |
-| `event_settings` | Singleton row for event name, dates, leaderboard hide date, domains, prizes. |
-| `admin_allowlist` | Bootstrap list for emails that become admins at signup. |
+| `event_settings` | Singleton row for event name, dates, and leaderboard hide date. |
+| `admin_allowlist` | RA emails that become admins at signup; managed in Admin -> Settings. |
 
 Important type choices:
 
@@ -179,7 +180,7 @@ Rules:
 - `signup_precheck(email)` gives user-friendly errors before creating an Auth
   user.
 - `handle_new_user()` is authoritative. It only creates a profile when the email
-  is in `admin_allowlist`, `roster`, or an allowed domain in `event_settings`.
+  is in `admin_allowlist` or `roster`; there is no other signup path.
 - Rostered users are linked to their pre-assigned team.
 - Admin allowlisted users become admins on signup.
 - Password recovery uses `/auth/callback` to exchange the Supabase recovery code
@@ -341,6 +342,9 @@ Admins can:
 - Create teams manually.
 - Rename or delete teams.
 - Add or remove roster members.
+- Move a member to another team (regrouping via the `move_roster_member`
+  RPC, which updates the roster entry and any signed-up profile in one
+  transaction; earned coins stay with the old team).
 - Grant manual bonus awards with a reason.
 
 Roster changes also update matching profiles when a user has already signed up.
@@ -358,10 +362,11 @@ created time.
 - Event name.
 - Start and end date.
 - Leaderboard hide date.
-- Allowed email domains.
-- Prize list.
 
-It also promotes existing signed-up users to admin by changing `profiles.role`.
+It also manages `admin_allowlist`: RA emails added there become admins at
+signup, and adding an email that already has an account promotes it right
+away. The prize messaging is not a setting; it is hardcoded in
+`src/lib/prizes.ts`.
 
 ## 11. Scoring and Leaderboard
 

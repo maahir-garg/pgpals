@@ -146,9 +146,9 @@ async function main() {
   if (process.argv.includes("--wipe-only")) {
     await db.from("admin_allowlist").delete().eq("email", "ra@pgpals.test");
     console.log(
-      "\nWiped clean (no demo data). Next: check admin_allowlist has the real",
-      "\nRA emails, have them sign up, set event dates + prizes in Settings,",
-      "\nthen import the real roster CSV. See README → D-day."
+      "\nWiped clean (no demo data). Next: check Admin → Settings lists the",
+      "\nreal RA emails, have them sign up, confirm the event dates, then",
+      "\nimport the real roster CSV. See README → D-day."
     );
     return;
   }
@@ -163,9 +163,6 @@ async function main() {
         start_at: days(-5),
         end_at: days(9),
         leaderboard_hide_at: days(6),
-        allowed_email_domains: [],
-        prizes:
-          "🥇 1st: $150 dinner voucher per pal\n🥈 2nd: $80 GrabFood credit each\n🥉 3rd: PGPals hoodie + supper spread\n🎲 Lucky draw for every team that finishes 10+ tasks",
       })
       .eq("id", 1);
     if (error) die("event_settings", error);

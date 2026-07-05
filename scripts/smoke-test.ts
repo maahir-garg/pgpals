@@ -179,6 +179,20 @@ async function main() {
     check("participant cannot edit event settings", !!settingsError || (settingsData ?? []).length === 0);
   }
 
+  console.log("\n— Regrouping (move_roster_member) —");
+  {
+    const { data: entry } = await admin.from("roster").select("id, team_id").eq("email", "chloe.lim@u.nus.edu").single();
+    const { data: destTeam } = await admin.from("teams").select("id").neq("id", entry!.team_id).limit(1).single();
+    const { error: moveDenied } = await participant.rpc("move_roster_member", { p_roster: entry!.id, p_team: destTeam!.id });
+    check("participant cannot move roster members", !!moveDenied, moveDenied?.message ?? "");
+    const { error: moved } = await ra.rpc("move_roster_member", { p_roster: entry!.id, p_team: destTeam!.id });
+    const { data: movedProfile } = await admin.from("profiles").select("team_id").eq("email", "chloe.lim@u.nus.edu").single();
+    check("admin move updates roster + signed-up profile", !moved && movedProfile!.team_id === destTeam!.id, moved?.message ?? "");
+    const { error: movedBack } = await ra.rpc("move_roster_member", { p_roster: entry!.id, p_team: entry!.team_id });
+    const { data: restored } = await admin.from("profiles").select("team_id").eq("email", "chloe.lim@u.nus.edu").single();
+    check("move back restores the original team", !movedBack && restored!.team_id === entry!.team_id, movedBack?.message ?? "");
+  }
+
   console.log("\n— Signup gate —");
   {
     const anon = client();

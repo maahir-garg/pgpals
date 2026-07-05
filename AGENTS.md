@@ -95,6 +95,16 @@ local, and Vercel agree.
   leaderboard, `get_my_profile()`, and admin aggregate RPCs. Keep future
   performance-sensitive DB changes in migrations, not only in UI code.
 
+- `supabase/migrations/20260705*.sql`
+  The 2026 run's simplifications: drop the editable prize list (hardcoded in
+  `src/lib/prizes.ts` instead) and set the real event window, roster-only
+  signup (no allowed-email-domains), and the `move_roster_member` RPC for
+  regrouping.
+
+- `src/lib/prizes.ts`
+  Hardcoded prize messaging and ceremony date, rendered by the landing page,
+  leaderboard, and dashboard.
+
 - `scripts/seed.ts`
   Destructive demo seed. `npm run seed` targets the local stack via
   `.env.local` and refuses non-local URLs; `npm run seed:prod` deliberately
@@ -125,9 +135,12 @@ Signup flow:
 2. Supabase Auth creates the user.
 3. The `on_auth_user_created` trigger calls `handle_new_user()`.
 4. `handle_new_user()` creates the profile only if the email is in:
-   - `admin_allowlist`, or
-   - `roster`, or
-   - `event_settings.allowed_email_domains`.
+   - `admin_allowlist` (RAs; they get the admin role), or
+   - `roster` (residents; they get linked to their pre-assigned team).
+
+There is no other signup path. The old allowed-email-domains escape hatch
+(team-less signups for whole domains) was removed to keep the gate simple:
+residents are roster-only, RAs are allowlist-only.
 
 First production admin:
 
@@ -136,6 +149,8 @@ insert into admin_allowlist (email) values ('real.email@u.nus.edu');
 ```
 
 Then sign up with that real email. Do not use `ra@pgpals.test` in production.
+Every later RA is added in Admin -> Settings, which writes to
+`admin_allowlist` and promotes an already-existing account immediately.
 
 Password reset:
 
@@ -291,11 +306,11 @@ comes from shapes, chunky borders, and hard shadows around them.
 - There is no dark mode. Do not add `.dark` styles without wiring a real
   theme switcher.
 - Prizes are a core incentive: landing, dashboard leaderboard card, and the
-  leaderboard page all remind residents that top teams win prizes at the
-  closing ceremony. The actual prize list lives in `event_settings.prizes`
-  (one per line, edited in Admin -> Settings, migration
-  `20260703000000_prizes.sql`); the landing spotlight and leaderboard banner
-  render it, falling back to generic copy when empty.
+  leaderboard page all advertise the prize pool. It is hardcoded in
+  `src/lib/prizes.ts` (top 8 tech prize pool, confirmed iPads, monitors,
+  AirPods, and projectors teaser, finale reveal, participation goodie bags,
+  ceremony on 17 September) so the pitch is identical everywhere; there is no
+  admin setting for it. Change the module, not individual pages.
 - The user-facing currency is **PGP Coins** ("coins" on second mention, the
   `Coins` lucide icon on chips/badges). Database columns, RPCs, and code
   identifiers still say `points` - rename copy, never schema.
@@ -338,11 +353,13 @@ Delete a test user from production:
 
 Add an admin:
 
+Admin -> Settings -> "Add an RA email". That writes to `admin_allowlist`; the
+person becomes an admin at signup (or immediately if they already have an
+account). The SQL fallback, needed only to bootstrap the first admin:
+
 ```sql
 insert into admin_allowlist (email) values ('real.email@u.nus.edu');
 ```
-
-Then have that person sign up.
 
 Clean account leftovers:
 

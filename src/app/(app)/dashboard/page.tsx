@@ -14,6 +14,7 @@ import {
 import { requireProfile, getEventSettings, getMyScore } from "@/lib/data";
 import { taskStatusMap, isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
+import { PRIZE_TAGLINE } from "@/lib/prizes";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -400,9 +401,7 @@ export default async function DashboardPage() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h2 className="font-bold">Leaderboard</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Top teams win prizes at the closing ceremony.
-                  </p>
+                  <p className="text-sm text-muted-foreground">{PRIZE_TAGLINE}</p>
                 </div>
                 <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-foreground bg-accent text-accent-foreground">
                   <Trophy className="size-5" strokeWidth={2.5} aria-hidden />

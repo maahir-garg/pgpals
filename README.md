@@ -21,8 +21,8 @@ Singapore Supabase database.
   event currency; the database still calls them points) on approval.
   Pair tasks let two teams submit jointly.
 - **Admins** (RAs, desktop): review queue (approve/reject with reason), task
-  CRUD with scheduled release and bonus rules, CSV team import, manual bonus
-  points, announcements, event settings. The review queue shows 50 cards per
+  CRUD with scheduled release and bonus rules, CSV team import, member
+  regrouping, manual bonus points, announcements, event settings. The review queue shows 50 cards per
   page with Previous/Next pagination so photo-heavy backlogs do not lock up
   the page.
 - **Security is in the database, not the UI.** Row Level Security and SQL
@@ -65,7 +65,7 @@ Useful:
 ```bash
 npx supabase status               # local URLs + keys
 open http://127.0.0.1:54323      # Supabase Studio (local)
-npx tsx scripts/smoke-test.ts    # 34 security/rules checks (after seed)
+npx tsx scripts/smoke-test.ts    # 37 security/rules checks (after seed)
 npx tsx scripts/render-test.ts   # page render checks (needs npm run dev running)
 npx tsx scripts/walkthrough.ts   # screenshots of every page, phone + desktop
 npm run build && npm run lint    # what Vercel will run
@@ -110,9 +110,12 @@ insert into admin_allowlist (email) values ('your.email@u.nus.edu');
 ```
 
 Then **sign up in the app** with that real email, and you'll be an admin. Do
-not use the local `ra@pgpals.test` demo address in production. Promote other
-RAs later in *Admin → Settings* (they must sign up first). To demote someone:
-SQL Editor → `update profiles set role = 'participant' where email = '...';`
+not use the local `ra@pgpals.test` demo address in production. Add every other
+RA's email in *Admin → Settings* **before** they sign up; being on that list is
+what makes an account an admin (an email that already has an account is
+promoted on the spot). To demote someone: SQL Editor →
+`update profiles set role = 'participant' where email = '...';` and remove
+them from the list in Settings.
 
 ### 3. Vercel
 
@@ -188,7 +191,8 @@ real tasks (about 30 minutes end to end):
    email (`select * from admin_allowlist;`), add any missing ones.
 5. Every RA signs up in the app with that email (they become admins
    automatically).
-6. *Admin → Settings*: real event dates, leaderboard hide date, prize list.
+6. *Admin → Settings*: confirm event dates and the leaderboard hide date
+   (the prize messaging is hardcoded in the app, nothing to configure).
 7. *Admin → Teams*: import the real roster CSV.
 8. *Admin → Tasks*: create the real tasks (set release times; drafts are
    invisible until published).
@@ -214,9 +218,9 @@ Waffle Warriors,Chloe Lim,chloe.lim@u.nus.edu,Wei Ling Tan,wei.ling.tan@u.nus.ed
 - Duplicate team names and already-rostered emails are **skipped with a note**
   (shown after import). Fix the file and re-import, nothing breaks.
 - After import, teams show ⏳ next to members until they sign up.
-- Late changes: *Admin → Teams → (team)* lets you add/remove members, rename,
-  or delete. Removing a member also unlinks their account if they already
-  signed up.
+- Late changes: *Admin → Teams → (team)* lets you add, remove, or move
+  members, rename, or delete. Removing a member also unlinks their account if
+  they already signed up; moving a member relinks it to the new team.
 
 ---
 
@@ -224,10 +228,17 @@ Waffle Warriors,Chloe Lim,chloe.lim@u.nus.edu,Wei Ling Tan,wei.ling.tan@u.nus.ed
 
 *Admin → Settings*: event name, start/end, **leaderboard hide date**
 (enforced in the database: participants get an empty response after this
-moment, admins keep seeing it), the **prize list** (one prize per line,
-shown on the public landing page and the leaderboard; leave empty to keep
-it a mystery), and optional allowed email domains (lets anyone on that
-domain sign up team-less; leave empty for roster-only).
+moment, admins keep seeing it), and the **RA admin list** (emails there
+become admins the moment they sign up).
+
+Signup is roster-only: residents must use an email on a team roster, RAs an
+email on the admin list. There is no other way in.
+
+The **prize messaging is hardcoded** in `src/lib/prizes.ts` (top 8 tech prize
+pool, confirmed iPads, monitors, AirPods, and projectors teaser, finale reveal
+on 17 September, and participation goodie bags) and rendered on the landing
+page, leaderboard, and dashboard. Changing it is a code edit plus deploy,
+which keeps the advertising consistent everywhere.
 
 *Admin → Tasks*: release/deadline datetimes (entered in SGT), standard or
 pair type, max approvals (e.g. 3 for a daily task), publish toggle
@@ -268,7 +279,7 @@ queue shows the auto amount and lets you override it.
 |---|---|
 | "My email isn't on the list" at signup | *Admin → Teams*: find their team, check the roster email matches exactly what they're typing; fix/add it, they retry |
 | "email rate limit exceeded" at signup | Make sure `SUPABASE_SERVICE_ROLE_KEY` is set in the app environment; signup uses it to create confirmed rostered users without sending confirmation emails. For password reset emails, wait for the quota window or configure SMTP in Supabase Auth. |
-| Resident on the wrong team | *Admin → Teams → (team)*: remove from wrong roster, add to right one; if already signed up, re-adding relinks them |
+| Resident on the wrong team, or two pals not getting along | *Admin → Teams → (team) → Move* next to the member: pick the destination team and they're regrouped (their account relinks automatically; coins already earned stay with the old team) |
 | Team wants a name change | They can rename themselves on their dashboard (✏️ next to the name) |
 | Submitted the wrong photos | Reject with a note; they can resubmit until the deadline |
 | Pair invite stuck | Either team can cancel/decline on the task page; admins can delete pairings in Studio if truly wedged |

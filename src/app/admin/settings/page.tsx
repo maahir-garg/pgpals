@@ -8,11 +8,10 @@ export const metadata: Metadata = { title: "Settings" };
 export default async function AdminSettingsPage() {
   const { supabase } = await requireAdmin();
   const settings = await getEventSettings(supabase);
-  const { data: admins } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("role", "admin")
-    .order("full_name");
+  const [{ data: admins }, { data: allowlist }] = await Promise.all([
+    supabase.from("profiles").select("*").eq("role", "admin").order("full_name"),
+    supabase.from("admin_allowlist").select("email").order("email"),
+  ]);
 
   return (
     <div className="space-y-4">
@@ -21,7 +20,11 @@ export default async function AdminSettingsPage() {
           Event settings
         </h1>
       </div>
-      <SettingsForm settings={settings} admins={(admins ?? []) as Profile[]} />
+      <SettingsForm
+        settings={settings}
+        admins={(admins ?? []) as Profile[]}
+        allowlist={(allowlist ?? []).map((row) => row.email as string)}
+      />
     </div>
   );
 }

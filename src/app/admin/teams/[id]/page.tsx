@@ -39,6 +39,7 @@ export default async function AdminTeamPage({
     { data: subsData },
     { data: tasksData },
     { data: bonusData },
+    { data: teamsData },
   ] = await Promise.all([
     supabase.from("roster").select("*").eq("team_id", id),
     supabase.from("profiles").select("*").eq("team_id", id),
@@ -53,12 +54,16 @@ export default async function AdminTeamPage({
       .select("*")
       .eq("team_id", id)
       .order("created_at", { ascending: false }),
+    supabase.from("teams").select("id, name").order("name"),
   ]);
 
   const roster = (rosterData ?? []) as RosterEntry[];
   const profiles = (profilesData ?? []) as Profile[];
   const submissions = (subsData ?? []) as Submission[];
   const bonuses = (bonusData ?? []) as BonusAward[];
+  const otherTeams = ((teamsData ?? []) as Pick<Team, "id" | "name">[]).filter(
+    (t) => t.id !== id
+  );
   const taskTitle = new Map(
     ((tasksData ?? []) as Pick<Task, "id" | "title">[]).map((t) => [t.id, t.title])
   );
@@ -80,6 +85,7 @@ export default async function AdminTeamPage({
           ...r,
           signedUp: signedUpEmails.has(r.email),
         }))}
+        otherTeams={otherTeams}
       />
 
       <section className="space-y-2">
