@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatSGTDate } from "@/lib/datetime";
 import {
+  LUCKY_DRAW,
   PARTICIPATION_REWARD,
   PRIZE_CEREMONY_LABEL,
   PRIZE_REVEAL_TEASER,
@@ -87,7 +88,7 @@ const STEPS: {
   {
     icon: Gift,
     title: "Win prizes",
-    text: `Top ${PRIZE_WINNER_COUNT} teams win from a tech prize pool, and every participant gets a goodie bag.`,
+    text: `Top ${PRIZE_WINNER_COUNT} teams win from the tech prize pool, and everyone is in the AirPods lucky draw.`,
     color: "bg-mint text-foreground",
   },
 ];
@@ -114,7 +115,7 @@ const FAQS = [
   },
   {
     q: "What can we win?",
-    a: `Top ${PRIZE_WINNER_COUNT} teams win from a pool with iPads, monitors, AirPods, projectors and more. Exact rank prizes are saved for the finale reveal on ${PRIZE_CEREMONY_LABEL}. Everyone who participates gets a goodie bag too.`,
+    a: `Top ${PRIZE_WINNER_COUNT} teams win from a pool led by an iPad grand prize, with monitors, Sony headphones, projectors and more. Exact rank prizes are saved for the finale reveal on ${PRIZE_CEREMONY_LABEL}. Everyone who participates gets a goodie bag and a shot at the AirPods lucky draw.`,
   },
   {
     q: "What if my email isn't recognised at signup?",
@@ -214,8 +215,8 @@ export default async function LandingPage() {
                 PGPals is PGPR&apos;s buddy challenge. Team up with your
                 assigned pal, complete photo tasks around campus, and race the
                 other teams to the top. The prize pool goes{" "}
-                {PRIZE_WINNER_COUNT} teams deep with iPads, monitors, AirPods,
-                projectors and more in play.
+                {PRIZE_WINNER_COUNT} teams deep with an iPad grand prize,
+                monitors, Sony headphones, projectors and more in play.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-4">
                 <Button asChild size="lg">
@@ -331,7 +332,7 @@ export default async function LandingPage() {
                   <span className="font-heading font-extrabold">
                     {PARTICIPATION_REWARD.prize}.
                   </span>{" "}
-                  {PARTICIPATION_REWARD.blurb}
+                  {PARTICIPATION_REWARD.blurb} {LUCKY_DRAW.blurb}
                 </p>
               </div>
             </div>

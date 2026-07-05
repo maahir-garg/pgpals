@@ -307,10 +307,11 @@ comes from shapes, chunky borders, and hard shadows around them.
   theme switcher.
 - Prizes are a core incentive: landing, dashboard leaderboard card, and the
   leaderboard page all advertise the prize pool. It is hardcoded in
-  `src/lib/prizes.ts` (top 8 tech prize pool, confirmed iPads, monitors,
-  AirPods, and projectors teaser, finale reveal, participation goodie bags,
-  ceremony on 17 September) so the pitch is identical everywhere; there is no
-  admin setting for it. Change the module, not individual pages.
+  `src/lib/prizes.ts` (top 8 tech prize pool led by an iPad, confirmed
+  monitors, Sony headphones, and projectors teaser, AirPods lucky draw for
+  all participants, finale reveal, participation goodie bags, ceremony on
+  17 September) so the pitch is identical everywhere; there is no admin
+  setting for it. Change the module, not individual pages.
 - The user-facing currency is **PGP Coins** ("coins" on second mention, the
   `Coins` lucide icon on chips/badges). Database columns, RPCs, and code
   identifiers still say `points` - rename copy, never schema.

@@ -1,29 +1,30 @@
 // Hardcoded prize messaging for the 2026 run. The confirmed items are teased
 // here, while exact rank allocations stay a ceremony reveal until purchases
-// and quantities are locked.
+// and quantities are locked. AirPods are the all-participant lucky draw, not
+// part of the ranked top-8 pool.
 // The ceremony date is display copy only; the event window itself lives in
 // event_settings and is edited in Admin -> Settings.
 
 export const PRIZE_CEREMONY_LABEL = "17 September";
 export const PRIZE_WINNER_COUNT = 8;
 export const PRIZE_TEASER_ITEMS = [
-  "iPads",
+  "an iPad grand prize",
   "monitors",
-  "AirPods",
+  "Sony headphones",
   "projectors",
 ] as const;
 
 export const PRIZE_TIERS = [
   {
     place: "1st",
-    prize: "Grand tech reveal",
-    blurb: "The champion team gets the headline reward from the premium pool.",
+    prize: "iPad grand prize",
+    blurb: "The champion team is playing for the headline iPad prize.",
     color: "bg-accent text-accent-foreground",
   },
   {
     place: "2nd-3rd",
     prize: "Podium tech bundles",
-    blurb: "iPads, monitors, AirPods and projectors are all in the mix.",
+    blurb: "Monitors, Sony headphones and projectors are all in the mix.",
     color: "bg-secondary text-secondary-foreground",
   },
   {
@@ -39,7 +40,12 @@ export const PARTICIPATION_REWARD = {
   blurb: "Every participant gets a goodie bag, no leaderboard finish required.",
 } as const;
 
+export const LUCKY_DRAW = {
+  prize: "AirPods",
+  blurb: `Every participant is in the AirPods lucky draw at the ceremony on ${PRIZE_CEREMONY_LABEL}.`,
+} as const;
+
 export const PRIZE_REVEAL_TEASER = `The pool includes ${PRIZE_TEASER_ITEMS.join(", ")} and more. Exact rank prizes are revealed at the ceremony on ${PRIZE_CEREMONY_LABEL}.`;
 
 // One-liner for tight spots like the dashboard sidebar card.
-export const PRIZE_TAGLINE = `Top ${PRIZE_WINNER_COUNT} teams win from a tech prize pool with ${PRIZE_TEASER_ITEMS.join(", ")} and more. Every participant gets a goodie bag.`;
+export const PRIZE_TAGLINE = `Top ${PRIZE_WINNER_COUNT} teams win from a tech prize pool led by an iPad, with monitors, Sony headphones, projectors and more. Everyone is in the AirPods lucky draw.`;

@@ -3,6 +3,7 @@ import { Gift, Lock, Trophy } from "lucide-react";
 import { requireProfile, getEventSettings } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
 import {
+  LUCKY_DRAW,
   PARTICIPATION_REWARD,
   PRIZE_CEREMONY_LABEL,
   PRIZE_REVEAL_TEASER,
@@ -92,6 +93,9 @@ export default async function LeaderboardPage() {
           ))}
           <li className="text-sm font-semibold">
             Participation: {PARTICIPATION_REWARD.prize}
+          </li>
+          <li className="text-sm font-semibold">
+            Lucky draw: {LUCKY_DRAW.prize}
           </li>
         </ul>
       </div>
