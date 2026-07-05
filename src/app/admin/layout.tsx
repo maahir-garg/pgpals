@@ -14,8 +14,8 @@ export default async function AdminLayout({
   const { profile } = await requireAdmin();
 
   return (
-    <div className="flex min-h-dvh overflow-x-clip bg-background">
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-card px-3 py-6 md:flex">
+    <div className="min-h-dvh bg-background md:flex">
+      <aside className="sticky top-0 hidden h-dvh w-60 flex-none flex-col overflow-y-auto border-r bg-card px-3 py-6 md:flex">
         <Link href="/admin" className="flex items-center gap-2 px-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
@@ -40,7 +40,7 @@ export default async function AdminLayout({
           </Button>
         </div>
       </aside>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 overflow-x-auto">
         {/* Mobile top bar */}
         <div className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 px-4 py-4 backdrop-blur md:hidden">
           <div className="flex items-center justify-between gap-3">
@@ -66,7 +66,7 @@ export default async function AdminLayout({
             <AdminNav horizontal />
           </div>
         </div>
-        <main className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-6">
+        <main className="mx-auto w-full max-w-6xl min-w-0 px-4 py-6 md:px-8 md:py-6">
           {children}
         </main>
       </div>

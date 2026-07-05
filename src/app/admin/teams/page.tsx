@@ -50,12 +50,12 @@ export default async function AdminTeamsPage() {
         <TeamsToolbar />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border-2 border-foreground bg-card shadow-sticker">
-        <Table>
+      <div className="min-w-0 overflow-x-auto rounded-xl border-2 border-foreground bg-card shadow-sticker">
+        <Table className="min-w-[720px]">
           <TableHeader>
             <TableRow>
               <TableHead>Team</TableHead>
-              <TableHead>Members</TableHead>
+              <TableHead className="min-w-[28rem]">Members</TableHead>
               <TableHead className="text-right">Coins</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,7 +72,7 @@ export default async function AdminTeamsPage() {
                       {team.name}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="min-w-[28rem] text-sm">
                     {members.length === 0 && (
                       <span className="text-muted-foreground">no members yet</span>
                     )}

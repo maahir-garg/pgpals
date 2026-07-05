@@ -177,7 +177,7 @@ export default async function ReviewPage({
       <div className="border-b-2 border-dashed border-foreground/25 pb-6">
         <h1 className="text-2xl font-extrabold tracking-tight">Review queue</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Oldest submissions first. Approvals award points immediately;
+          Oldest submissions first. Approvals award coins immediately;
           rejections need a note the team will see.
         </p>
       </div>

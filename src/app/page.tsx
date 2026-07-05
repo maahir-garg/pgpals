@@ -205,11 +205,14 @@ export default async function LandingPage() {
                   {formatSGTDate(settings.end_at)} · PGP Residences
                 </span>
               )}
-              <h1 className="mt-4 max-w-xl text-balance font-heading text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:mt-6 sm:text-6xl">
-                Two weeks. One buddy.{" "}
-                <span className="relative inline-block text-primary">
+              <h1 className="mt-4 max-w-3xl font-heading text-[1.5rem] font-extrabold leading-[1.05] tracking-normal min-[360px]:text-[1.75rem] min-[430px]:text-[2rem] sm:mt-6 sm:text-5xl xl:text-6xl">
+                <span className="block whitespace-nowrap">
+                  Two weeks. One buddy.
+                </span>
+                {" "}
+                <span className="relative inline-block whitespace-nowrap text-primary">
                   Win {PRIZE_POOL_VALUE_LABEL} in prizes.
-                  <Squiggle className="absolute -bottom-3 left-0 h-3 w-full text-secondary" />
+                  <Squiggle className="absolute -bottom-2 left-0 h-3 w-full text-secondary sm:-bottom-3" />
                 </span>
               </h1>
               <p className="mt-4 max-w-lg text-pretty text-base leading-6 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
