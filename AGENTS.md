@@ -111,8 +111,9 @@ local, and Vercel agree.
   `.env.local` and refuses non-local URLs; `npm run seed:prod` deliberately
   wipes and reseeds production via `.env.production.local` (5-second abort
   window) for dry runs; it sets the 2026 SGT event dates and prize-pool demo
-  announcements, using `ra.dryrun@u.nus.edu` instead of local-only
-  `ra@pgpals.test`; `--wipe-only` is the D-day clean build (see README).
+  announcements, trying `ra@pgpals.test` first and falling back to
+  `ra.dryrun@u.nus.edu` if hosted Auth rejects `.test`; `--wipe-only` is the
+  D-day clean build (see README).
 
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
@@ -129,8 +130,9 @@ local, and Vercel agree.
 
 ## Auth And Accounts
 
-Hosted Supabase Auth rejects reserved `.test` emails. The demo account
-`ra@pgpals.test` is local-only and should not be inserted into production.
+Hosted Supabase Auth can reject reserved `.test` emails. The demo seed now
+tries `ra@pgpals.test` for disposable dry runs and falls back if hosted Auth
+rejects it. Do not rely on `.test` for real production admins.
 
 Signup flow:
 
@@ -144,6 +146,11 @@ Signup flow:
 There is no other signup path. The old allowed-email-domains escape hatch
 (team-less signups for whole domains) was removed to keep the gate simple:
 residents are roster-only, RAs are allowlist-only.
+
+Email criteria: emails are lowercased and must match roster/admin_allowlist
+exactly. `@u.nus.edu` is conventional for residents, not a domain-wide bypass.
+The public signup/reset forms block `.test`; seeded/admin-created `.test`
+accounts can log in only if hosted Supabase accepts them.
 
 First production admin:
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, Shield } from "lucide-react";
+import { ArrowLeft, LogOut, Shield } from "lucide-react";
+import { signout } from "@/app/(auth)/actions";
 import { requireAdmin } from "@/lib/data";
 import { AdminNav } from "./admin-nav";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,17 @@ export default async function AdminLayout({
               Participant view
             </Link>
           </Button>
+          <form action={signout}>
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-muted-foreground"
+            >
+              <LogOut className="size-4" aria-hidden />
+              Log out
+            </Button>
+          </form>
         </div>
       </aside>
       <div className="min-w-0 flex-1 overflow-x-auto">
@@ -55,12 +67,25 @@ export default async function AdminLayout({
                 <Shield className="size-3.5" strokeWidth={2.5} aria-hidden />
               </span>
             </Link>
-            <Button asChild variant="outline" size="sm" className="h-9 px-3">
-              <Link href="/dashboard">
-                <ArrowLeft className="size-4" aria-hidden />
-                App
-              </Link>
-            </Button>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button asChild variant="outline" size="sm" className="h-9 px-3">
+                <Link href="/dashboard">
+                  <ArrowLeft className="size-4" aria-hidden />
+                  App
+                </Link>
+              </Button>
+              <form action={signout}>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Log out"
+                  title="Log out"
+                >
+                  <LogOut className="size-4" aria-hidden />
+                </Button>
+              </form>
+            </div>
           </div>
           <div className="mt-4">
             <AdminNav horizontal />

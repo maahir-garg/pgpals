@@ -151,13 +151,14 @@ Use this for dress rehearsals on the real URL before the event: RAs can
 click through review, tasks, and announcements with realistic data. Two
 warnings: it deletes **everything** first (including real accounts, so RAs
 re-sign-up afterwards), and the demo accounts all share the password
-documented in this README. Production dry runs use
-`ra.dryrun@u.nus.edu / pgpals123` for the demo RA instead of the local-only
-`.test` address. That's fine while testing; all demo accounts must be gone by
-D-day (see below). The seed sets the 2026 SGT defaults (31 August to
-13 September, leaderboard dark around 8 September) and demo announcements that
-advertise the S$5,000+ prize pool, top-8 tech prizes, participation goodie
-bags, and AirPods lucky draw.
+documented in this README. Production dry runs try to create
+`ra@pgpals.test / pgpals123` as the disposable RA account; if hosted Supabase
+rejects the reserved `.test` domain, the seed falls back to
+`ra.dryrun@u.nus.edu / pgpals123` and prints a warning. That's fine while
+testing; all demo accounts must be gone by D-day (see below). The seed sets
+the 2026 SGT defaults (31 August to 13 September, leaderboard dark around
+8 September) and demo announcements that advertise the S$5,000+ prize pool,
+top-8 tech prizes, participation goodie bags, and AirPods lucky draw.
 
 Before any production reseed, take `npm run backup:prod -- --photos` unless
 you have explicitly decided to lose the current production photos and rows.
@@ -242,6 +243,15 @@ editable in Settings.
 
 Signup is roster-only: residents must use an email on a team roster, RAs an
 email on the admin list. There is no other way in.
+
+Email rules:
+- Emails are lowercased and must match the roster/admin-list email exactly.
+- Resident signup works only for emails in *Admin → Teams* roster.
+- RA signup works only for emails in *Admin → Settings* admin list.
+- There is no allowed-domain shortcut; `@u.nus.edu` is common, not magical.
+- The normal signup and password-reset forms block `.test` demo emails.
+  Seed/admin-created `.test` users can log in if hosted Supabase accepts them,
+  but they cannot receive real reset emails.
 
 The **prize messaging is hardcoded** in `src/lib/prizes.ts` (S$5,000+ top 8
 tech prize pool led by an iPad, confirmed monitors, Sony headphones, and

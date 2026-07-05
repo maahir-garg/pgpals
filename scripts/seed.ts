@@ -66,8 +66,7 @@ const db = createClient(url, serviceKey, {
 
 const PASSWORD = "pgpals123";
 const LOCAL_ADMIN_EMAIL = "ra@pgpals.test";
-const PROD_ADMIN_EMAIL = "ra.dryrun@u.nus.edu";
-const ADMIN_EMAIL = PROD ? PROD_ADMIN_EMAIL : LOCAL_ADMIN_EMAIL;
+const PROD_FALLBACK_ADMIN_EMAIL = "ra.dryrun@u.nus.edu";
 const hours = (n: number) => new Date(Date.now() + n * 3600_000).toISOString();
 const days = (n: number) => hours(n * 24);
 
@@ -168,7 +167,7 @@ async function main() {
     await db
       .from("admin_allowlist")
       .delete()
-      .in("email", [LOCAL_ADMIN_EMAIL, PROD_ADMIN_EMAIL]);
+      .in("email", [LOCAL_ADMIN_EMAIL, PROD_FALLBACK_ADMIN_EMAIL]);
     console.log(
       "\nWiped clean (no demo data). Next: check Admin → Settings lists the",
       "\nreal RA emails, have them sign up, confirm the event dates, then",
@@ -211,19 +210,51 @@ async function main() {
     if (rosterError) die("roster", rosterError);
   }
 
-  // Users: admin (via app_metadata) + participants (roster-linked by trigger)
+  // Users: dry-run admin + participants (roster-linked by trigger). We prefer
+  // ra@pgpals.test for prod dry runs too, but hosted Auth can reject reserved
+  // .test domains, so prod falls back instead of leaving a half-seeded DB.
   console.log("Users (this takes ~30s)…");
-  const { error: allowError } = await db
-    .from("admin_allowlist")
-    .upsert({ email: ADMIN_EMAIL });
-  if (allowError) die("admin_allowlist", allowError);
-  const { error: adminError } = await db.auth.admin.createUser({
-    email: ADMIN_EMAIL,
-    password: PASSWORD,
-    email_confirm: true,
-    user_metadata: { full_name: "RA R3" },
-  });
-  if (adminError) die("admin user", adminError);
+  async function createSeedAdmin(email: string): Promise<
+    | { ok: true; id: string; email: string }
+    | { ok: false; error: string }
+  > {
+    const { error: allowError } = await db
+      .from("admin_allowlist")
+      .upsert({ email });
+    if (allowError) return { ok: false, error: allowError.message };
+
+    const { error: adminError } = await db.auth.admin.createUser({
+      email,
+      password: PASSWORD,
+      email_confirm: true,
+      user_metadata: { full_name: "RA R3" },
+    });
+    if (adminError) return { ok: false, error: adminError.message };
+
+    const { data: adminProfile, error: profileError } = await db
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .single();
+    if (profileError || !adminProfile) {
+      return {
+        ok: false,
+        error: profileError?.message ?? "Admin profile was not created.",
+      };
+    }
+    return { ok: true, id: adminProfile.id, email };
+  }
+
+  let adminResult = await createSeedAdmin(LOCAL_ADMIN_EMAIL);
+  if (!adminResult.ok && PROD) {
+    console.warn(
+      `Could not create ${LOCAL_ADMIN_EMAIL} on hosted Auth: ${adminResult.error}`
+    );
+    console.warn(`Falling back to ${PROD_FALLBACK_ADMIN_EMAIL}.`);
+    await db.from("admin_allowlist").delete().eq("email", LOCAL_ADMIN_EMAIL);
+    adminResult = await createSeedAdmin(PROD_FALLBACK_ADMIN_EMAIL);
+  }
+  if (!adminResult.ok) die("admin user", adminResult.error);
 
   const profileIdByEmail = new Map<string, string>();
   for (let i = 0; i < TEAM_NAMES.length * 2; i++) {
@@ -238,12 +269,7 @@ async function main() {
     if (error) die(`user ${residentEmail(i)}`, error);
     profileIdByEmail.set(residentEmail(i), data.user.id);
   }
-  const { data: adminProfile } = await db
-    .from("profiles")
-    .select("id")
-    .eq("email", ADMIN_EMAIL)
-    .single();
-  const adminId = adminProfile!.id;
+  const adminId = adminResult.id;
 
   // Tasks
   console.log("Tasks…");
@@ -493,7 +519,7 @@ async function main() {
   console.log(`
 ✅ Seed complete!
 
-  Admin:        ${ADMIN_EMAIL} / ${PASSWORD}
+  Admin:        ${adminResult.email} / ${PASSWORD}
   Participant:  ${residentEmail(0)} / ${PASSWORD}   (team "${TEAM_NAMES[0]}")
   Participant:  ${residentEmail(24)} / ${PASSWORD}   (team "${TEAM_NAMES[12]}", has a resubmission)
   Not signed up yet (to demo signup): ${residentEmail(15)}
