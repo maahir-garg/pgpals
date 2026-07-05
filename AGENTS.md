@@ -8,8 +8,8 @@ when making changes.
 
 PGPals is a web app for a two-week PGPR buddy challenge. Residents sign up with
 their registered email, get linked to a team of two, complete photo tasks, and
-earn points after RA review. Admins manage teams, tasks, announcements, reviews,
-event settings, bonus points, and the leaderboard.
+earn PGP Coins after RA review. Admins manage teams, tasks, announcements,
+reviews, event settings, bonus coins, and the leaderboard.
 
 The app is meant to support roughly 400 residents on free-tier-friendly
 infrastructure:
@@ -110,7 +110,8 @@ local, and Vercel agree.
   Destructive demo seed. `npm run seed` targets the local stack via
   `.env.local` and refuses non-local URLs; `npm run seed:prod` deliberately
   wipes and reseeds production via `.env.production.local` (5-second abort
-  window) for dry runs; `--wipe-only` is the D-day clean build (see README).
+  window) for dry runs; it sets the 2026 SGT event dates and prize-pool demo
+  announcements; `--wipe-only` is the D-day clean build (see README).
 
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,

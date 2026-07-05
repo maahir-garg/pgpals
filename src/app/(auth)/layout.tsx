@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { PRIZE_POOL_VALUE_LABEL } from "@/lib/prizes";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </h1>
           </Link>
           <p className="mt-1 text-sm text-muted-foreground">
-            Two weeks. One buddy. Real prizes.
+            Two weeks. One buddy. Win {PRIZE_POOL_VALUE_LABEL} in prizes.
           </p>
         </div>
         {children}

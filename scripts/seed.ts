@@ -13,6 +13,15 @@ import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import {
+  LUCKY_DRAW,
+  PARTICIPATION_REWARD,
+  PRIZE_CEREMONY_LABEL,
+  PRIZE_POOL_VALUE_LABEL,
+  PRIZE_REVEAL_TEASER,
+  PRIZE_TAGLINE,
+  PRIZE_WINNER_COUNT,
+} from "../src/lib/prizes";
 
 // --- env -------------------------------------------------------------------
 // Default target is the LOCAL stack via .env.local, and anything that does
@@ -64,6 +73,9 @@ const days = (n: number) => hours(n * 24);
 const EVENT_START_AT = "2026-08-31T00:00:00+08:00";
 const EVENT_END_AT = "2026-09-13T23:59:00+08:00";
 const LEADERBOARD_HIDE_AT = "2026-09-08T00:00:00+08:00";
+const EVENT_START_LABEL = "31 August";
+const EVENT_END_LABEL = "13 September";
+const LEADERBOARD_HIDE_LABEL = "8 September";
 
 // --- demo data -------------------------------------------------------------
 const TEAM_NAMES = [
@@ -258,7 +270,7 @@ async function main() {
   });
   const tSweep = await addTask({
     title: "Supermarket sweep 🛒",
-    description: "Recreate a famous album cover using only items from the supermarket. Bonus points for commitment.",
+    description: "Recreate a famous album cover using only items from the supermarket. Bonus coins for commitment.",
     points: 20, type: "standard", release_at: days(-2), deadline_at: days(5),
     bonus_config: { kind: "before", cutoff: days(1), bonus: 10 },
   });
@@ -455,15 +467,19 @@ async function main() {
   const { error: annError } = await db.from("announcements").insert([
     {
       title: "Welcome to PGPals! 🎉", pinned: true, created_by: adminId,
-      body: "Here's how it works:\n\n1. Complete tasks with your pal\n2. Snap photos as proof\n3. Earn points and climb the board\n\nNew tasks drop every few days, so check back often! Questions? Find any RA at the lounge.",
+      body: `PGPals runs ${EVENT_START_LABEL} to ${EVENT_END_LABEL}, all times SGT.\n\nHere's how it works:\n\n1. Complete tasks with your pal\n2. Snap photos as proof\n3. Earn PGP Coins and climb the board\n\n${PRIZE_TAGLINE}\n\nNew tasks drop through the event, so check back often! Questions? Find any RA at the lounge.`,
+    },
+    {
+      title: `${PRIZE_POOL_VALUE_LABEL} prize pool is in play 🎁`, pinned: false, created_by: adminId,
+      body: `Top ${PRIZE_WINNER_COUNT} teams win from the tech pool, led by the iPad grand prize. ${PRIZE_REVEAL_TEASER} ${PARTICIPATION_REWARD.blurb} ${LUCKY_DRAW.blurb}`,
     },
     {
       title: "Movie night pair task is live 🎬", pinned: false, created_by: adminId,
-      body: "Team up with another duo for **1.5× points** if you submit in the next two days. The pairing feature is on the task page!",
+      body: "Team up with another duo for **1.5× coins** if you submit in the next two days. The pairing feature is on the task page!",
     },
     {
-      title: "Leaderboard goes dark in 6 days 🤫", pinned: false, created_by: adminId,
-      body: "The board hides 3 days before the closing ceremony, and final standings are revealed live. Make those last points count!",
+      title: `Leaderboard goes dark around ${LEADERBOARD_HIDE_LABEL} 🤫`, pinned: false, created_by: adminId,
+      body: `The board hides before the final stretch, and final standings are revealed live at the prize ceremony on ${PRIZE_CEREMONY_LABEL}. Make those last coins count!`,
     },
   ]);
   if (annError) die("announcements", annError);

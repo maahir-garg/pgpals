@@ -26,8 +26,9 @@ create table public.profiles (
   created_at timestamptz not null default now()
 );
 
--- Pre-assigned membership list, imported from CSV by admins. Signup is only
--- allowed for emails on this roster (or an allowed domain in event_settings).
+-- Pre-assigned membership list, imported from CSV by admins. The initial
+-- schema also had an allowed-domain escape hatch; the 2026 roster-only
+-- migration removes that path and leaves roster/admin-allowlist signup only.
 create table public.roster (
   id uuid primary key default gen_random_uuid(),
   email text not null unique check (email = lower(email)),
@@ -153,8 +154,8 @@ returns boolean language sql stable set search_path = public, pg_temp as
 $$ select coalesce(auth.jwt() ->> 'role', current_user) in ('service_role', 'postgres', 'supabase_admin') $$;
 
 -- ---------------------------------------------------------------------------
--- Signup: reject emails that aren't on the roster (or an allowed domain),
--- auto-link the profile to the pre-assigned team.
+-- Initial signup path. A later 2026 migration replaces this with roster-only
+-- resident signup plus admin_allowlist for RAs.
 -- ---------------------------------------------------------------------------
 
 create or replace function public.handle_new_user()

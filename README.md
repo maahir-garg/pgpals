@@ -1,7 +1,7 @@
 # PGPals 🐧
 
 Event website for PGPR's 2-week buddy challenge: ~200 teams of 2 complete
-photo tasks, RAs review submissions and award points, everyone watches the
+photo tasks, RAs review submissions and award PGP Coins, everyone watches the
 leaderboard (until it goes dark before the closing ceremony).
 
 **Stack:** Next.js 15 (App Router, TypeScript) · Supabase (Postgres, Auth,
@@ -22,7 +22,7 @@ Singapore Supabase database.
   Pair tasks let two teams submit jointly.
 - **Admins** (RAs, desktop): review queue (approve/reject with reason), task
   CRUD with scheduled release and bonus rules, CSV team import, member
-  regrouping, manual bonus points, announcements, event settings. The review queue shows 50 cards per
+  regrouping, manual bonus coins, announcements, event settings. The review queue shows 50 cards per
   page with Previous/Next pagination so photo-heavy backlogs do not lock up
   the page.
 - **Security is in the database, not the UI.** Row Level Security and SQL
@@ -53,7 +53,7 @@ Prereqs: Node 20+, Docker Desktop (running).
 npm install
 npx supabase start        # first run downloads images (~5 min)
 npx supabase db reset     # applies supabase/migrations/*
-npm run seed              # demo teams/tasks/submissions/photos
+npm run seed              # demo teams/tasks/submissions/photos/prize announcements
 npm run dev               # http://localhost:3000
 ```
 
@@ -152,7 +152,10 @@ click through review, tasks, and announcements with realistic data. Two
 warnings: it deletes **everything** first (including real accounts, so RAs
 re-sign-up afterwards), and the demo accounts all share the password
 documented in this README. That's fine while testing; they must be gone by
-D-day (see below).
+D-day (see below). The seed sets the 2026 SGT defaults (31 August to
+13 September, leaderboard dark around 8 September) and demo announcements
+that advertise the S$5,000+ prize pool, top-8 tech prizes, participation
+goodie bags, and AirPods lucky draw.
 
 Before any production reseed, take `npm run backup:prod -- --photos` unless
 you have explicitly decided to lose the current production photos and rows.
@@ -253,9 +256,9 @@ pair type, max approvals (e.g. 3 for a daily task), publish toggle
 |---|---|
 | Early bird | first N approved submissions get +X |
 | Before cutoff | submissions before a time get +X |
-| Multiplier | submissions before a time get points ×M |
+| Multiplier | submissions before a time get coins ×M |
 
-Bonus points are computed **at review time** by the database; the review
+Bonus coins are computed **at review time** by the database; the review
 queue shows the auto amount and lets you override it.
 
 ---
@@ -273,7 +276,7 @@ queue shows the auto amount and lets you override it.
   the residents, they see it verbatim.
 - The review queue shows 50 submissions per page. Use Next/Previous to move
   through a backlog; 50 is a rendering guardrail, not a task/submission cap.
-- Approve = points auto-computed (bonus included). Only override the number
+- Approve = coins auto-computed (bonus included). Only override the number
   for special cases.
 - Misclicked? *Review → Approved or Rejected tab → Undo review* puts it back
   to pending.
@@ -288,7 +291,7 @@ queue shows the auto amount and lets you override it.
 | Team wants a name change | They can rename themselves on their dashboard (✏️ next to the name) |
 | Submitted the wrong photos | Reject with a note; they can resubmit until the deadline |
 | Pair invite stuck | Either team can cancel/decline on the task page; admins can delete pairings in Studio if truly wedged |
-| Extra points for event participation | *Admin → Teams → (team) → Grant bonus* (negative numbers work as penalties) |
+| Extra coins for event participation | *Admin → Teams → (team) → Grant bonus* (negative numbers work as penalties) |
 
 **Storage budget (the one thing that can bite)**
 Photos are compressed on-device to ~200 KB. Free tier = 1 GB storage,
