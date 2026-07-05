@@ -17,6 +17,7 @@ import {
   LUCKY_DRAW,
   PARTICIPATION_REWARD,
   PRIZE_CEREMONY_LABEL,
+  PRIZE_POOL_VALUE_LABEL,
   PRIZE_REVEAL_TEASER,
   PRIZE_TIERS,
   PRIZE_WINNER_COUNT,
@@ -87,7 +88,7 @@ const STEPS: {
   },
   {
     icon: Gift,
-    title: "Win prizes",
+    title: `Win ${PRIZE_POOL_VALUE_LABEL} in prizes`,
     text: `Top ${PRIZE_WINNER_COUNT} teams win from the tech prize pool, and everyone is in the AirPods lucky draw.`,
     color: "bg-mint text-foreground",
   },
@@ -115,7 +116,7 @@ const FAQS = [
   },
   {
     q: "What can we win?",
-    a: `Top ${PRIZE_WINNER_COUNT} teams win from a pool led by an iPad grand prize, with monitors, Sony headphones, projectors and more. Exact rank prizes are saved for the finale reveal on ${PRIZE_CEREMONY_LABEL}. Everyone who participates gets a goodie bag and a shot at the AirPods lucky draw.`,
+    a: `Win ${PRIZE_POOL_VALUE_LABEL} in prizes: top ${PRIZE_WINNER_COUNT} teams chase an iPad-led tech pool with monitors, Sony headphones, projectors and more. Exact rank prizes are saved for the finale reveal on ${PRIZE_CEREMONY_LABEL}. Everyone who participates gets a goodie bag and a shot at the AirPods lucky draw.`,
   },
   {
     q: "What if my email isn't recognised at signup?",
@@ -207,16 +208,16 @@ export default async function LandingPage() {
               <h1 className="mt-4 max-w-xl text-balance font-heading text-[2.2rem] font-extrabold leading-[1.05] tracking-tight sm:mt-6 sm:text-6xl">
                 Two weeks. One buddy.{" "}
                 <span className="relative inline-block text-primary">
-                  Real prizes.
+                  Win {PRIZE_POOL_VALUE_LABEL} in prizes.
                   <Squiggle className="absolute -bottom-3 left-0 h-3 w-full text-secondary" />
                 </span>
               </h1>
               <p className="mt-4 max-w-lg text-pretty text-base leading-6 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
                 PGPals is PGPR&apos;s buddy challenge. Team up with your
                 assigned pal, complete photo tasks around campus, and race the
-                other teams to the top. The prize pool goes{" "}
-                {PRIZE_WINNER_COUNT} teams deep with an iPad grand prize,
-                monitors, Sony headphones, projectors and more in play.
+                other teams to the top. The {PRIZE_POOL_VALUE_LABEL} prize
+                pool goes {PRIZE_WINNER_COUNT} teams deep with an iPad grand
+                prize, monitors, Sony headphones, projectors and more in play.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-4">
                 <Button asChild size="lg">
@@ -294,7 +295,7 @@ export default async function LandingPage() {
                 PRIZE CEREMONY · {PRIZE_CEREMONY_LABEL.toUpperCase()}
               </span>
               <h2 className="mt-4 font-heading text-3xl font-extrabold tracking-tight sm:mt-6 sm:text-4xl">
-                The prize pool goes {PRIZE_WINNER_COUNT} teams deep
+                Win {PRIZE_POOL_VALUE_LABEL} in prizes
               </h2>
               <p className="mt-3 max-w-xl text-base leading-7 text-primary-foreground/90 sm:text-lg">
                 The leaderboard goes dark for the final stretch, so the final

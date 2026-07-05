@@ -6,6 +6,7 @@ import {
   LUCKY_DRAW,
   PARTICIPATION_REWARD,
   PRIZE_CEREMONY_LABEL,
+  PRIZE_POOL_VALUE_LABEL,
   PRIZE_REVEAL_TEASER,
   PRIZE_TIERS,
   PRIZE_WINNER_COUNT,
@@ -77,9 +78,9 @@ export default async function LeaderboardPage() {
             <Gift className="size-4" strokeWidth={2.5} aria-hidden />
           </span>
           <p className="text-sm font-semibold">
-            Top {PRIZE_WINNER_COUNT} teams win from a tech prize pool at the
-            ceremony on {PRIZE_CEREMONY_LABEL}. The board hides before the
-            finale, so keep pushing!
+            Win {PRIZE_POOL_VALUE_LABEL} in prizes: top {PRIZE_WINNER_COUNT}{" "}
+            teams chase the tech pool at the ceremony on {PRIZE_CEREMONY_LABEL}.
+            The board hides before the finale, so keep pushing!
           </p>
         </div>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">

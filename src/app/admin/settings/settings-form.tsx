@@ -109,9 +109,9 @@ export function SettingsForm({
           </div>
           <p className="text-xs text-muted-foreground">
             The prize messaging is fixed for this run and lives in the code
-            (src/lib/prizes.ts): top 8 tech prize pool led by an iPad, monitors,
-            Sony headphones, projectors, AirPods lucky draw, finale reveal, and
-            participation goodie bags.
+            (src/lib/prizes.ts): S$5,000+ top 8 tech prize pool led by an iPad,
+            monitors, Sony headphones, projectors, AirPods lucky draw, finale
+            reveal, and participation goodie bags.
           </p>
           <Button onClick={save} disabled={pending} className="font-bold">
             Save settings

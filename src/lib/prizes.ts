@@ -7,6 +7,7 @@
 
 export const PRIZE_CEREMONY_LABEL = "17 September";
 export const PRIZE_WINNER_COUNT = 8;
+export const PRIZE_POOL_VALUE_LABEL = "S$5,000+";
 export const PRIZE_TEASER_ITEMS = [
   "an iPad grand prize",
   "monitors",
@@ -18,7 +19,7 @@ export const PRIZE_TIERS = [
   {
     place: "1st",
     prize: "iPad grand prize",
-    blurb: "The champion team is playing for the headline iPad prize.",
+    blurb: `The champion team leads the ${PRIZE_POOL_VALUE_LABEL} reveal with the headline iPad prize.`,
     color: "bg-accent text-accent-foreground",
   },
   {
@@ -45,7 +46,7 @@ export const LUCKY_DRAW = {
   blurb: `Every participant is in the AirPods lucky draw at the ceremony on ${PRIZE_CEREMONY_LABEL}.`,
 } as const;
 
-export const PRIZE_REVEAL_TEASER = `The pool includes ${PRIZE_TEASER_ITEMS.join(", ")} and more. Exact rank prizes are revealed at the ceremony on ${PRIZE_CEREMONY_LABEL}.`;
+export const PRIZE_REVEAL_TEASER = `The ${PRIZE_POOL_VALUE_LABEL} pool includes ${PRIZE_TEASER_ITEMS.join(", ")} and more. Exact rank prizes are revealed at the ceremony on ${PRIZE_CEREMONY_LABEL}.`;
 
 // One-liner for tight spots like the dashboard sidebar card.
-export const PRIZE_TAGLINE = `Top ${PRIZE_WINNER_COUNT} teams win from a tech prize pool led by an iPad, with monitors, Sony headphones, projectors and more. Everyone is in the AirPods lucky draw.`;
+export const PRIZE_TAGLINE = `Win ${PRIZE_POOL_VALUE_LABEL} in prizes: top ${PRIZE_WINNER_COUNT} teams chase an iPad-led tech pool, everyone is in the AirPods lucky draw, and every participant gets a goodie bag.`;

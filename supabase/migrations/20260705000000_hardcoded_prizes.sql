@@ -1,8 +1,8 @@
--- Prize messaging is now hardcoded in src/lib/prizes.ts (top 8 tech prize
--- pool led by an iPad, confirmed monitors, Sony headphones, and projectors teaser,
--- AirPods lucky draw, finale reveal, and participation goodie bags) so the
--- pitch is identical on the landing page, leaderboard, and dashboard. The
--- editable column goes away.
+-- Prize messaging is now hardcoded in src/lib/prizes.ts (S$5,000+ top 8 tech
+-- prize pool led by an iPad, confirmed monitors, Sony headphones, and
+-- projectors teaser, AirPods lucky draw, finale reveal, and participation
+-- goodie bags) so the pitch is identical on the landing page, leaderboard,
+-- and dashboard. The editable column goes away.
 alter table public.event_settings drop column prizes;
 
 -- Real 2026 event window in SGT. The board-dark date defaults to around

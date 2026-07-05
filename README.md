@@ -238,12 +238,12 @@ editable in Settings.
 Signup is roster-only: residents must use an email on a team roster, RAs an
 email on the admin list. There is no other way in.
 
-The **prize messaging is hardcoded** in `src/lib/prizes.ts` (top 8 tech prize
-pool led by an iPad, confirmed monitors, Sony headphones, and projectors
-teaser, AirPods lucky draw for all participants, finale reveal on 17 September,
-and participation goodie bags) and rendered on the landing page, leaderboard,
-and dashboard. Changing it is a code edit plus deploy, which keeps the
-advertising consistent everywhere.
+The **prize messaging is hardcoded** in `src/lib/prizes.ts` (S$5,000+ top 8
+tech prize pool led by an iPad, confirmed monitors, Sony headphones, and
+projectors teaser, AirPods lucky draw for all participants, finale reveal on
+17 September, and participation goodie bags) and rendered on the landing page,
+leaderboard, and dashboard. Changing it is a code edit plus deploy, which
+keeps the advertising consistent everywhere.
 
 *Admin → Tasks*: release/deadline datetimes (entered in SGT), standard or
 pair type, max approvals (e.g. 3 for a daily task), publish toggle
