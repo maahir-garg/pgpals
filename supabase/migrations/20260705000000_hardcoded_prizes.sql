@@ -5,11 +5,11 @@
 -- editable column goes away.
 alter table public.event_settings drop column prizes;
 
--- Real 2026 event window: 31 Aug to 13 Sep, board dark for the final stretch,
--- prize ceremony on 17 Sep (ceremony date is copy in src/lib/prizes.ts).
--- Admins can still adjust these in Admin -> Settings.
+-- Real 2026 event window in SGT. The board-dark date defaults to around
+-- 8 Sep, but admins can still adjust all three dates in Admin -> Settings.
+-- Prize ceremony on 17 Sep is display copy in src/lib/prizes.ts.
 update public.event_settings
 set start_at = timestamptz '2026-08-31 00:00:00+08',
     end_at = timestamptz '2026-09-13 23:59:00+08',
-    leaderboard_hide_at = timestamptz '2026-09-11 00:00:00+08'
+    leaderboard_hide_at = timestamptz '2026-09-08 00:00:00+08'
 where id = 1;

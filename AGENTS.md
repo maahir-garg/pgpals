@@ -97,9 +97,10 @@ local, and Vercel agree.
 
 - `supabase/migrations/20260705*.sql`
   The 2026 run's simplifications: drop the editable prize list (hardcoded in
-  `src/lib/prizes.ts` instead) and set the real event window, roster-only
-  signup (no allowed-email-domains), and the `move_roster_member` RPC for
-  regrouping.
+  `src/lib/prizes.ts` instead), set the real event window defaults (31 Aug to
+  13 Sep SGT, leaderboard dark around 8 Sep, still editable in Settings),
+  roster-only signup (no allowed-email-domains), and the `move_roster_member`
+  RPC for regrouping.
 
 - `src/lib/prizes.ts`
   Hardcoded prize messaging and ceremony date, rendered by the landing page,

@@ -363,6 +363,10 @@ created time.
 - Start and end date.
 - Leaderboard hide date.
 
+The current 2026 defaults are 31 August to 13 September, with the leaderboard
+dark around 8 September. These are stored in `event_settings`, interpreted as
+SGT in admin inputs, and remain editable.
+
 It also manages `admin_allowlist`: RA emails added there become admins at
 signup, and adding an email that already has an account promotes it right
 away. The prize messaging is not a setting; it is hardcoded in

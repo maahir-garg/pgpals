@@ -59,6 +59,12 @@ const PASSWORD = "pgpals123";
 const hours = (n: number) => new Date(Date.now() + n * 3600_000).toISOString();
 const days = (n: number) => hours(n * 24);
 
+// Real 2026 run defaults. Admins can still edit these in Settings; the seed
+// just avoids showing a confusing relative demo window on the landing page.
+const EVENT_START_AT = "2026-08-31T00:00:00+08:00";
+const EVENT_END_AT = "2026-09-13T23:59:00+08:00";
+const LEADERBOARD_HIDE_AT = "2026-09-08T00:00:00+08:00";
+
 // --- demo data -------------------------------------------------------------
 const TEAM_NAMES = [
   "Waffle Warriors", "Duck Duck Goose", "The Dumpling Duo", "Chicken Rice Champions",
@@ -153,16 +159,17 @@ async function main() {
     return;
   }
 
-  // Event window: started 5 days ago, ends in 9 days, board hides at end-3d.
+  // Event window defaults use the real 2026 run in SGT. Task timings below
+  // remain relative so local/demo workflows still have live tasks.
   console.log("Event settings…");
   {
     const { error } = await db
       .from("event_settings")
       .update({
         event_name: "PGPals",
-        start_at: days(-5),
-        end_at: days(9),
-        leaderboard_hide_at: days(6),
+        start_at: EVENT_START_AT,
+        end_at: EVENT_END_AT,
+        leaderboard_hide_at: LEADERBOARD_HIDE_AT,
       })
       .eq("id", 1);
     if (error) die("event_settings", error);

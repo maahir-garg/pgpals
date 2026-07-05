@@ -231,6 +231,10 @@ Waffle Warriors,Chloe Lim,chloe.lim@u.nus.edu,Wei Ling Tan,wei.ling.tan@u.nus.ed
 moment, admins keep seeing it), and the **RA admin list** (emails there
 become admins the moment they sign up).
 
+Current 2026 defaults are 31 August to 13 September, with the leaderboard
+going dark around 8 September. All times are SGT, and all three dates remain
+editable in Settings.
+
 Signup is roster-only: residents must use an email on a team roster, RAs an
 email on the admin list. There is no other way in.
 
