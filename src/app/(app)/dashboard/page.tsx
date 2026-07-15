@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import {
   AlertTriangle,
   ArrowRight,
+  BookOpen,
   CalendarDays,
   Clock3,
   Coins,
@@ -107,6 +108,34 @@ function EventDatesCard({ settings }: { settings: EventSettings }) {
   );
 }
 
+function GuideCard() {
+  return (
+    <Card className="bg-mint">
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-bold">New here or need help?</h2>
+            <p className="text-sm text-foreground/75">
+              See how NUSync registration, teams, tasks, proof, reviews, and
+              PGP Coins all work.
+            </p>
+          </div>
+          <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-foreground bg-card text-primary">
+            <BookOpen className="size-5" strokeWidth={2.5} aria-hidden />
+          </span>
+        </div>
+        <Link
+          href="/guide"
+          className="flex items-center justify-between rounded-lg border-2 border-foreground bg-card px-3 py-2 text-sm font-bold transition-colors hover:bg-accent"
+        >
+          Open the event guide
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default async function DashboardPage() {
   const { supabase, profile } = await requireProfile();
 
@@ -150,6 +179,7 @@ export default async function DashboardPage() {
             </p>
           )}
         </section>
+        <GuideCard />
         <AnnouncementsFeed
           announcements={(announcements ?? []) as Announcement[]}
         />
@@ -396,6 +426,7 @@ export default async function DashboardPage() {
         </div>
 
         <aside className="min-w-0 space-y-4">
+          <GuideCard />
           <Card>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between gap-3">

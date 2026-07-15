@@ -486,6 +486,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: added a prominent event-guide card to participant Home, including
+  the no-team state, so onboarding and troubleshooting are not nav-only.
 - 2026-07-15: fixed the landing-page prize sentence to preserve the explicit
   JSX space between the top-eight count and "teams".
 - 2026-07-15: added a participant Guide covering NUSync-first onboarding, RA
