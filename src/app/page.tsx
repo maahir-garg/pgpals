@@ -219,7 +219,7 @@ export default async function LandingPage() {
                 PGPals: The Emerald Challenge is PGPR&apos;s buddy challenge.
                 Team up with your assigned pal, complete photo and video tasks around
                 campus, and race the other teams to the top. The{" "}
-                {PRIZE_POOL_VALUE_LABEL} prize pool goes {PRIZE_WINNER_COUNT}
+                {PRIZE_POOL_VALUE_LABEL} prize pool goes {PRIZE_WINNER_COUNT} 
                 teams deep with an iPad grand prize, monitors, Sony headphones,
                 projectors and more in play.
               </p>
