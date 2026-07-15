@@ -6,10 +6,12 @@ when making changes.
 
 ## Product Goal
 
-PGPals is a web app for a two-week PGPR buddy challenge. Residents sign up with
-their registered email, get linked to a team of two, complete photo tasks, and
-earn PGP Coins after RA review. Admins manage teams, tasks, announcements,
-reviews, event settings, bonus coins, and the leaderboard.
+PGPals: The Emerald Challenge is a web app for a two-week PGPR buddy challenge.
+Residents sign up with their registered email, get linked to a resident team of
+two, complete photo tasks, and earn PGP Coins after RA review. Some group tasks
+join 2, 3, or a custom 4–20 resident teams for one shared submission. Admins
+manage teams, tasks, announcements, reviews, event settings, bonus coins, and
+the leaderboard.
 
 The app is meant to support roughly 400 residents on free-tier-friendly
 infrastructure:
@@ -102,6 +104,13 @@ local, and Vercel agree.
   roster-only signup (no allowed-email-domains), and the `move_roster_member`
   RPC for regrouping.
 
+- `supabase/migrations/20260715*.sql`
+  The Emerald Challenge rename, generalized 2–20-team group pairings, and the
+  single-approval invariant. Group membership lives in `pairings.team_ids`,
+  each invitee records acceptance in `accepted_team_ids`, and all invited teams
+  must accept before the group can submit. `max_submissions` remains as a
+  compatibility column but is constrained to `1` for every task.
+
 - `src/lib/prizes.ts`
   Hardcoded prize messaging and ceremony date, rendered by the landing page,
   leaderboard, and dashboard.
@@ -180,10 +189,18 @@ Treat Postgres as the source of truth and security layer.
 - Participants do not write `submissions` or `pairings` directly. They use RPCs
   such as `create_submission`, `create_pair_invite`, and
   `respond_pair_invite`.
+- Group tasks have an exact `pair_team_count` between 2 and 20. The creator
+  selects every partner at once, every invited team must accept, and any member
+  team may then create the group's one shared submission. Every team in
+  `pairings.team_ids` receives the approved submission's coins.
 - Admin review uses `review_submission`; bonus points are computed in the
   database at review time. Submission creation/review and pair invites use
   transaction-scoped advisory locks so concurrent clicks cannot over-submit,
   over-approve, or double-pair.
+- Every standard task or accepted group can receive exactly one approved
+  submission. One RA decision completes the review; there is no repeat-approval
+  setting in the admin task form. Rejected submissions may still be fixed and
+  resubmitted before the deadline.
 - Scores are computed, not stored. `team_score()` derives one team's score;
   `get_leaderboard()` uses a set-based aggregate over approved submissions and
   manual bonuses so standings do not require one score query per team.
@@ -336,9 +353,8 @@ Workflow conventions:
 - The resident dashboard is a to-do list: rejected tasks first, then all open
   tasks ordered by deadline, then submissions in review, then announcements.
   Do not gate the to-do list on recency.
-- The tasks page groups Closing soon / Open / Done / Closed. "Done" means all
-  allowed approvals are used (`max_submissions`), so repeatable tasks stay
-  open.
+- The tasks page groups Closing soon / Open / Done / Closed. "Done" means the
+  team or accepted group has one approved submission for the task.
 - Admin views are desktop-oriented and should be dense, scannable, and
   practical. The review queue is the primary surface: status tabs with counts,
   task/team filters preserved across tabs, and 50 review cards per page with
@@ -396,6 +412,25 @@ Clean account leftovers:
 - Do not delete user data casually. Verify target rows first, then delete.
 - Do not assume a Vercel deploy means GitHub is current.
 - Do not re-add unused Next starter assets unless a route actually uses them.
+
+## Commit Discipline
+
+- Keep each requested fix in its own focused commit unless the user explicitly
+  asks for a different grouping.
+- Every implementation commit must include an `AGENTS.md` update documenting
+  the behavior, schema, workflow, deployment, or maintenance change introduced
+  by that commit. Review the whole guide for stale statements; do not only add
+  a changelog entry.
+- Never add agent attribution, co-author trailers, or self-credit to commits.
+
+## Recent Changes
+
+- 2026-07-15: renamed the event to **PGPals: The Emerald Challenge**.
+- 2026-07-15: submission forms warn that AI-generated photos are screened and
+  may be rejected.
+- 2026-07-15: group challenges now support an exact 2, 3, or custom 4–20 teams,
+  with acceptance required from every invited team.
+- 2026-07-15: removed repeat approvals; every task or group has one approval.
 
 ## Validation Checklist
 
