@@ -11,10 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/pgpals/badges";
 import type { Submission, SubmissionStatus } from "@/lib/types";
+import type { SignedAttachment } from "@/lib/attachments";
 
 export function ReviewCard({
   submission,
-  photoUrls,
+  attachments,
   taskTitle,
   basePoints,
   bonusNote,
@@ -25,7 +26,7 @@ export function ReviewCard({
   status,
 }: {
   submission: Submission;
-  photoUrls: string[];
+  attachments: SignedAttachment[];
   taskTitle: string;
   basePoints: number;
   bonusNote: string | null;
@@ -85,17 +86,35 @@ export function ReviewCard({
           <StatusBadge status={submission.status} />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto">
-          {photoUrls.map((url, i) =>
-            url ? (
-              <button key={i} type="button" onClick={() => setLightbox(url)}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`Photo ${i + 1}`}
-                  className="h-28 w-28 shrink-0 rounded-md object-cover transition-transform hover:scale-105"
-                />
-              </button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {attachments.map((attachment, i) =>
+            attachment.url ? (
+              attachment.kind === "video" ? (
+                <video
+                  key={attachment.path}
+                  src={attachment.url}
+                  controls
+                  preload="metadata"
+                  playsInline
+                  className="aspect-video w-full rounded-md bg-foreground object-contain"
+                >
+                  Your browser does not support video playback.
+                </video>
+              ) : (
+                <button
+                  key={attachment.path}
+                  type="button"
+                  className="w-full"
+                  onClick={() => setLightbox(attachment.url)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={attachment.url}
+                    alt={`Photo ${i + 1}`}
+                    className="aspect-video w-full rounded-md object-cover transition-transform hover:scale-[1.02]"
+                  />
+                </button>
+              )
             ) : null
           )}
         </div>

@@ -77,7 +77,7 @@ const STEPS: {
   {
     icon: Camera,
     title: "Complete tasks",
-    text: "New photo challenges drop through the event. Snap your proof and submit with a caption.",
+    text: "New photo and video challenges drop through the event. Capture your proof and submit with a caption.",
     color: "bg-secondary text-secondary-foreground",
   },
   {
@@ -217,7 +217,7 @@ export default async function LandingPage() {
               </h1>
               <p className="mt-4 max-w-lg text-pretty text-base leading-6 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
                 PGPals: The Emerald Challenge is PGPR&apos;s buddy challenge.
-                Team up with your assigned pal, complete photo tasks around
+                Team up with your assigned pal, complete photo and video tasks around
                 campus, and race the other teams to the top. The{" "}
                 {PRIZE_POOL_VALUE_LABEL} prize pool goes {PRIZE_WINNER_COUNT}
                 teams deep with an iPad grand prize, monitors, Sony headphones,

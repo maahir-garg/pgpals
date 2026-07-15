@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// Service-role client. Bypasses RLS; only used server-side for signed photo
+// Service-role client. Bypasses RLS; only used server-side for signed media
 // URLs (after an RLS-checked read proves access) and user administration.
 export function createAdminClient() {
   return createSupabaseClient(

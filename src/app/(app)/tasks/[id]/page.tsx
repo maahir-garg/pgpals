@@ -5,7 +5,10 @@ import { requireProfile } from "@/lib/data";
 import { isClosed } from "@/lib/status";
 import { formatSGT } from "@/lib/datetime";
 import { describeBonus } from "@/lib/bonus";
-import { getSignedPhotoUrlMap } from "@/lib/photos";
+import {
+  getSignedAttachmentUrlMap,
+  signedAttachments,
+} from "@/lib/attachments";
 import { Card, CardContent } from "@/components/ui/card";
 import { Markdown } from "@/components/pgpals/markdown";
 import {
@@ -87,13 +90,13 @@ export default async function TaskDetailPage({
     approvedCount === 0 &&
     (task.type === "standard" || pairing?.status === "accepted");
 
-  const photoUrlByPath = await getSignedPhotoUrlMap(
+  const attachmentUrlByPath = await getSignedAttachmentUrlMap(
     submissions.flatMap((s) => s.photo_paths)
   );
-  const photoUrlsBySubmission = new Map(
+  const attachmentsBySubmission = new Map(
     submissions.map((s) => [
       s.id,
-      s.photo_paths.map((path) => photoUrlByPath.get(path) ?? ""),
+      signedAttachments(s.photo_paths, attachmentUrlByPath),
     ])
   );
 
@@ -171,7 +174,7 @@ export default async function TaskDetailPage({
       {hasPending && (
         <Card className="border-warning/30 bg-warning/10">
           <CardContent className="text-sm">
-            <span className="font-bold">Submitted!</span> Your photos are with
+            <span className="font-bold">Submitted!</span> Your proof is with
             the RAs. You&apos;ll see the result here.
           </CardContent>
         </Card>
@@ -199,16 +202,34 @@ export default async function TaskDetailPage({
                   </span>
                 </div>
                 <div className="flex gap-2 overflow-x-auto">
-                  {(photoUrlsBySubmission.get(s.id) ?? []).map((url, i) =>
-                    url ? (
-                      <a key={i} href={url} target="_blank" rel="noreferrer">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={url}
-                          alt={`Photo ${i + 1}`}
-                          className="h-24 w-24 shrink-0 rounded-md object-cover"
-                        />
-                      </a>
+                  {(attachmentsBySubmission.get(s.id) ?? []).map((attachment, i) =>
+                    attachment.url ? (
+                      attachment.kind === "video" ? (
+                        <video
+                          key={attachment.path}
+                          src={attachment.url}
+                          controls
+                          preload="metadata"
+                          playsInline
+                          className="h-40 max-w-72 shrink-0 rounded-md bg-foreground object-contain"
+                        >
+                          Your browser does not support video playback.
+                        </video>
+                      ) : (
+                        <a
+                          key={attachment.path}
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={attachment.url}
+                            alt={`Photo ${i + 1}`}
+                            className="h-24 w-24 shrink-0 rounded-md object-cover"
+                          />
+                        </a>
+                      )
                     ) : null
                   )}
                 </div>

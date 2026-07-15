@@ -8,7 +8,7 @@ when making changes.
 
 PGPals: The Emerald Challenge is a web app for a two-week PGPR buddy challenge.
 Residents sign up with their registered email, get linked to a resident team of
-two, complete photo tasks, and earn PGP Coins after RA review. Some group tasks
+two, complete photo/video tasks, and earn PGP Coins after RA review. Some group tasks
 join 2, 3, or a custom 4–20 resident teams for one shared submission. Admins
 manage teams, tasks, announcements, reviews, event settings, bonus coins, and
 the leaderboard.
@@ -83,8 +83,8 @@ local, and Vercel agree.
 - `src/lib/types.ts`
   Hand-written database row types. Keep these in sync with migrations.
 
-- `src/lib/data.ts`, `photos.ts`, `bonus.ts`, `datetime.ts`, `status.ts`
-  Shared data loading, signed-photo URL helpers, bonus display helpers, SGT time
+- `src/lib/data.ts`, `attachments.ts`, `bonus.ts`, `datetime.ts`, `status.ts`
+  Shared data loading, signed-media URL helpers, bonus display helpers, SGT time
   formatting, and status utilities.
 
 - `supabase/migrations/20260702000000_init.sql`
@@ -110,6 +110,9 @@ local, and Vercel agree.
   each invitee records acceptance in `accepted_team_ids`, and all invited teams
   must accept before the group can submit. `max_submissions` remains as a
   compatibility column but is constrained to `1` for every task.
+  The video attachment migration expands the private bucket to MP4/MOV/WebM,
+  enforces 1–5 supported attachments with no more than 3 video paths, and sets
+  a 50 MB per-object bucket cap.
 
 - `src/lib/prizes.ts`
   Hardcoded prize messaging and ceremony date, rendered by the landing page,
@@ -126,7 +129,8 @@ local, and Vercel agree.
 
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
-  `--photos` to include storage) into the gitignored `backups/` directory.
+  `--photos` to include all storage media; the flag name is legacy) into the
+  gitignored `backups/` directory.
 
 - `scripts/smoke-test.ts`
   Security and rules checks against a seeded database.
@@ -205,11 +209,11 @@ Treat Postgres as the source of truth and security layer.
   `get_leaderboard()` uses a set-based aggregate over approved submissions and
   manual bonuses so standings do not require one score query per team.
 - The leaderboard hide date is enforced by `get_leaderboard()`, not just the UI.
-- Private submission photos live in the `submissions` storage bucket. UI access
+- Private submission photos and videos live in the `submissions` storage bucket. UI access
   goes through server-generated signed URLs after an RLS-checked read.
 - Hot server routes should keep payloads narrow. Use `get_my_profile()` for
   request profile loading, aggregate RPCs for admin counts, and batched signed
-  URLs (`getSignedPhotoUrlMap`) for photo-heavy pages. Do not reintroduce broad
+  URLs (`getSignedAttachmentUrlMap`) for media-heavy pages. Do not reintroduce broad
   `select("*")` calls on dashboard/tasks/review pages unless every column is
   needed.
 
@@ -364,6 +368,11 @@ Workflow conventions:
 - Keep domain components under `src/components/pgpals`.
 - Use server components for read-heavy pages when possible; use client
   components for forms, uploads, and interactive controls.
+- Submission proof supports 1–5 total attachments: photos up to 15 MB before
+  browser compression, and up to 3 MP4/MOV/WebM videos. Each video is at most
+  60 seconds / 50 MB and combined videos are at most 100 MB. Videos upload
+  directly to Supabase through TUS in 6 MB chunks; keep the standard upload
+  path only for compressed images.
 - Use `formatSGT()` / `formatSGTDate()` for display times. Admin datetime inputs
   are interpreted as Singapore time.
 - Do not add marketing-style screens when the route is an app surface. The app
@@ -402,10 +411,10 @@ Clean account leftovers:
   the seed wiped production because `.env.local` had been switched.)
 - Production reseeds happen only via `npm run seed:prod`, and never after
   the D-day clean build (README → "Dry runs, backups, and D-day").
-- Production reseeds wipe auth users, event rows, submissions, storage photos,
+- Production reseeds wipe auth users, event rows, submissions, storage media,
   and demo/recreated data. Take `npm run backup:prod -- --photos` first unless
   the user explicitly accepts losing current production data; backups contain
-  resident names, emails, and photos, so treat them as private data.
+  resident names, emails, photos, and videos, so treat them as private data.
 - Do not expose or commit `.env.local` or `.env.production.local`.
 - Do not import the service-role admin client into client components.
 - Do not rely on UI checks for security. Put access rules in RLS/RPCs.
@@ -426,11 +435,13 @@ Clean account leftovers:
 ## Recent Changes
 
 - 2026-07-15: renamed the event to **PGPals: The Emerald Challenge**.
-- 2026-07-15: submission forms warn that AI-generated photos are screened and
+- 2026-07-15: submission forms warn that AI-generated media is screened and
   may be rejected.
 - 2026-07-15: group challenges now support an exact 2, 3, or custom 4–20 teams,
   with acceptance required from every invited team.
 - 2026-07-15: removed repeat approvals; every task or group has one approval.
+- 2026-07-15: added mixed photo/video proof, resumable video uploads, RA video
+  playback, database-enforced media formats/counts, and seeded multi-video data.
 
 ## Validation Checklist
 

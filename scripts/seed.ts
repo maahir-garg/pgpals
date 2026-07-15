@@ -117,6 +117,13 @@ const PALETTES: [string, string, string][] = [
   ["#3b82f6", "#dbeafe", "🎬"], ["#ef4444", "#fee2e2", "🧺"],
 ];
 
+// Tiny valid H.264 MP4 used to exercise video playback in participant and RA
+// views without bloating local or production demo storage.
+const DEMO_VIDEO = Buffer.from(
+  "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",
+  "base64"
+);
+
 async function makePhoto(index: number): Promise<Buffer> {
   const [bg, fg, emoji] = PALETTES[index % PALETTES.length];
   const svg = `<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
@@ -308,7 +315,7 @@ async function main() {
   });
   const tMovie = await addTask({
     title: "Movie night squad 🎬",
-    description: "**Group task!** Link up with two other teams for a movie night: 6 people, 1 screen, snacks mandatory. One submission for all three teams.",
+    description: "**Group video task!** Link up with two other teams for a movie night: 6 people, 1 screen, snacks mandatory. Submit two short clips as one shared submission for all three teams.",
     points: 25, type: "pair", release_at: days(-2), deadline_at: days(6),
     pair_team_count: 3,
     bonus_config: { kind: "multiplier_before", cutoff: days(2), multiplier: 1.5 },
@@ -341,7 +348,7 @@ async function main() {
   });
 
   // Photos
-  console.log("Uploading demo photos…");
+  console.log("Uploading demo media…");
   const photoBuffers = await Promise.all(PALETTES.map((_, i) => makePhoto(i)));
   let photoCounter = 0;
   async function uploadPhotos(teamId: string, count: number): Promise<string[]> {
@@ -360,15 +367,31 @@ async function main() {
     return paths;
   }
 
+  async function uploadVideos(teamId: string, folder: string, count: number) {
+    const paths: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const path = `${teamId}/${folder}/video-${i + 1}.mp4`;
+      const { error } = await db.storage
+        .from("submissions")
+        .upload(path, DEMO_VIDEO, { contentType: "video/mp4" });
+      if (error) die(`upload ${path}`, error);
+      paths.push(path);
+    }
+    return paths;
+  }
+
   // Submissions
   console.log("Submissions…");
   interface SubSpec {
     task: string; team: string; status: "pending" | "approved" | "rejected" | "superseded";
     points?: number; note?: string; submittedH: number; reviewedH?: number;
-    pairing?: string; resubOf?: string; photos?: number; text?: string;
+    pairing?: string; resubOf?: string; photos?: number; videos?: number; text?: string;
   }
   async function addSub(spec: SubSpec): Promise<string> {
     const paths = await uploadPhotos(spec.team, spec.photos ?? 2);
+    if (spec.videos) {
+      paths.push(...await uploadVideos(spec.team, crypto.randomUUID(), spec.videos));
+    }
     const { data, error } = await db
       .from("submissions")
       .insert({
@@ -486,8 +509,8 @@ async function main() {
   const moviePending2 = await addPairing(tMovie, [teamIds[3], teamIds[4], teamIds[5]], "accepted");
   await addSub({
     task: tMovie, team: teamIds[3], pairing: moviePending2,
-    status: "pending", submittedH: -1, photos: 2,
-    text: "Horror night. Half of us watched through fingers 👻",
+    status: "pending", submittedH: -1, photos: 1, videos: 2,
+    text: "Two short clips from our horror movie night 👻",
   });
   await addPairing(tMovie, [teamIds[6], teamIds[7], teamIds[8]], "pending");
   await addPairing(tMovie, [teamIds[9], teamIds[10], teamIds[11]], "declined");
@@ -507,7 +530,7 @@ async function main() {
   const { error: annError } = await db.from("announcements").insert([
     {
       title: "Welcome to PGPals! 🎉", pinned: true, created_by: adminId,
-      body: `PGPals runs ${EVENT_START_LABEL} to ${EVENT_END_LABEL}, all times SGT.\n\nHere's how it works:\n\n1. Complete tasks with your pal\n2. Snap photos as proof\n3. Earn PGP Coins and climb the board\n\n${PRIZE_TAGLINE}\n\nNew tasks drop through the event, so check back often! Questions? Find any RA at the lounge.`,
+      body: `PGPals runs ${EVENT_START_LABEL} to ${EVENT_END_LABEL}, all times SGT.\n\nHere's how it works:\n\n1. Complete tasks with your pal\n2. Capture photo or video proof\n3. Earn PGP Coins and climb the board\n\n${PRIZE_TAGLINE}\n\nNew tasks drop through the event, so check back often! Questions? Find any RA at the lounge.`,
     },
     {
       title: `${PRIZE_POOL_VALUE_LABEL} prize pool is in play 🎁`, pinned: false, created_by: adminId,

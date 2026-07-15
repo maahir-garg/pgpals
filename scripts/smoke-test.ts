@@ -114,10 +114,19 @@ async function main() {
     const rivalTeam = rivalProfile!.team_id as string;
     const { data: path } = await rival.storage.from("submissions").upload(`${rivalTeam}/smoke/1.jpg`, Buffer.from([0xff, 0xd8, 0xff, 0xdb]), { contentType: "image/jpeg" });
     check("upload to own team folder works", !!path);
-    const { data: subId, error: okError } = await rival.rpc("create_submission", {
-      p_task: sweep!.id, p_text: "smoke test submission", p_photos: [`${rivalTeam}/smoke/1.jpg`], p_pairing: null,
+    const { data: videoPath } = await rival.storage.from("submissions").upload(`${rivalTeam}/smoke/1.mp4`, Buffer.from([0, 0, 0, 24, 102, 116, 121, 112]), { contentType: "video/mp4" });
+    check("video upload to own team folder works", !!videoPath);
+    const { error: tooManyVideos } = await rival.rpc("create_submission", {
+      p_task: sweep!.id,
+      p_text: "too many clips",
+      p_photos: [1, 2, 3, 4].map((n) => `${rivalTeam}/smoke/${n}.mp4`),
+      p_pairing: null,
     });
-    check("valid submission accepted", !okError && !!subId, okError?.message ?? "");
+    check("more than three videos rejected", !!tooManyVideos);
+    const { data: subId, error: okError } = await rival.rpc("create_submission", {
+      p_task: sweep!.id, p_text: "smoke test mixed-media submission", p_photos: [`${rivalTeam}/smoke/1.jpg`, `${rivalTeam}/smoke/1.mp4`], p_pairing: null,
+    });
+    check("valid mixed photo/video submission accepted", !okError && !!subId, okError?.message ?? "");
 
     // review as participant must fail; as admin must work and compute bonus (+10 before cutoff)
     const { error: reviewAsUser } = await participant.rpc("review_submission", {
@@ -140,6 +149,8 @@ async function main() {
   {
     const { error } = await participant.storage.from("submissions").upload("not-my-team/hack/1.jpg", Buffer.from([1]), { contentType: "image/jpeg" });
     check("upload to another folder blocked", !!error);
+    const { error: unsupportedType } = await participant.storage.from("submissions").upload(`${myTeam}/hack/1.pdf`, Buffer.from([1]), { contentType: "application/pdf" });
+    check("unsupported attachment MIME type blocked", !!unsupportedType);
     const { data: rivalProfile } = await admin.from("profiles").select("team_id").eq("email", "divya.pillai@u.nus.edu").single();
     const { data: files, error: listError } = await participant.storage.from("submissions").list(`${rivalProfile!.team_id}/smoke`);
     check("cannot list another team's photos", !!listError || (files ?? []).length === 0);
@@ -243,11 +254,11 @@ async function main() {
 
   console.log("\n— Cleanup —");
   {
-    // remove the test submission + photo so the demo review queue stays clean
+    // Remove the mixed-media test submission so the demo queue stays clean.
     const { data: leftovers } = await admin
       .from("submissions")
       .select("id, photo_paths")
-      .eq("text_content", "smoke test submission");
+      .eq("text_content", "smoke test mixed-media submission");
     for (const s of leftovers ?? []) {
       if (s.photo_paths?.length) await admin.storage.from("submissions").remove(s.photo_paths);
       await admin.from("submissions").delete().eq("id", s.id);
@@ -255,7 +266,7 @@ async function main() {
     const { data: remaining } = await admin
       .from("submissions")
       .select("id")
-      .eq("text_content", "smoke test submission");
+      .eq("text_content", "smoke test mixed-media submission");
     check("smoke submission cleaned up", (remaining ?? []).length === 0);
   }
 

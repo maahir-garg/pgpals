@@ -2,11 +2,12 @@
 
 Event website for PGPals: The Emerald Challenge, PGPR's 2-week buddy challenge:
 ~200 teams of 2 complete
-photo tasks, RAs review submissions and award PGP Coins, everyone watches the
+photo and video tasks, RAs review submissions and award PGP Coins, everyone watches the
 leaderboard (until it goes dark before the closing ceremony).
 
 **Stack:** Next.js 15 (App Router, TypeScript) · Supabase (Postgres, Auth,
-Storage) · Tailwind + shadcn/ui · Vercel. Fits free tiers for ~400 users.
+Storage) · Tailwind + shadcn/ui · Vercel. Photo-only runs can fit free tiers;
+video-heavy runs should use Supabase Pro.
 Server functions are pinned to Vercel `sin1` so app clicks stay close to the
 Singapore Supabase database.
 
@@ -18,17 +19,17 @@ Singapore Supabase database.
   FAQ) with signup and login. Everything else needs an account.
 - **Participants** (phones, but the layout scales up to laptops too): sign up
   with their rostered email, get auto-linked to their pre-assigned team,
-  complete tasks, submit 1-5 photos plus a caption, earn PGP Coins (the
+  complete tasks, submit 1-5 photo/video attachments plus a caption, earn PGP Coins (the
   event currency; the database still calls them points) on approval.
-  Pair tasks let two teams submit jointly.
+  Group tasks let 2-20 teams submit jointly.
 - **Admins** (RAs, desktop): review queue (approve/reject with reason), task
   CRUD with scheduled release and bonus rules, CSV team import, member
   regrouping, manual bonus coins, announcements, event settings. The review queue shows 50 cards per
-  page with Previous/Next pagination so photo-heavy backlogs do not lock up
+  page with Previous/Next pagination so media-heavy backlogs do not lock up
   the page.
 - **Security is in the database, not the UI.** Row Level Security and SQL
   functions enforce: unreleased tasks invisible, submissions visible only to
-  the owning team (plus pair partner and admins), no submissions after the
+  the owning team (plus accepted group members and admins), no submissions after the
   deadline, leaderboard returns *nothing* to participants after the hide
   date. `scripts/smoke-test.ts` proves all of this against a live database.
 - All times display in **Asia/Singapore**; storage is UTC.
@@ -162,24 +163,25 @@ the 2026 SGT defaults (31 August to 13 September, leaderboard dark around
 top-8 tech prizes, participation goodie bags, and AirPods lucky draw.
 
 Before any production reseed, take `npm run backup:prod -- --photos` unless
-you have explicitly decided to lose the current production photos and rows.
-The backup folder contains resident names, emails, and photos; keep it out of
+you have explicitly decided to lose the current production media and rows.
+The backup folder contains resident names, emails, photos, and videos; keep it out of
 Git and move it only to an approved private location.
 
 ### Backups (do this daily during the event)
 
 ```bash
-npm run backup:prod -- --photos    # full backup incl. submission photos
+npm run backup:prod -- --photos    # full backup incl. all submission media (legacy flag name)
 npm run backup:prod                # tables + auth users only (fast)
 ```
 
 Writes `backups/<host>/<timestamp>/` containing `tables.json` (every table,
-all rows), `auth-users.json`, and `photos/`. Passwords can't be exported, so
+all rows), `auth-users.json`, and `photos/` (both photos and videos; legacy
+folder name). Passwords can't be exported, so
 a worst-case restore means users reset passwords; scores, submissions, and
-photos are all in the backup and final standings can be recomputed from
+media files are all in the backup and final standings can be recomputed from
 `tables.json` alone.
 
-- During the event, run a photo backup **once a day** (set a phone
+- During the event, run a media backup **once a day** (set a phone
   reminder) and before anything risky (schema change, bulk edit).
 - Copy the latest backup folder somewhere off the laptop (Google Drive,
   etc.). The folder is gitignored; it contains resident names and emails,
@@ -302,21 +304,25 @@ queue shows the auto amount and lets you override it.
 | "email rate limit exceeded" at signup | Make sure `SUPABASE_SERVICE_ROLE_KEY` is set in the app environment; signup uses it to create confirmed rostered users without sending confirmation emails. For password reset emails, wait for the quota window or configure SMTP in Supabase Auth. |
 | Resident on the wrong team, or two pals not getting along | *Admin → Teams → (team) → Move* next to the member: pick the destination team and they're regrouped (their account relinks automatically; coins already earned stay with the old team) |
 | Team wants a name change | They can rename themselves on their dashboard (✏️ next to the name) |
-| Submitted the wrong photos | Reject with a note; they can resubmit until the deadline |
+| Submitted the wrong proof | Reject with a note; they can resubmit until the deadline |
 | Pair invite stuck | Either team can cancel/decline on the task page; admins can delete pairings in Studio if truly wedged |
 | Extra coins for event participation | *Admin → Teams → (team) → Grant bonus* (negative numbers work as penalties) |
 
 **Storage budget (the one thing that can bite)**
-Photos are compressed on-device to ~200 KB. Free tier = 1 GB storage,
-5 GB/month egress, roughly 5,000 photos. With 20 tasks × 200 teams × 2-3
-photos you may approach it. If the dashboard graph is trending past ~80% in
-week 1: *Supabase → Billing → upgrade to Pro ($25/month, 100 GB)* for the
-event month, downgrade after. No code changes needed.
+Photos start at up to 15 MB and are compressed on-device to roughly 300 KB.
+Each submission accepts five total attachments, including up to three videos;
+each video is capped at 60 seconds and 50 MB, with a 100 MB combined video cap.
+Video uploads use Supabase TUS resumable uploads for mobile reliability.
 
-For larger runs, the math moves fast: 100 tasks × 200 teams × 2 photos is
-about 40,000 photos, roughly 8 GB before egress. The app avoids loading those
-photos during normal navigation, but Supabase free-tier storage is not enough
-for that volume.
+As of July 2026, Supabase Pro includes 100 GB file storage plus 250 GB each of
+cached and uncached egress. Storage above the quota is $0.0213/GB/month;
+uncached egress is $0.09/GB and cached egress is $0.03/GB. See the official
+[storage pricing](https://supabase.com/docs/guides/storage/pricing),
+[egress guide](https://supabase.com/docs/guides/platform/manage-your-usage/egress),
+and [upload limits](https://supabase.com/docs/guides/storage/uploads/file-limits).
+A worst-case submission is about 100 MB, so 200 such submissions are about
+20 GB before RA playback egress. Monitor Storage and Egress during video-heavy
+task drops.
 
 **Also good to know**
 - Free Supabase projects pause after about a week with no traffic (outside
@@ -370,12 +376,12 @@ Design notes worth knowing before editing:
   once per team. The leaderboard RPC wraps this with the hide-date check.
 - **Performance-sensitive reads stay narrow**: app pages load profile via
   `get_my_profile()`, admin count cards use aggregate RPCs, and review/task
-  photo URLs are signed in batches. Do not reintroduce broad `select("*")`
+  attachment URLs are signed in batches. Do not reintroduce broad `select("*")`
   calls on hot routes unless the UI truly needs every column.
 - **Times**: stored UTC, displayed via `formatSGT()`; admin datetime inputs
   are interpreted as SGT (+08:00 fixed; Singapore has no DST).
-- Photos live in the private `submissions` bucket at `<team_id>/<uuid>/n.jpg`;
-  the UI shows them via 1-hour signed URLs generated server-side after an
+- Photos and videos live in the private `submissions` bucket at
+  `<team_id>/<uuid>/<attachment>`; the UI shows them via 1-hour signed URLs generated server-side after an
   RLS-checked read. If the submission RPC rejects after upload, the client
   removes the just-uploaded objects so failed attempts do not leak storage.
 - The landing page reads event dates with the service-role client (anon has

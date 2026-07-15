@@ -93,7 +93,7 @@ async function main() {
   check("admin overview renders", r.body.includes("Pending review"), String(r.status));
   r = await get("/admin/review", admin);
   check("review queue shows pending cards", r.body.includes("Approve"), String(r.status));
-  check("review queue shows photos", r.body.includes("supabase") || r.body.includes("sign"));
+  check("review queue shows media", r.body.includes("supabase") || r.body.includes("sign"));
   r = await get("/admin/tasks", admin);
   check("admin tasks table incl. draft", r.body.includes("Karaoke"), String(r.status));
   check("admin tasks shows states", r.body.includes("Scheduled") && r.body.includes("Live") && r.body.includes("Closed"));

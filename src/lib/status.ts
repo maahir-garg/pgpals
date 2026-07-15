@@ -3,7 +3,7 @@ import type { Submission, SubmissionStatus } from "@/lib/types";
 type SubmissionStatusRow = Pick<Submission, "task_id" | "status">;
 
 // A team's effective status for a task, from the submissions they can see
-// (own + joint pair submissions). Superseded rows are history only.
+// (own + joint group submissions). Superseded rows are history only.
 export function taskStatusFor(
   taskId: string,
   submissions: SubmissionStatusRow[]

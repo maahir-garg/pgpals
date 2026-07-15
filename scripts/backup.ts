@@ -3,7 +3,7 @@
  *   tables.json      every app table, all rows
  *   auth-users.json  auth users (id/email/metadata - passwords are not
  *                    exportable; a restore means users reset passwords)
- *   photos/          every submission photo (with --photos)
+ *   photos/          every submission photo/video (with legacy --photos flag)
  *
  * Run: npm run backup          (local stack, via .env.local)
  *      npm run backup:prod     (production, via .env.production.local)
@@ -124,9 +124,9 @@ async function main() {
       writeFileSync(flat, Buffer.from(await data.arrayBuffer()));
       saved++;
     }
-    console.log(`  photos: ${saved} saved${failed ? `, ${failed} FAILED` : ""}`);
+    console.log(`  media: ${saved} saved${failed ? `, ${failed} FAILED` : ""}`);
   } else {
-    console.log("  photos: skipped (pass --photos to include)");
+    console.log("  media: skipped (pass legacy --photos flag to include)");
   }
 
   console.log(`\nDone. Backup written to ${outDir}`);

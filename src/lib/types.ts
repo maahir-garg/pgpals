@@ -68,7 +68,7 @@ export interface Submission {
   team_id: string;
   pairing_id: string | null;
   text_content: string;
-  photo_paths: string[];
+  photo_paths: string[]; // Legacy column name; contains photo and video paths.
   status: SubmissionStatus;
   points_awarded: number | null;
   reviewer_id: string | null;

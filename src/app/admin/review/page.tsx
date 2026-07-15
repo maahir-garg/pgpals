@@ -2,7 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ClipboardCheck } from "lucide-react";
 import { requireAdmin } from "@/lib/data";
-import { getSignedPhotoUrlMap } from "@/lib/photos";
+import {
+  getSignedAttachmentUrlMap,
+  signedAttachments,
+} from "@/lib/attachments";
 import { formatSGT } from "@/lib/datetime";
 import { describeBonus } from "@/lib/bonus";
 import { cn } from "@/lib/utils";
@@ -87,8 +90,8 @@ export default async function ReviewPage({
     supabase.from("teams").select("*").order("name"),
     supabase.rpc("admin_submission_counts_by_task"),
     supabase.rpc("admin_submission_status_counts", {
-      p_task: params.task ?? null,
-      p_team: params.team ?? null,
+      p_task: params.task || null,
+      p_team: params.team || null,
     }),
   ]);
 
@@ -98,11 +101,11 @@ export default async function ReviewPage({
   const pairingIds = [
     ...new Set(submissions.map((s) => s.pairing_id).filter(Boolean)),
   ] as string[];
-  const [{ data: pairingsData }, photoUrlByPath] = await Promise.all([
+  const [{ data: pairingsData }, attachmentUrlByPath] = await Promise.all([
     pairingIds.length > 0
       ? supabase.from("pairings").select("*").in("id", pairingIds)
       : Promise.resolve({ data: [] as Pairing[] }),
-    getSignedPhotoUrlMap(submissions.flatMap((s) => s.photo_paths)),
+    getSignedAttachmentUrlMap(submissions.flatMap((s) => s.photo_paths)),
   ]);
   const pairings = (pairingsData ?? []) as Pairing[];
   const countByStatus = new Map<(typeof STATUSES)[number], number>(
@@ -131,7 +134,7 @@ export default async function ReviewPage({
     const creditedTeamIds = pairing?.team_ids ?? [s.team_id];
     return {
       submission: s,
-      photoUrls: s.photo_paths.map((path) => photoUrlByPath.get(path) ?? ""),
+      attachments: signedAttachments(s.photo_paths, attachmentUrlByPath),
       taskTitle: task?.title ?? "(deleted task)",
       basePoints: task?.points ?? 0,
       bonusNote: task ? describeBonus(task.bonus_config) : null,
