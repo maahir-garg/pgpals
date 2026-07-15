@@ -491,6 +491,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: reordered participant navigation to Home, Guide, Tasks, then
+  Leaderboard on both mobile and desktop.
 - 2026-07-15: moved the participant Home guide card directly below the team
   summary on mobile/stacked layouts while retaining the desktop sidebar order.
 - 2026-07-15: added an under-5-MB video compression recommendation to the
