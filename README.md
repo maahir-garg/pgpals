@@ -300,7 +300,7 @@ queue shows the auto amount and lets you override it.
 **Common issues**
 | Symptom | Fix |
 |---|---|
-| "My email isn't on the list" at signup | *Admin → Teams*: find their team, check the roster email matches exactly what they're typing; fix/add it, they retry |
+| Generic "Could not create your account" at signup | To prevent roster/account enumeration the public form does not say whether an email exists. In *Admin → Teams*, find their team, check the roster email matches exactly, and fix/add it; otherwise ask them to try login or password reset. |
 | "email rate limit exceeded" at signup | Make sure `SUPABASE_SERVICE_ROLE_KEY` is set in the app environment; signup uses it to create confirmed rostered users without sending confirmation emails. For password reset emails, wait for the quota window or configure SMTP in Supabase Auth. |
 | Resident on the wrong team, or two pals not getting along | *Admin → Teams → (team) → Move* next to the member: pick the destination team and they're regrouped (their account relinks automatically; coins already earned stay with the old team) |
 | Team wants a name change | They can rename themselves on their dashboard (✏️ next to the name) |

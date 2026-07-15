@@ -149,7 +149,9 @@ rejects it. Do not rely on `.test` for real production admins.
 
 Signup flow:
 
-1. `signup_precheck(email)` runs before Auth signup for a friendly error.
+1. `signup_precheck(email)` runs as a neutral availability check. It always
+   returns the same `{ "ok": true }` response and must never reveal whether an
+   email is rostered, allowlisted, already registered, or linked to a name/team.
 2. Supabase Auth creates the user.
 3. The `on_auth_user_created` trigger calls `handle_new_user()`.
 4. `handle_new_user()` creates the profile only if the email is in:
@@ -162,6 +164,8 @@ residents are roster-only, RAs are allowlist-only.
 
 Email criteria: emails are lowercased and must match roster/admin_allowlist
 exactly. `@u.nus.edu` is conventional for residents, not a domain-wide bypass.
+Public signup failures stay generic to avoid turning the server action into an
+email-enumeration endpoint; admins diagnose roster mismatches in Admin -> Teams.
 The public signup/reset forms block `.test`; seeded/admin-created `.test`
 accounts can log in only if hosted Supabase accepts them.
 

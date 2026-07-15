@@ -224,9 +224,14 @@ async function main() {
   {
     const anon = client();
     const { data: precheckBad } = await anon.rpc("signup_precheck", { p_email: "stranger@gmail.com" });
-    check("precheck rejects unknown email", precheckBad?.ok === false);
     const { data: precheckGood } = await anon.rpc("signup_precheck", { p_email: "hafiz.bin.salleh@u.nus.edu" });
-    check("precheck accepts rostered email", precheckGood?.ok === true && !!precheckGood?.team_name);
+    check(
+      "precheck does not reveal roster eligibility",
+      precheckBad?.ok === true &&
+        precheckGood?.ok === true &&
+        Object.keys(precheckBad).length === 1 &&
+        Object.keys(precheckGood).length === 1
+    );
     const { error: strangerError } = await admin.auth.admin.createUser({
       email: "stranger@gmail.com",
       password: "password123",

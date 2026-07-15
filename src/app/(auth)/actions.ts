@@ -15,10 +15,10 @@ function signupErrorMessage(message: string) {
       "Supabase has hit its auth email limit. Ask an admin to check the service-role key or email settings, then try again."
     );
   }
-  if (normalized.includes("already") && normalized.includes("registered")) {
-    return "This email already has an account. Log in instead.";
-  }
-  return "Could not create your account: " + message;
+  return (
+    "Could not create your account. Check the email you registered with, " +
+    "or log in/reset your password if you may already have an account."
+  );
 }
 
 async function getSiteOrigin() {
@@ -70,24 +70,14 @@ export async function signup(
 
   const supabase = await createClient();
 
-  // Friendly pre-check against the roster; the database trigger is the
-  // authoritative gate and rejects unlisted emails regardless.
-  const { data: precheck, error: precheckError } = await supabase.rpc(
+  // This intentionally returns the same response for every email so the
+  // public endpoint cannot enumerate roster, team, admin, or signup data.
+  // handle_new_user() remains the authoritative eligibility gate.
+  const { error: precheckError } = await supabase.rpc(
     "signup_precheck",
     { p_email: email }
   );
   if (precheckError) return { error: "Something went wrong. Try again." };
-  if (!precheck?.ok) {
-    if (precheck?.reason === "already_registered") {
-      return { error: "This email already has an account. Log in instead." };
-    }
-    return {
-      error:
-        "This email isn't on the PGPals list. Check you used the email you registered with, or ask your RA to add you.",
-    };
-  }
-
-  const displayName = fullName || precheck.full_name || "";
 
   if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
     const admin = createAdminClient();
@@ -95,7 +85,7 @@ export async function signup(
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name: displayName },
+      user_metadata: { full_name: fullName },
     });
     if (createError) return { error: signupErrorMessage(createError.message) };
 
@@ -113,7 +103,7 @@ export async function signup(
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: displayName } },
+      options: { data: { full_name: fullName } },
     });
     if (error) return { error: signupErrorMessage(error.message) };
   }
