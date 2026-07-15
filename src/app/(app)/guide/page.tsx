@@ -70,6 +70,22 @@ const helpItems = [
   },
 ] as const;
 
+function HelpItem({ item }: { item: (typeof helpItems)[number] }) {
+  return (
+    <details className="group rounded-xl border-2 border-foreground bg-card shadow-sticker">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-bold marker:content-none">
+        {item.question}
+        <span className="grid size-7 shrink-0 place-items-center rounded-full bg-muted transition-transform group-open:rotate-180">
+          <ChevronDown className="size-3.5" aria-hidden />
+        </span>
+      </summary>
+      <p className="border-t-2 border-dashed border-foreground/20 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+        {item.answer}
+      </p>
+    </details>
+  );
+}
+
 export default function GuidePage() {
   return (
     <div className="space-y-8">
@@ -173,22 +189,20 @@ export default function GuidePage() {
             </h2>
           </div>
         </div>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-3 md:hidden">
           {helpItems.map((item) => (
-            <details
-              key={item.question}
-              className="group rounded-xl border-2 border-foreground bg-card shadow-sticker"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-bold marker:content-none">
-                {item.question}
-                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-muted transition-transform group-open:rotate-180">
-                  <ChevronDown className="size-3.5" aria-hidden />
-                </span>
-              </summary>
-              <p className="border-t-2 border-dashed border-foreground/20 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-                {item.answer}
-              </p>
-            </details>
+            <HelpItem key={item.question} item={item} />
+          ))}
+        </div>
+        <div className="hidden grid-cols-2 items-start gap-3 md:grid">
+          {[0, 1].map((column) => (
+            <div key={column} className="space-y-3">
+              {helpItems
+                .filter((_, index) => index % 2 === column)
+                .map((item) => (
+                  <HelpItem key={item.question} item={item} />
+                ))}
+            </div>
           ))}
         </div>
       </section>

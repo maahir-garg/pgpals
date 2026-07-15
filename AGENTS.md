@@ -487,6 +487,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: split the desktop Guide FAQ into independent columns so opening
+  one disclosure never stretches or distorts a closed card beside it.
 - 2026-07-15: removed completed signup/onboarding steps from the authenticated
   Guide and Home guide card; the participant help page now starts with gameplay.
 - 2026-07-15: added a prominent event-guide card to participant Home, including
