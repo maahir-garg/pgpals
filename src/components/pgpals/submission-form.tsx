@@ -309,18 +309,14 @@ export function SubmissionForm({
         />
         <div className="space-y-1 text-xs text-muted-foreground">
           <p>
-            1–5 attachments · max 3 videos (MP4, MOV, or WebM)
+            1-5 attachments · max 3 videos (MP4 or MOV)
           </p>
           <p>
-            Each video: max 60 sec / 50 MB · videos combined: max 100 MB
+            Each video: max 50 MB · videos combined: max 100 MB
           </p>
           <p className="font-semibold text-primary">
-            Recommended: compress each video to under 5 MB for a faster, more
+            Recommended: compress each video to under 5 MB and photos to under 1 MB for a faster, more
             reliable upload.
-          </p>
-          <p>
-            Photos: max 15 MB each, compressed before upload · every upload
-            uses a short-lived reserved URL
           </p>
           <p className="font-semibold text-foreground">
             AI-generated media is not allowed. Every upload is screened by
