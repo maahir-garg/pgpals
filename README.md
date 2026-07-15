@@ -115,9 +115,10 @@ Then **sign up in the app** with that real email, and you'll be an admin. Do
 not use the local `ra@pgpals.test` demo address in production. Add every other
 RA's email in *Admin → Settings* **before** they sign up; being on that list is
 what makes an account an admin (an email that already has an account is
-promoted on the spot). To demote someone: SQL Editor →
-`update profiles set role = 'participant' where email = '...';` and remove
-them from the list in Settings.
+promoted on the spot). Use **Demote & revoke** in the same screen to remove a
+signed-up RA: it removes the allowlist entry, changes the account to a
+participant, and revokes every active Auth session in one transaction. The app
+refuses to remove the last signed-up admin.
 
 ### 3. Vercel
 

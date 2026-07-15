@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { addAdminEmail, removeAdminEmail, updateSettings } from "../actions";
+import { addAdminEmail, demoteAdminEmail, updateSettings } from "../actions";
 import { utcToSgtInput } from "@/lib/datetime";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,15 +62,17 @@ export function SettingsForm({
     });
   }
 
-  function removeEmail(email: string) {
+  function removeAdmin(email: string, signedUp: boolean) {
     if (
       !confirm(
-        `Remove ${email} from the admin list? They won't become an admin at signup anymore.`
+        signedUp
+          ? `Demote ${email}? Their admin access will be removed and every active session will be revoked.`
+          : `Remove ${email} from the future-admin list?`
       )
     )
       return;
     startTransition(async () => {
-      const result = await removeAdminEmail(email);
+      const result = await demoteAdminEmail(email);
       if (result.ok) toast.success(result.message);
       else toast.error(result.error);
     });
@@ -155,10 +157,10 @@ export function SettingsForm({
                     variant="ghost"
                     size="sm"
                     disabled={pending}
-                    onClick={() => removeEmail(email)}
+                    onClick={() => removeAdmin(email, Boolean(profile))}
                     className="shrink-0 text-destructive hover:text-destructive"
                   >
-                    Remove
+                    {profile ? "Demote & revoke" : "Remove"}
                   </Button>
                 </li>
               );
@@ -169,12 +171,26 @@ export function SettingsForm({
               </li>
             )}
             {legacyAdmins.map((a) => (
-              <li key={a.id} className="rounded-md bg-muted px-3 py-2 text-sm">
-                <span className="font-semibold">{a.full_name}</span>{" "}
-                <span className="text-muted-foreground">· {a.email}</span>{" "}
-                <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
-                  Admin
-                </span>
+              <li
+                key={a.id}
+                className="flex items-center justify-between gap-2 rounded-md bg-muted px-3 py-2 text-sm"
+              >
+                <div className="min-w-0">
+                  <span className="font-semibold">{a.full_name}</span>{" "}
+                  <span className="break-all text-muted-foreground">· {a.email}</span>{" "}
+                  <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">
+                    Admin
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={pending}
+                  onClick={() => removeAdmin(a.email, true)}
+                  className="shrink-0 text-destructive hover:text-destructive"
+                >
+                  Demote & revoke
+                </Button>
               </li>
             ))}
           </ul>
@@ -192,9 +208,8 @@ export function SettingsForm({
             </div>
             <p className="text-xs text-muted-foreground">
               If they already have an account it is promoted right away.
-              Removing an email only blocks future signups; demoting an
-              existing admin is done in Supabase Studio (see README) to avoid
-              accidental lockouts.
+              Demoting a signed-up RA also revokes all of their active sessions.
+              The last signed-up admin cannot be removed.
             </p>
           </div>
         </CardContent>

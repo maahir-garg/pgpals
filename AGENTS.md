@@ -181,7 +181,12 @@ insert into admin_allowlist (email) values ('real.email@u.nus.edu');
 
 Then sign up with that real email. Do not use `ra@pgpals.test` in production.
 Every later RA is added in Admin -> Settings, which writes to
-`admin_allowlist` and promotes an already-existing account immediately.
+`admin_allowlist` and promotes an already-existing account immediately. The
+same screen's **Demote & revoke** action calls `demote_admin(email)`, which
+atomically removes the allowlist entry, changes an existing profile back to a
+participant, and deletes all of that user's Auth sessions. An advisory lock and
+a last-signed-up-admin check prevent concurrent demotions from locking everyone
+out.
 
 Password reset:
 
@@ -417,6 +422,12 @@ account). The SQL fallback, needed only to bootstrap the first admin:
 ```sql
 insert into admin_allowlist (email) values ('real.email@u.nus.edu');
 ```
+
+Remove an admin:
+
+Admin -> Settings -> "Demote & revoke". Do not update `profiles.role` directly:
+the RPC-backed workflow also removes the allowlist entry, revokes active Auth
+sessions, and refuses to remove the last signed-up admin.
 
 Clean account leftovers:
 

@@ -259,6 +259,72 @@ async function main() {
     check("participant cannot edit event settings", !!settingsError || (settingsData ?? []).length === 0);
   }
 
+  console.log("\n— Admin lifecycle —");
+  {
+    const temporaryAdminEmail = "security.admin@pgpals.test";
+    await admin.from("admin_allowlist").upsert({ email: temporaryAdminEmail });
+    const { data: temporaryUser, error: createAdminError } =
+      await admin.auth.admin.createUser({
+        email: temporaryAdminEmail,
+        password: "pgpals123",
+        email_confirm: true,
+        user_metadata: { full_name: "Security Admin" },
+      });
+    const temporaryAdmin = await login(temporaryAdminEmail);
+    const { data: temporaryProfile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("email", temporaryAdminEmail)
+      .single();
+    check(
+      "allowlisted signup creates an admin",
+      !createAdminError && temporaryProfile?.role === "admin",
+      createAdminError?.message ?? ""
+    );
+
+    const { data: demotion, error: demotionError } = await ra.rpc(
+      "demote_admin",
+      { p_email: temporaryAdminEmail }
+    );
+    const { data: demotedProfile } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("email", temporaryAdminEmail)
+      .single();
+    const { data: removedAllowlist } = await admin
+      .from("admin_allowlist")
+      .select("email")
+      .eq("email", temporaryAdminEmail);
+    check(
+      "demotion changes role and removes the allowlist entry",
+      !demotionError &&
+        demotion?.demoted === true &&
+        demotedProfile?.role === "participant" &&
+        (removedAllowlist ?? []).length === 0,
+      demotionError?.message ?? ""
+    );
+    const { error: revokedSessionError } = await temporaryAdmin.auth.getUser();
+    check("demotion revokes active sessions", !!revokedSessionError);
+
+    const { error: lastAdminError } = await ra.rpc("demote_admin", {
+      p_email: "ra@pgpals.test",
+    });
+    const { data: originalAdmin } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("email", "ra@pgpals.test")
+      .single();
+    check(
+      "last signed-up admin cannot be demoted",
+      !!lastAdminError && originalAdmin?.role === "admin",
+      lastAdminError?.message ?? ""
+    );
+
+    if (temporaryUser.user) {
+      await admin.auth.admin.deleteUser(temporaryUser.user.id);
+    }
+  }
+
   console.log("\n— Regrouping (move_roster_member) —");
   {
     const { data: entry } = await admin.from("roster").select("id, team_id").eq("email", "chloe.lim@u.nus.edu").single();

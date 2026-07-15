@@ -432,13 +432,24 @@ export async function addAdminEmail(email: string): Promise<ActionResult> {
   };
 }
 
-export async function removeAdminEmail(email: string): Promise<ActionResult> {
+export async function demoteAdminEmail(email: string): Promise<ActionResult> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized.includes("@")) return { ok: false, error: "Enter a valid email." };
   const supabase = await adminClient();
-  const { error } = await supabase
-    .from("admin_allowlist")
-    .delete()
-    .eq("email", email);
+  const { data, error } = await supabase.rpc("demote_admin", {
+    p_email: normalized,
+  });
   if (error) return { ok: false, error: error.message };
   revalidateAdmin();
-  return { ok: true, message: "Removed from the list." };
+  revalidatePath("/", "layout");
+  const result = data as {
+    demoted?: boolean;
+    allowlist_removed?: boolean;
+  } | null;
+  return {
+    ok: true,
+    message: result?.demoted
+      ? "Admin access removed and all sessions revoked."
+      : "Removed from the future-admin list.",
+  };
 }
