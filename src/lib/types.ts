@@ -41,6 +41,7 @@ export interface Task {
   description: string;
   points: number;
   type: TaskType;
+  pair_team_count: number;
   release_at: string;
   deadline_at: string;
   bonus_config: BonusConfig | null;
@@ -55,6 +56,8 @@ export interface Pairing {
   task_id: string;
   team_a: string;
   team_b: string;
+  team_ids: string[];
+  accepted_team_ids: string[];
   status: PairingStatus;
   created_by_team: string;
   created_at: string;

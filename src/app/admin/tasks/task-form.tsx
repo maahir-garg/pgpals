@@ -23,6 +23,16 @@ export function TaskForm({ task }: { task: Task | null }) {
   const [description, setDescription] = useState(task?.description ?? "");
   const [points, setPoints] = useState(String(task?.points ?? 10));
   const [type, setType] = useState<"standard" | "pair">(task?.type ?? "standard");
+  const [pairSizeMode, setPairSizeMode] = useState<"2" | "3" | "more">(
+    task && task.pair_team_count > 3
+      ? "more"
+      : task?.pair_team_count === 3
+        ? "3"
+        : "2"
+  );
+  const [pairTeamCount, setPairTeamCount] = useState(
+    String(task?.pair_team_count ?? 4)
+  );
   const [releaseAt, setReleaseAt] = useState(
     task ? utcToSgtInput(task.release_at) : ""
   );
@@ -80,6 +90,8 @@ export function TaskForm({ task }: { task: Task | null }) {
   function save() {
     const pts = Number(points);
     const maxSubs = Number(maxSubmissions);
+    const teamsInPair =
+      pairSizeMode === "more" ? Number(pairTeamCount) : Number(pairSizeMode);
     if (!title.trim()) return void toast.error("Title is required.");
     if (!Number.isInteger(pts) || pts < 0)
       return void toast.error("Coins must be a whole number ≥ 0.");
@@ -89,6 +101,11 @@ export function TaskForm({ task }: { task: Task | null }) {
       return void toast.error("Deadline must be after release.");
     if (!Number.isInteger(maxSubs) || maxSubs < 1)
       return void toast.error("Max submissions must be ≥ 1.");
+    if (
+      type === "pair" &&
+      (!Number.isInteger(teamsInPair) || teamsInPair < 2 || teamsInPair > 20)
+    )
+      return void toast.error("Group tasks must include between 2 and 20 teams.");
     const bonusConfig = buildBonus();
     if (bonusConfig === "invalid")
       return void toast.error("Bonus settings are incomplete.");
@@ -98,6 +115,7 @@ export function TaskForm({ task }: { task: Task | null }) {
       description,
       points: pts,
       type,
+      pairTeamCount: type === "pair" ? teamsInPair : 2,
       releaseAtSgt: releaseAt,
       deadlineAtSgt: deadlineAt,
       maxSubmissions: maxSubs,
@@ -181,7 +199,7 @@ export function TaskForm({ task }: { task: Task | null }) {
               className="h-10 w-full rounded-lg border-2 border-input bg-card px-3 text-sm outline-none focus-visible:border-primary"
             >
               <option value="standard">Standard</option>
-              <option value="pair">Pair (two teams)</option>
+              <option value="pair">Pair / group</option>
             </select>
           </div>
           <div className="space-y-1.5">
@@ -196,6 +214,44 @@ export function TaskForm({ task }: { task: Task | null }) {
             />
           </div>
         </div>
+
+        {type === "pair" && (
+          <div className="space-y-3 rounded-lg bg-muted p-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="pair-size">Teams in the group</Label>
+              <select
+                id="pair-size"
+                value={pairSizeMode}
+                onChange={(e) =>
+                  setPairSizeMode(e.target.value as "2" | "3" | "more")
+                }
+                className="h-10 w-full rounded-lg border-2 border-input bg-card px-3 text-sm outline-none focus-visible:border-primary"
+              >
+                <option value="2">2 teams</option>
+                <option value="3">3 teams</option>
+                <option value="more">More than 3 teams</option>
+              </select>
+            </div>
+            {pairSizeMode === "more" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="pair-team-count">Exact number of teams</Label>
+                <Input
+                  id="pair-team-count"
+                  type="number"
+                  min={4}
+                  max={20}
+                  value={pairTeamCount}
+                  onChange={(e) => setPairTeamCount(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              One team invites the others. Every invited team must accept
+              before anyone can submit.
+            </p>
+          </div>
+        )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">

@@ -128,11 +128,7 @@ export default async function ReviewPage({
   const cards = submissions.map((s) => {
     const task = taskById.get(s.task_id);
     const pairing = s.pairing_id ? pairingById.get(s.pairing_id) : null;
-    const partnerTeamId = pairing
-      ? pairing.team_a === s.team_id
-        ? pairing.team_b
-        : pairing.team_a
-      : null;
+    const creditedTeamIds = pairing?.team_ids ?? [s.team_id];
     return {
       submission: s,
       photoUrls: s.photo_paths.map((path) => photoUrlByPath.get(path) ?? ""),
@@ -140,9 +136,7 @@ export default async function ReviewPage({
       basePoints: task?.points ?? 0,
       bonusNote: task ? describeBonus(task.bonus_config) : null,
       preview: task ? previewPoints(task, s, approvedCountByTask) : 0,
-      teamLabel:
-        (teamName.get(s.team_id) ?? "?") +
-        (partnerTeamId ? ` + ${teamName.get(partnerTeamId) ?? "?"}` : ""),
+      teamLabel: creditedTeamIds.map((id) => teamName.get(id) ?? "?").join(" + "),
       submittedAt: formatSGT(s.submitted_at),
       reviewedAt: s.reviewed_at ? formatSGT(s.reviewed_at) : null,
     };

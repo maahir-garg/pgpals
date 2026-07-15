@@ -33,14 +33,14 @@ export async function submitTask(input: {
   return { ok: true };
 }
 
-export async function invitePartner(
+export async function invitePartners(
   taskId: string,
-  partnerTeamId: string
+  partnerTeamIds: string[]
 ): Promise<ActionResult> {
   const supabase = await createClient();
   const { error } = await supabase.rpc("create_pair_invite", {
     p_task: taskId,
-    p_partner: partnerTeamId,
+    p_partners: partnerTeamIds,
   });
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/tasks/${taskId}`);

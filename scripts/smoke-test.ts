@@ -142,11 +142,21 @@ async function main() {
   console.log("\n— Pairing rules —");
   {
     const { data: picnic } = await admin.from("tasks").select("id").ilike("title", "%picnic%").single();
-    const { error: selfError } = await participant.rpc("create_pair_invite", { p_task: picnic!.id, p_partner: myTeam });
+    const { error: selfError } = await participant.rpc("create_pair_invite", { p_task: picnic!.id, p_partners: [myTeam] });
     check("cannot pair with own team", !!selfError);
     const { data: standard } = await admin.from("tasks").select("id").ilike("title", "%sweep%").single();
-    const { error: typeError } = await participant.rpc("create_pair_invite", { p_task: standard!.id, p_partner: (await admin.from("teams").select("id").neq("id", myTeam).limit(1).single()).data!.id });
+    const { error: typeError } = await participant.rpc("create_pair_invite", { p_task: standard!.id, p_partners: [(await admin.from("teams").select("id").neq("id", myTeam).limit(1).single()).data!.id] });
     check("cannot pair on a standard task", !!typeError);
+
+    const { data: movie } = await admin.from("tasks").select("id, pair_team_count").ilike("title", "%movie%").single();
+    const { data: movieGroups } = await participant
+      .from("pairings")
+      .select("team_ids, accepted_team_ids, status")
+      .eq("task_id", movie!.id)
+      .eq("status", "accepted");
+    const myMovieGroup = (movieGroups ?? []).find((group) => group.team_ids.includes(myTeam));
+    check("three-team task stores all group members", movie!.pair_team_count === 3 && myMovieGroup?.team_ids.length === 3);
+    check("accepted group records every team's acceptance", myMovieGroup?.accepted_team_ids.length === 3);
   }
 
   console.log("\n— Leaderboard hiding —");

@@ -65,6 +65,7 @@ export interface TaskInput {
   description: string;
   points: number;
   type: "standard" | "pair";
+  pairTeamCount: number;
   releaseAtSgt: string; // from <input type="datetime-local">, SGT
   deadlineAtSgt: string;
   maxSubmissions: number;
@@ -78,6 +79,7 @@ function taskRow(input: TaskInput) {
     description: input.description,
     points: input.points,
     type: input.type,
+    pair_team_count: input.pairTeamCount,
     release_at: sgtInputToUtc(input.releaseAtSgt),
     deadline_at: sgtInputToUtc(input.deadlineAtSgt),
     max_submissions: input.maxSubmissions,

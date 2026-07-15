@@ -308,8 +308,9 @@ async function main() {
   });
   const tMovie = await addTask({
     title: "Movie night squad 🎬",
-    description: "**Pair task!** Link up with another team for a movie night: 4 people, 1 screen, snacks mandatory. One submission for both teams.",
+    description: "**Group task!** Link up with two other teams for a movie night: 6 people, 1 screen, snacks mandatory. One submission for all three teams.",
     points: 25, type: "pair", release_at: days(-2), deadline_at: days(6),
+    pair_team_count: 3,
     bonus_config: { kind: "multiplier_before", cutoff: days(2), multiplier: 1.5 },
   });
   await addTask({
@@ -456,34 +457,43 @@ async function main() {
   // Pairings for movie night: accepted+approved joint sub, pending invite, declined
   console.log("Pairings…");
   async function addPairing(
-    task: string, a: string, b: string,
+    task: string, teamIds: string[],
     status: "pending" | "accepted" | "declined"
   ): Promise<string> {
+    const acceptedTeamIds = status === "accepted" ? teamIds : [teamIds[0]];
     const { data, error } = await db
       .from("pairings")
-      .insert({ task_id: task, team_a: a, team_b: b, status, created_by_team: a })
+      .insert({
+        task_id: task,
+        team_a: teamIds[0],
+        team_b: teamIds[1],
+        team_ids: teamIds,
+        accepted_team_ids: acceptedTeamIds,
+        status,
+        created_by_team: teamIds[0],
+      })
       .select("id")
       .single();
     if (error) die("pairing", error);
     return data.id;
   }
 
-  const movieAccepted = await addPairing(tMovie, teamIds[0], teamIds[1], "accepted");
+  const movieAccepted = await addPairing(tMovie, [teamIds[0], teamIds[1], teamIds[2]], "accepted");
   await addSub({
     task: tMovie, team: teamIds[0], pairing: movieAccepted,
     status: "approved", points: 38, // 25 × 1.5 rounded
     submittedH: -10, reviewedH: -5, photos: 3,
     text: "Double date movie night, 10/10 would recommend 🍿",
   });
-  const moviePending2 = await addPairing(tMovie, teamIds[2], teamIds[3], "accepted");
+  const moviePending2 = await addPairing(tMovie, [teamIds[3], teamIds[4], teamIds[5]], "accepted");
   await addSub({
     task: tMovie, team: teamIds[3], pairing: moviePending2,
     status: "pending", submittedH: -1, photos: 2,
     text: "Horror night. Half of us watched through fingers 👻",
   });
-  await addPairing(tMovie, teamIds[4], teamIds[5], "pending");
-  await addPairing(tMovie, teamIds[6], teamIds[7], "declined");
-  await addPairing(tPicnic, teamIds[8], teamIds[2], "pending");
+  await addPairing(tMovie, [teamIds[6], teamIds[7], teamIds[8]], "pending");
+  await addPairing(tMovie, [teamIds[9], teamIds[10], teamIds[11]], "declined");
+  await addPairing(tPicnic, [teamIds[8], teamIds[2]], "pending");
 
   // Manual bonuses
   console.log("Bonuses…");

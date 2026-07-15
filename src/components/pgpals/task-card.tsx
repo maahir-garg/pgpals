@@ -12,7 +12,7 @@ import {
 
 export type TaskCardTask = Pick<
   Task,
-  "id" | "title" | "points" | "type" | "deadline_at" | "bonus_config"
+  "id" | "title" | "points" | "type" | "pair_team_count" | "deadline_at" | "bonus_config"
 >;
 
 export function TaskCard({
@@ -38,7 +38,7 @@ export function TaskCard({
         </div>
         <div className="flex flex-1 flex-col justify-between gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
-            {task.type === "pair" && <PairBadge />}
+            {task.type === "pair" && <PairBadge teamCount={task.pair_team_count} />}
             {task.bonus_config && !closed && <BonusBadge />}
             <CountdownBadge deadline={task.deadline_at} />
             {status && <StatusBadge status={status} />}

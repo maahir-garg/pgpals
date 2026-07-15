@@ -15,10 +15,11 @@ export function PointsBadge({ points }: { points: number }) {
   );
 }
 
-export function PairBadge() {
+export function PairBadge({ teamCount }: { teamCount?: number }) {
   return (
     <Badge className="bg-secondary text-secondary-foreground hover:bg-secondary">
-      <Users className="size-3" aria-hidden /> Pair task
+      <Users className="size-3" aria-hidden />
+      {teamCount ? `${teamCount}-team task` : "Group task"}
     </Badge>
   );
 }

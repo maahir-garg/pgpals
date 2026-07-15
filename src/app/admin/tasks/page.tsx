@@ -87,7 +87,7 @@ export default async function AdminTasksPage() {
                       {task.type === "pair" && (
                         <Badge variant="outline">
                           <Users className="size-3" aria-hidden />
-                          Pair
+                          {task.pair_team_count} teams
                         </Badge>
                       )}
                       {task.bonus_config && (

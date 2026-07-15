@@ -104,7 +104,7 @@ const PERKS: { icon: LucideIcon; title: string; text: string; iconBg: string }[]
   {
     icon: Users,
     title: "Pair tasks",
-    text: "Team up with another duo for joint challenges. One submission, coins for both teams.",
+    text: "Team up with one or more other duos for group challenges. One submission, coins for every team.",
     iconBg: "bg-secondary text-secondary-foreground",
   },
 ];

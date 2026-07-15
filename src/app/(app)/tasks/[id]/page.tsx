@@ -48,7 +48,7 @@ export default async function TaskDetailPage({
 
   // Pair task state: the one live (pending/accepted) pairing involving us.
   let pairing: Pairing | null = null;
-  let partnerName: string | null = null;
+  let groupTeams: { id: string; name: string; accepted: boolean }[] = [];
   let availableTeams: { id: string; name: string }[] = [];
   if (task.type === "pair" && profile.team_id) {
     const { data: pairings } = await supabase
@@ -59,14 +59,14 @@ export default async function TaskDetailPage({
       .order("created_at", { ascending: false });
     pairing = ((pairings ?? []) as Pairing[])[0] ?? null;
     if (pairing) {
-      const partnerId =
-        pairing.team_a === profile.team_id ? pairing.team_b : pairing.team_a;
-      const { data: partner } = await supabase
+      const { data: members } = await supabase
         .from("teams")
-        .select("name")
-        .eq("id", partnerId)
-        .single();
-      partnerName = partner?.name ?? "another team";
+        .select("id, name")
+        .in("id", pairing.team_ids);
+      groupTeams = (members ?? []).map((team) => ({
+        ...team,
+        accepted: pairing!.accepted_team_ids.includes(team.id),
+      }));
     } else {
       const { data: available } = await supabase.rpc("available_partner_teams", {
         p_task: id,
@@ -122,7 +122,7 @@ export default async function TaskDetailPage({
           <PointsBadge points={task.points} />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          {task.type === "pair" && <PairBadge />}
+          {task.type === "pair" && <PairBadge teamCount={task.pair_team_count} />}
           {task.bonus_config && <BonusBadge />}
           <CountdownBadge deadline={task.deadline_at} />
           {hasPending && <StatusBadge status="pending" />}
@@ -152,7 +152,8 @@ export default async function TaskDetailPage({
           taskId={task.id}
           myTeamId={profile.team_id}
           pairing={pairing}
-          partnerName={partnerName}
+          groupTeams={groupTeams}
+          requiredTeamCount={task.pair_team_count}
           availableTeams={availableTeams}
           closed={closed}
         />
