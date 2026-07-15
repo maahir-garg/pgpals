@@ -116,8 +116,8 @@ function GuideCard() {
           <div>
             <h2 className="font-bold">New here or need help?</h2>
             <p className="text-sm text-foreground/75">
-              See how NUSync registration, teams, tasks, proof, reviews, and
-              PGP Coins all work.
+              See how tasks, proof, group challenges, reviews, and PGP Coins
+              all work.
             </p>
           </div>
           <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-foreground bg-card text-primary">

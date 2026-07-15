@@ -67,8 +67,8 @@ local, and Vercel agree.
 - `src/app/(app)/`
   Participant app routes: dashboard, tasks, task detail, event guide,
   leaderboard, and participant server actions. `/guide` is the resident-facing
-  source for NUSync/roster onboarding, challenge rules, media limits,
-  multi-team behavior, reviews, resubmissions, and common troubleshooting.
+  source for challenge rules, media limits, multi-team behavior, reviews,
+  resubmissions, and common post-login troubleshooting.
 
 - `src/app/admin/`
   RA/admin routes and admin server actions: overview, teams, review queue,
@@ -394,9 +394,10 @@ comes from shapes, chunky borders, and hard shadows around them.
 Workflow conventions:
 
 - Participants are mobile-first, but layouts should scale to desktop.
-- Keep the `/guide` onboarding and help copy aligned with the actual signup,
-  submission, pairing, scoring, and deadline rules whenever those workflows
-  change. NUSync registration and RA rostering precede PGPals account creation.
+- Keep `/guide` help copy aligned with the actual submission, pairing, scoring,
+  and deadline rules whenever those workflows change. Do not repeat NUSync,
+  rostering, or account-creation onboarding after login; those prerequisites
+  belong on the signup screen.
 - The resident dashboard is a to-do list: rejected tasks first, then all open
   tasks ordered by deadline, then submissions in review, then announcements.
   Do not gate the to-do list on recency.
@@ -486,13 +487,15 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: removed completed signup/onboarding steps from the authenticated
+  Guide and Home guide card; the participant help page now starts with gameplay.
 - 2026-07-15: added a prominent event-guide card to participant Home, including
   the no-team state, so onboarding and troubleshooting are not nav-only.
 - 2026-07-15: fixed the landing-page prize sentence to preserve the explicit
   JSX space between the top-eight count and "teams".
-- 2026-07-15: added a participant Guide covering NUSync-first onboarding, RA
-  rostering, the task-to-coins loop, group challenges, media rules, and common
-  account/submission troubleshooting; signup now repeats the prerequisite.
+- 2026-07-15: added a participant Guide covering the task-to-coins loop, group
+  challenges, media rules, and common team/submission troubleshooting; signup
+  separately explains its NUSync and RA-roster prerequisites.
 - 2026-07-15: renamed the event to **PGPals: The Emerald Challenge**.
 - 2026-07-15: submission forms warn that AI-generated media is screened and
   may be rejected.

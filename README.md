@@ -20,8 +20,9 @@ Singapore Supabase database.
 - **Participants** (phones, but the layout scales up to laptops too): register
   for the event on NUSync first, then sign up with the exact email their RA
   entered on the team roster and get auto-linked to their pre-assigned team.
-  The in-app **Guide** explains onboarding, the challenge loop, media rules,
-  multi-team tasks, reviews/resubmissions, and common account/upload problems.
+  The post-login **Guide** explains the challenge loop, media rules, multi-team
+  tasks, reviews/resubmissions, and common team/upload problems. Signup
+  prerequisites stay on the signup screen rather than being repeated after login.
   Participants complete tasks, submit 1-5 photo/video attachments plus a caption, earn PGP Coins (the
   event currency; the database still calls them points) on approval.
   Group tasks let 2-20 teams submit jointly.

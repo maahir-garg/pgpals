@@ -9,39 +9,15 @@ import {
   CircleHelp,
   Coins,
   ImageUp,
-  KeyRound,
   ListChecks,
   ShieldCheck,
   Sparkles,
-  UserRoundCheck,
-  UsersRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "How it works" };
-
-const gettingStarted = [
-  {
-    icon: UserRoundCheck,
-    title: "Register on NUSync",
-    body: "NUSync registration comes first. It confirms that you joined the event before an account can be prepared here.",
-    color: "bg-accent text-accent-foreground",
-  },
-  {
-    icon: UsersRound,
-    title: "Your RA rosters you",
-    body: "Your RA enters your registered email and places you on a two-person team. Make sure they use your exact NUS email.",
-    color: "bg-secondary text-secondary-foreground",
-  },
-  {
-    icon: KeyRound,
-    title: "Create your PGPals account",
-    body: "Use the same rostered email on the sign-up page and set your own password. Your team will be linked automatically.",
-    color: "bg-mint text-foreground",
-  },
-] as const;
 
 const playSteps = [
   {
@@ -67,11 +43,6 @@ const playSteps = [
 ] as const;
 
 const helpItems = [
-  {
-    question: "Why can’t I create an account?",
-    answer:
-      "Check that you completed NUSync registration and are using the exact email your RA rostered. If it still fails, ask your RA to check your team entry—do not create a second account with another email.",
-  },
   {
     question: "I’m on the wrong team or my teammate is missing.",
     answer:
@@ -115,46 +86,9 @@ export default function GuidePage() {
             How the Emerald Challenge works
           </h1>
           <p className="mt-3 max-w-xl text-sm font-medium text-primary-foreground/85 md:text-base">
-            Get rostered, tackle challenges with your pal, send genuine proof,
-            and turn approved submissions into PGP Coins.
+            Tackle challenges with your pal, send genuine proof, and turn
+            approved submissions into PGP Coins.
           </p>
-        </div>
-      </section>
-
-      <section className="space-y-4" aria-labelledby="before-you-play">
-        <div>
-          <p className="text-sm font-bold text-primary">Before you play</p>
-          <h2 id="before-you-play" className="text-2xl font-extrabold tracking-tight">
-            NUSync first, PGPals second
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            A PGPals account is only for residents already registered for the
-            event and entered into a team roster by an RA.
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {gettingStarted.map((step, index) => (
-            <Card key={step.title}>
-              <CardContent>
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`grid size-11 shrink-0 place-items-center rounded-full border-2 border-foreground ${step.color}`}
-                  >
-                    <step.icon className="size-5" strokeWidth={2.5} aria-hidden />
-                  </span>
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-wide text-muted-foreground">
-                      Step {index + 1}
-                    </p>
-                    <h3 className="mt-0.5 font-extrabold">{step.title}</h3>
-                  </div>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  {step.body}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </section>
 
