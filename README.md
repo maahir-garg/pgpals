@@ -135,6 +135,13 @@ refuses to remove the last signed-up admin.
 
 3. Deploy. Done. The URL is what you share with residents.
 
+Every route is served with a Content Security Policy (`frame-ancestors 'none'`),
+`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, a strict cross-origin
+referrer policy, and a restrictive Permissions Policy. The CSP allows only the
+app, Supabase API/signed-media hosts, the blob workers/previews used during
+attachment compression, and Vercel Analytics. Keep those allowlists narrow when
+adding an external service.
+
 ---
 
 ## Dry runs, backups, and D-day

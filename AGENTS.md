@@ -30,6 +30,10 @@ boundary. The UI should be ergonomic, but it is not trusted.
 - Vercel project: `maahir-gargs-projects/pgpals`
 - Vercel Web Analytics is enabled and `<Analytics />` is mounted in
   `src/app/layout.tsx`.
+- `next.config.ts` applies CSP/frame protections, `nosniff`, Referrer-Policy,
+  and Permissions-Policy to every route. CSP intentionally allows Supabase
+  HTTPS/WebSocket/signed-media hosts, blob attachment workers/previews, and
+  Vercel Analytics; update the narrow allowlists when adding a new origin.
 - Runtime route region is pinned with `preferredRegion = "sin1"` in
   `src/app/layout.tsx` so server-rendered app clicks stay close to the
   Singapore Supabase database.
