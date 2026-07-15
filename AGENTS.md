@@ -400,7 +400,9 @@ Workflow conventions:
   belong on the signup screen.
 - The resident dashboard is a to-do list: rejected tasks first, then all open
   tasks ordered by deadline, then submissions in review, then announcements.
-  Do not gate the to-do list on recency.
+  Do not gate the to-do list on recency. On stacked/mobile layouts, the Guide
+  card sits directly below the team summary; on desktop it stays in the sidebar.
+  "Up next" renders at most six open tasks and links to the rest.
 - The tasks page groups Closing soon / Open / Done / Closed. "Done" means the
   team or accepted group has one approved submission for the task.
 - Admin views are desktop-oriented and should be dense, scannable, and
@@ -489,6 +491,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: moved the participant Home guide card directly below the team
+  summary on mobile/stacked layouts while retaining the desktop sidebar order.
 - 2026-07-15: added an under-5-MB video compression recommendation to the
   submission form and Guide without changing the enforced 50 MB limit.
 - 2026-07-15: split the desktop Guide FAQ into independent columns so opening

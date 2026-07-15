@@ -328,6 +328,10 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      <div className="lg:hidden">
+        <GuideCard />
+      </div>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
         <div className="min-w-0 space-y-6">
           {actionNeeded.length > 0 && (
@@ -426,7 +430,9 @@ export default async function DashboardPage() {
         </div>
 
         <aside className="min-w-0 space-y-4">
-          <GuideCard />
+          <div className="hidden lg:block">
+            <GuideCard />
+          </div>
           <Card>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between gap-3">
