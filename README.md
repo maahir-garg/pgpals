@@ -17,9 +17,12 @@ Singapore Supabase database.
 
 - **Visitors** land on a public event page (what PGPals is, how it works,
   FAQ) with signup and login. Everything else needs an account.
-- **Participants** (phones, but the layout scales up to laptops too): sign up
-  with their rostered email, get auto-linked to their pre-assigned team,
-  complete tasks, submit 1-5 photo/video attachments plus a caption, earn PGP Coins (the
+- **Participants** (phones, but the layout scales up to laptops too): register
+  for the event on NUSync first, then sign up with the exact email their RA
+  entered on the team roster and get auto-linked to their pre-assigned team.
+  The in-app **Guide** explains onboarding, the challenge loop, media rules,
+  multi-team tasks, reviews/resubmissions, and common account/upload problems.
+  Participants complete tasks, submit 1-5 photo/video attachments plus a caption, earn PGP Coins (the
   event currency; the database still calls them points) on approval.
   Group tasks let 2-20 teams submit jointly.
 - **Admins** (RAs, desktop): review queue (approve/reject with reason), task
@@ -376,7 +379,7 @@ scripts/walkthrough.ts full-app screenshots for design review
 src/lib/               supabase clients, types, SGT time helpers
 src/app/page.tsx       public landing page
 src/app/(auth)/        login/signup
-src/app/(app)/         participant UI (mobile-first, desktop-aware)
+src/app/(app)/         participant UI and event guide (mobile-first, desktop-aware)
 src/app/admin/         admin UI (desktop-oriented)
 ```
 

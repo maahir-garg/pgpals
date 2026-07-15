@@ -20,7 +20,8 @@ export function SignupForm() {
         <div>
           <h2 className="text-xl font-extrabold tracking-tight">Create account</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Use the email your RA registered.
+            First register for the event on NUSync. Once your RA adds you to a
+            team roster, create your account with that exact email.
           </p>
         </div>
         <form action={action} className="space-y-4">

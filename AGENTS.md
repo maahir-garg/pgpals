@@ -7,8 +7,9 @@ when making changes.
 ## Product Goal
 
 PGPals: The Emerald Challenge is a web app for a two-week PGPR buddy challenge.
-Residents sign up with their registered email, get linked to a resident team of
-two, complete photo/video tasks, and earn PGP Coins after RA review. Some group tasks
+Residents register for the event on NUSync first, then use the exact email an
+RA entered on a team roster to create their account and get linked to a resident
+team of two. They complete photo/video tasks and earn PGP Coins after RA review. Some group tasks
 join 2, 3, or a custom 4–20 resident teams for one shared submission. Admins
 manage teams, tasks, announcements, reviews, event settings, bonus coins, and
 the leaderboard.
@@ -64,8 +65,10 @@ local, and Vercel agree.
   and redirects to `/reset-password`.
 
 - `src/app/(app)/`
-  Participant app routes: dashboard, tasks, task detail, leaderboard, and
-  participant server actions.
+  Participant app routes: dashboard, tasks, task detail, event guide,
+  leaderboard, and participant server actions. `/guide` is the resident-facing
+  source for NUSync/roster onboarding, challenge rules, media limits,
+  multi-team behavior, reviews, resubmissions, and common troubleshooting.
 
 - `src/app/admin/`
   RA/admin routes and admin server actions: overview, teams, review queue,
@@ -391,6 +394,9 @@ comes from shapes, chunky borders, and hard shadows around them.
 Workflow conventions:
 
 - Participants are mobile-first, but layouts should scale to desktop.
+- Keep the `/guide` onboarding and help copy aligned with the actual signup,
+  submission, pairing, scoring, and deadline rules whenever those workflows
+  change. NUSync registration and RA rostering precede PGPals account creation.
 - The resident dashboard is a to-do list: rejected tasks first, then all open
   tasks ordered by deadline, then submissions in review, then announcements.
   Do not gate the to-do list on recency.
@@ -480,6 +486,9 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: added a participant Guide covering NUSync-first onboarding, RA
+  rostering, the task-to-coins loop, group challenges, media rules, and common
+  account/submission troubleshooting; signup now repeats the prerequisite.
 - 2026-07-15: renamed the event to **PGPals: The Emerald Challenge**.
 - 2026-07-15: submission forms warn that AI-generated media is screened and
   may be rejected.

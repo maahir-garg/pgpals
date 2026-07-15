@@ -9,7 +9,7 @@ export function BottomNav() {
   const pathname = usePathname();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-foreground bg-card md:hidden">
-      <div className="mx-auto grid max-w-lg grid-cols-3 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid max-w-lg grid-cols-4 pb-[env(safe-area-inset-bottom)]">
         {NAV_TABS.map((tab) => {
           const active =
             pathname === tab.href || pathname.startsWith(tab.href + "/");
