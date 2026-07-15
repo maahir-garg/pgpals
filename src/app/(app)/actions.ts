@@ -11,7 +11,7 @@ type UploadReservationResult =
   | {
       ok: true;
       batchId: string;
-      uploads: { path: string; token: string; signedUrl: string }[];
+      uploads: { path: string; token: string }[];
     }
   | { ok: false; error: string };
 
@@ -132,7 +132,7 @@ export async function reserveSubmissionUploads(input: {
         if (error || !data?.token) {
           throw new Error(error?.message ?? "Could not authorize an upload.");
         }
-        return { path, token: data.token, signedUrl: data.signedUrl };
+        return { path, token: data.token };
       })
     );
     return { ok: true, batchId: batch.batch_id, uploads };

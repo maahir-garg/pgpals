@@ -184,7 +184,8 @@ npm run backup:prod                # tables + auth users only (fast)
 
 Writes `backups/<host>/<timestamp>/` containing `tables.json` (every table,
 all rows), `auth-users.json`, and `photos/` (both photos and videos; legacy
-folder name). Passwords can't be exported, so
+folder name). A requested media backup exits with an error if even one object
+cannot be downloaded. Passwords can't be exported, so
 a worst-case restore means users reset passwords; scores, submissions, and
 media files are all in the backup and final standings can be recomputed from
 `tables.json` alone.
@@ -329,8 +330,8 @@ because Supabase Storage metadata does not provide a trustworthy duration.
 
 For multi-team tasks, `pairings.team_ids` is also the authorization source of
 truth: every invited team, including the third through twentieth members, can
-read the group and respond. The legacy `team_a`/`team_b` columns are retained
-only for compatibility and must not be used for access policies.
+read the group and respond. There are no separate first/second-team columns;
+deleting a team with group history is blocked until those pairings are removed.
 
 As of July 2026, Supabase Pro includes 100 GB file storage plus 250 GB each of
 cached and uncached egress. Storage above the quota is $0.0213/GB/month;

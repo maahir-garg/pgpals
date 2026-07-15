@@ -47,6 +47,7 @@ const TABLES = [
   "tasks",
   "pairings",
   "submissions",
+  "submission_upload_batches",
   "bonus_awards",
   "announcements",
 ] as const;
@@ -125,6 +126,9 @@ async function main() {
       saved++;
     }
     console.log(`  media: ${saved} saved${failed ? `, ${failed} FAILED` : ""}`);
+    if (failed > 0) {
+      throw new Error(`Incomplete media backup: ${failed} file${failed === 1 ? "" : "s"} failed to download.`);
+    }
   } else {
     console.log("  media: skipped (pass legacy --photos flag to include)");
   }

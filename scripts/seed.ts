@@ -2,7 +2,7 @@
  * Seeds the database with realistic demo data:
  *  - 1 dry-run admin + 20 teams (40 rostered residents, most signed up)
  *  - tasks in every state (live, closing soon, closed, scheduled, draft,
- *    pair, every bonus type, multi-submission)
+ *    group, every bonus type, single-approval)
  *  - submissions in every status incl. a rejected→resubmitted chain
  *  - pairings (accepted / pending / declined), manual bonuses, announcements
  *
@@ -486,8 +486,6 @@ async function main() {
       .from("pairings")
       .insert({
         task_id: task,
-        team_a: teamIds[0],
-        team_b: teamIds[1],
         team_ids: teamIds,
         accepted_team_ids: acceptedTeamIds,
         status,
@@ -538,7 +536,7 @@ async function main() {
     },
     {
       title: "Movie night pair task is live 🎬", pinned: false, created_by: adminId,
-      body: "Team up with another duo for **1.5× coins** if you submit in the next two days. The pairing feature is on the task page!",
+      body: "Team up with two other resident teams for **1.5× coins** if you submit in the next two days. The group feature is on the task page!",
     },
     {
       title: `Leaderboard goes dark around ${LEADERBOARD_HIDE_LABEL} 🤫`, pinned: false, created_by: adminId,

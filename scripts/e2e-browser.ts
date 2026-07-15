@@ -68,6 +68,13 @@ async function main() {
   await page.fill("textarea", "Golden hour was unreal today 🌇 (e2e test)");
   await shot(page, "task-filled");
   await page.click('button:has-text("Submit")');
+  const submissionToast = page.locator("[data-sonner-toast]").last();
+  await submissionToast.waitFor({ state: "visible", timeout: 20000 });
+  const submissionMessage = (await submissionToast.textContent())?.trim() ?? "";
+  if (!submissionMessage.includes("Submitted. Your RAs will review it soon!")) {
+    throw new Error(`Participant submission failed: ${submissionMessage}`);
+  }
+  await page.reload();
   await page.waitForSelector("text=In review", { timeout: 20000 });
   await shot(page, "task-submitted");
   console.log("  ✅ photo submission went through the real form");
@@ -94,15 +101,12 @@ async function main() {
   await shot(admin, "admin-review");
 
   // approve the submission we just made
-  const card = admin.locator("div", { hasText: "e2e test" }).locator("visible=true").last();
-  const approveButton = admin
-    .locator('div:has-text("Golden hour")')
-    .locator('button:has-text("Approve")')
-    .last();
-  await approveButton.click();
+  const reviewCard = admin.locator('[data-slot="card"]').filter({
+    hasText: "Golden hour was unreal today",
+  });
+  await reviewCard.getByRole("button", { name: "Approve" }).click();
   await admin.waitForSelector("text=Approved for", { timeout: 20000 });
   console.log("  ✅ approved via the review UI");
-  void card;
 
   await admin.goto(`${BASE}/admin/tasks`);
   await admin.waitForLoadState("networkidle");
@@ -126,9 +130,9 @@ async function main() {
   await page2.waitForURL("**/dashboard", { timeout: 20000 });
   await page2.goto(`${BASE}/tasks`);
   await page2.click("text=Golden hour at the Mound");
-  await page2.waitForSelector("text=points awarded", { timeout: 20000 });
+  await page2.waitForSelector("text=PGP Coins earned", { timeout: 20000 });
   await shot(page2, "participant-sees-approval");
-  console.log("  ✅ approval + points visible to the team");
+  console.log("  ✅ approval + PGP Coins visible to the team");
   await phone2.close();
 
   await browser.close();

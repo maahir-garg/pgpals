@@ -53,8 +53,6 @@ export interface Task {
 export interface Pairing {
   id: string;
   task_id: string;
-  team_a: string;
-  team_b: string;
   team_ids: string[];
   accepted_team_ids: string[];
   status: PairingStatus;
@@ -76,21 +74,6 @@ export interface Submission {
   submitted_at: string;
   reviewed_at: string | null;
   resubmission_of: string | null;
-}
-
-export interface SubmissionUploadBatch {
-  id: string;
-  created_by: string;
-  team_id: string;
-  task_id: string;
-  pairing_id: string | null;
-  paths: string[];
-  content_types: string[];
-  declared_sizes: number[];
-  created_at: string;
-  expires_at: string;
-  consumed_at: string | null;
-  cancelled_at: string | null;
 }
 
 export interface BonusAward {

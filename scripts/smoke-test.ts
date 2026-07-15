@@ -65,12 +65,11 @@ async function main() {
     check("participant cannot see draft task", !titles.includes("Karaoke"));
     const { data: adminTasks } = await ra.from("tasks").select("title");
     check("admin sees all tasks incl. draft", (adminTasks ?? []).some((t) => t.title.includes("Karaoke")));
-    const { data: standardTask } = await admin.from("tasks").select("id").eq("type", "standard").limit(1).single();
-    const { error: repeatApprovalError } = await admin
+    const { error: legacyApprovalColumnError } = await admin
       .from("tasks")
-      .update({ max_submissions: 2 })
-      .eq("id", standardTask!.id);
-    check("all task types enforce one approval", !!repeatApprovalError);
+      .select("max_submissions")
+      .limit(1);
+    check("repeat-approval compatibility column is removed", !!legacyApprovalColumnError);
   }
 
   console.log("\n— Submission isolation —");
@@ -184,6 +183,28 @@ async function main() {
       p_submission: subId, p_approve: true, p_note: null, p_points_override: null,
     });
     check("admin approve computes before-cutoff bonus (20+10=30)", awarded === 30, `got ${awarded} ${reviewError?.message ?? ""}`);
+    const { data: dinnerTask } = await admin.from("tasks").select("id").ilike("title", "%dinner%").single();
+    const { data: dinnerPending } = await admin
+      .from("submissions")
+      .select("id")
+      .eq("task_id", dinnerTask!.id)
+      .eq("status", "pending")
+      .limit(1)
+      .single();
+    const { data: awardPreview, error: awardPreviewError } = await ra.rpc(
+      "admin_submission_award_previews",
+      { p_submissions: [dinnerPending!.id] }
+    );
+    check(
+      "review queue preview uses the database award calculation",
+      !awardPreviewError && awardPreview?.[0]?.points === 15,
+      awardPreviewError?.message
+    );
+    const { error: participantPreviewError } = await participant.rpc(
+      "admin_submission_award_previews",
+      { p_submissions: [dinnerPending!.id] }
+    );
+    check("participant cannot call admin award previews", !!participantPreviewError);
     await ra.rpc("revert_review", { p_submission: subId });
     const { error: rejectNoNote } = await ra.rpc("review_submission", {
       p_submission: subId, p_approve: false, p_note: "", p_points_override: null,
@@ -227,9 +248,19 @@ async function main() {
     const myMovieGroup = (movieGroups ?? []).find((group) => group.team_ids.includes(myTeam));
     check("three-team task stores all group members", movie!.pair_team_count === 3 && myMovieGroup?.team_ids.length === 3);
     check("accepted group records every team's acceptance", myMovieGroup?.accepted_team_ids.length === 3);
+    const { error: legacyPairColumnsError } = await admin
+      .from("pairings")
+      .select("team_a, team_b")
+      .limit(1);
+    check("legacy first/second group columns are removed", !!legacyPairColumnsError);
+    const { error: groupedTeamDeleteError } = await admin
+      .from("teams")
+      .delete()
+      .eq("id", myTeam);
+    check("team deletion cannot orphan group membership", !!groupedTeamDeleteError);
 
     // The Dumpling Duo is deliberately the third entry in the seeded group.
-    // This catches regressions to the legacy team_a/team_b-only RLS policy.
+    // This catches regressions that authorize only the first two array members.
     const thirdGroupMember = await login("mei.hui.chen@u.nus.edu");
     const { data: visibleToThirdMember } = await thirdGroupMember
       .from("pairings")

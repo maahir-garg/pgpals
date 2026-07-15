@@ -31,9 +31,11 @@ boundary. The UI should be ergonomic, but it is not trusted.
 - Vercel Web Analytics is enabled and `<Analytics />` is mounted in
   `src/app/layout.tsx`.
 - `next.config.ts` applies CSP/frame protections, `nosniff`, Referrer-Policy,
-  and Permissions-Policy to every route. CSP intentionally allows Supabase
-  HTTPS/WebSocket/signed-media hosts, blob attachment workers/previews, and
-  Vercel Analytics; update the narrow allowlists when adding a new origin.
+  and Permissions-Policy to every route. CSP derives the exact HTTP/WebSocket
+  and signed-media origin from `NEXT_PUBLIC_SUPABASE_URL`, so both the local
+  stack and hosted project work without a wildcard; it also allows blob
+  attachment workers/previews and Vercel Analytics. Update the narrow
+  allowlists when adding a new origin.
 - Runtime route region is pinned with `preferredRegion = "sin1"` in
   `src/app/layout.tsx` so server-rendered app clicks stay close to the
   Singapore Supabase database.
@@ -73,9 +75,10 @@ local, and Vercel agree.
   Product-specific reusable UI pieces.
 
 - `src/components/ui/`
-  shadcn/radix-style primitives. Only the primitives actually in use are kept;
-  add new ones with the shadcn CLI when a screen needs them, and remove them
-  again if they stop being used.
+  shadcn/radix-style primitives. Only primitives and subcomponent exports that
+  are actually in use are kept; add new ones with the shadcn CLI when a screen
+  needs them, and remove them again if they stop being used. Internal helpers
+  used to assemble a primitive do not need to be exported.
 
 - `src/lib/supabase/`
   Supabase clients:
@@ -112,8 +115,9 @@ local, and Vercel agree.
   The Emerald Challenge rename, generalized 2–20-team group pairings, and the
   single-approval invariant. Group membership lives in `pairings.team_ids`,
   each invitee records acceptance in `accepted_team_ids`, and all invited teams
-  must accept before the group can submit. `max_submissions` remains as a
-  compatibility column but is constrained to `1` for every task.
+  must accept before the group can submit. The final cleanup migration removes
+  the obsolete `pairings.team_a`/`team_b` and `tasks.max_submissions` columns;
+  `team_ids` is the sole membership field and one approval is unconditional.
   The video attachment migration expands the private bucket to MP4/MOV/WebM,
   enforces 1–5 supported attachments with no more than 3 video paths, and sets
   a 50 MB per-object bucket cap. The upload-reservation migration then removes
@@ -138,7 +142,8 @@ local, and Vercel agree.
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
   `--photos` to include all storage media; the flag name is legacy) into the
-  gitignored `backups/` directory.
+  gitignored `backups/` directory. It includes upload-reservation rows and exits
+  unsuccessfully if any requested media object cannot be downloaded.
 
 - `scripts/smoke-test.ts`
   Security and rules checks against a seeded database.
@@ -215,10 +220,12 @@ Treat Postgres as the source of truth and security layer.
   team may then create the group's one shared submission. Every team in
   `pairings.team_ids` receives the approved submission's coins. RLS also uses
   `team_ids` as the sole membership source so every invited team can load the
-  group; `team_a`/`team_b` are compatibility columns and must not be used for
-  authorization.
+  group. Teams with group history cannot be deleted until those pairings are
+  removed, preventing dangling array memberships.
 - Admin review uses `review_submission`; bonus points are computed in the
-  database at review time. Submission creation/review and pair invites use
+  database at review time, and `admin_submission_award_previews()` supplies the
+  same calculation to the review UI so there is no second TypeScript bonus
+  implementation. Submission creation/review and pair invites use
   transaction-scoped advisory locks so concurrent clicks cannot over-submit,
   over-approve, or double-pair.
 - Every standard task or accepted group can receive exactly one approved
@@ -479,6 +486,8 @@ Clean account leftovers:
 - 2026-07-15: group challenges now support an exact 2, 3, or custom 4–20 teams,
   with acceptance required from every invited team.
 - 2026-07-15: removed repeat approvals; every task or group has one approval.
+- 2026-07-15: removed the legacy `max_submissions`, `team_a`, and `team_b`
+  columns; award previews now use the database's authoritative calculation.
 - 2026-07-15: added mixed photo/video proof, RA video playback,
   database-enforced media formats/counts, and seeded multi-video data.
 - 2026-07-15: replaced direct participant media uploads with database-reserved

@@ -10,7 +10,7 @@ import { formatSGT } from "@/lib/datetime";
 import { describeBonus } from "@/lib/bonus";
 import { cn } from "@/lib/utils";
 import { ReviewCard } from "./review-card";
-import type { BonusConfig, Pairing, Submission, Task, Team } from "@/lib/types";
+import type { Pairing, Submission, Task, Team } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Review queue" };
 
@@ -22,33 +22,6 @@ const STATUS_LABELS: Record<(typeof STATUSES)[number], string> = {
   rejected: "Rejected",
   superseded: "Replaced",
 };
-
-// Mirrors the database's compute_award() for display only; the authoritative
-// number is computed inside the review_submission RPC at approval time.
-function previewPoints(
-  task: Task,
-  submission: Submission,
-  approvedCountByTask: Map<string, number>
-): number {
-  const cfg = task.bonus_config as BonusConfig | null;
-  if (!cfg) return task.points;
-  if (cfg.kind === "first_n") {
-    return (approvedCountByTask.get(task.id) ?? 0) < cfg.n
-      ? task.points + cfg.bonus
-      : task.points;
-  }
-  if (cfg.kind === "before") {
-    return new Date(submission.submitted_at) <= new Date(cfg.cutoff)
-      ? task.points + cfg.bonus
-      : task.points;
-  }
-  if (cfg.kind === "multiplier_before") {
-    return new Date(submission.submitted_at) <= new Date(cfg.cutoff)
-      ? Math.round(task.points * cfg.multiplier)
-      : task.points;
-  }
-  return task.points;
-}
 
 export default async function ReviewPage({
   searchParams,
@@ -82,13 +55,11 @@ export default async function ReviewPage({
     { data: subsData },
     { data: tasksData },
     { data: teamsData },
-    { data: approvedCountsData },
     { data: statusCountsData },
   ] = await Promise.all([
     query,
     supabase.from("tasks").select("*").order("release_at"),
     supabase.from("teams").select("*").order("name"),
-    supabase.rpc("admin_submission_counts_by_task"),
     supabase.rpc("admin_submission_status_counts", {
       p_task: params.task || null,
       p_team: params.team || null,
@@ -101,11 +72,24 @@ export default async function ReviewPage({
   const pairingIds = [
     ...new Set(submissions.map((s) => s.pairing_id).filter(Boolean)),
   ] as string[];
-  const [{ data: pairingsData }, attachmentUrlByPath] = await Promise.all([
+  const previewPromise =
+    status === "pending" && submissions.length > 0
+      ? supabase.rpc("admin_submission_award_previews", {
+          p_submissions: submissions.map((submission) => submission.id),
+        })
+      : Promise.resolve({
+          data: [] as { submission_id: string; points: number }[],
+        });
+  const [
+    { data: pairingsData },
+    attachmentUrlByPath,
+    { data: previewData },
+  ] = await Promise.all([
     pairingIds.length > 0
       ? supabase.from("pairings").select("*").in("id", pairingIds)
       : Promise.resolve({ data: [] as Pairing[] }),
     getSignedAttachmentUrlMap(submissions.flatMap((s) => s.photo_paths)),
+    previewPromise,
   ]);
   const pairings = (pairingsData ?? []) as Pairing[];
   const countByStatus = new Map<(typeof STATUSES)[number], number>(
@@ -123,10 +107,11 @@ export default async function ReviewPage({
   const taskById = new Map(tasks.map((t) => [t.id, t]));
   const teamName = new Map(teams.map((t) => [t.id, t.name]));
   const pairingById = new Map(pairings.map((p) => [p.id, p]));
-  const approvedCountByTask = new Map<string, number>();
-  for (const row of approvedCountsData ?? []) {
-    approvedCountByTask.set(row.task_id, Number(row.approved_count));
-  }
+  const previewBySubmission = new Map<string, number>(
+    ((previewData ?? []) as { submission_id: string; points: number }[]).map(
+      (row) => [row.submission_id, Number(row.points)]
+    )
+  );
 
   const cards = submissions.map((s) => {
     const task = taskById.get(s.task_id);
@@ -138,7 +123,7 @@ export default async function ReviewPage({
       taskTitle: task?.title ?? "(deleted task)",
       basePoints: task?.points ?? 0,
       bonusNote: task ? describeBonus(task.bonus_config) : null,
-      preview: task ? previewPoints(task, s, approvedCountByTask) : 0,
+      preview: previewBySubmission.get(s.id) ?? task?.points ?? 0,
       teamLabel: creditedTeamIds.map((id) => teamName.get(id) ?? "?").join(" + "),
       submittedAt: formatSGT(s.submitted_at),
       reviewedAt: s.reviewed_at ? formatSGT(s.reviewed_at) : null,
