@@ -227,6 +227,21 @@ async function main() {
     const myMovieGroup = (movieGroups ?? []).find((group) => group.team_ids.includes(myTeam));
     check("three-team task stores all group members", movie!.pair_team_count === 3 && myMovieGroup?.team_ids.length === 3);
     check("accepted group records every team's acceptance", myMovieGroup?.accepted_team_ids.length === 3);
+
+    // The Dumpling Duo is deliberately the third entry in the seeded group.
+    // This catches regressions to the legacy team_a/team_b-only RLS policy.
+    const thirdGroupMember = await login("mei.hui.chen@u.nus.edu");
+    const { data: visibleToThirdMember } = await thirdGroupMember
+      .from("pairings")
+      .select("team_ids")
+      .eq("task_id", movie!.id)
+      .eq("status", "accepted");
+    check(
+      "third and later group members can read their group",
+      (visibleToThirdMember ?? []).some(
+        (group) => group.team_ids.length === 3
+      )
+    );
   }
 
   console.log("\n— Leaderboard hiding —");

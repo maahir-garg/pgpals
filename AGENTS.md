@@ -209,7 +209,10 @@ Treat Postgres as the source of truth and security layer.
 - Group tasks have an exact `pair_team_count` between 2 and 20. The creator
   selects every partner at once, every invited team must accept, and any member
   team may then create the group's one shared submission. Every team in
-  `pairings.team_ids` receives the approved submission's coins.
+  `pairings.team_ids` receives the approved submission's coins. RLS also uses
+  `team_ids` as the sole membership source so every invited team can load the
+  group; `team_a`/`team_b` are compatibility columns and must not be used for
+  authorization.
 - Admin review uses `review_submission`; bonus points are computed in the
   database at review time. Submission creation/review and pair invites use
   transaction-scoped advisory locks so concurrent clicks cannot over-submit,

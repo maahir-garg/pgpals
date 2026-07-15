@@ -320,6 +320,11 @@ stored MIME types and byte sizes against the reservation; failed and expired
 batches are removed by the server. Video duration is still verified by the RA
 because Supabase Storage metadata does not provide a trustworthy duration.
 
+For multi-team tasks, `pairings.team_ids` is also the authorization source of
+truth: every invited team, including the third through twentieth members, can
+read the group and respond. The legacy `team_a`/`team_b` columns are retained
+only for compatibility and must not be used for access policies.
+
 As of July 2026, Supabase Pro includes 100 GB file storage plus 250 GB each of
 cached and uncached egress. Storage above the quota is $0.0213/GB/month;
 uncached egress is $0.09/GB and cached egress is $0.03/GB. See the official
