@@ -103,7 +103,7 @@ create table public.announcements (
 
 create table public.event_settings (
   id int primary key default 1 check (id = 1),
-  event_name text not null default 'PGPals',
+  event_name text not null default 'PGPals: The Emerald Challenge',
   start_at timestamptz not null,
   end_at timestamptz not null,
   leaderboard_hide_at timestamptz not null,

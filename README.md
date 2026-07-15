@@ -1,6 +1,7 @@
 # PGPals 🐧
 
-Event website for PGPR's 2-week buddy challenge: ~200 teams of 2 complete
+Event website for PGPals: The Emerald Challenge, PGPR's 2-week buddy challenge:
+~200 teams of 2 complete
 photo tasks, RAs review submissions and award PGP Coins, everyone watches the
 leaderboard (until it goes dark before the closing ceremony).
 

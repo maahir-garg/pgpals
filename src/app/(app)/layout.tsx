@@ -22,7 +22,7 @@ export default async function AppLayout({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
             <span className="font-heading text-lg font-extrabold tracking-tight">
-              PGPals
+              PGPals<span className="hidden lg:inline">: The Emerald Challenge</span>
             </span>
           </Link>
           <TopNav />

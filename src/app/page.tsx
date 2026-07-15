@@ -147,7 +147,7 @@ export default async function LandingPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon.svg" alt="" className="size-8 rounded-lg sm:size-9" />
             <span className="font-heading text-lg font-extrabold tracking-tight sm:text-xl">
-              PGPals
+              PGPals<span className="hidden md:inline">: The Emerald Challenge</span>
             </span>
           </Link>
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
@@ -216,11 +216,12 @@ export default async function LandingPage() {
                 </span>
               </h1>
               <p className="mt-4 max-w-lg text-pretty text-base leading-6 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
-                PGPals is PGPR&apos;s buddy challenge. Team up with your
-                assigned pal, complete photo tasks around campus, and race the
-                other teams to the top. The {PRIZE_POOL_VALUE_LABEL} prize
-                pool goes {PRIZE_WINNER_COUNT} teams deep with an iPad grand
-                prize, monitors, Sony headphones, projectors and more in play.
+                PGPals: The Emerald Challenge is PGPR&apos;s buddy challenge.
+                Team up with your assigned pal, complete photo tasks around
+                campus, and race the other teams to the top. The{" "}
+                {PRIZE_POOL_VALUE_LABEL} prize pool goes {PRIZE_WINNER_COUNT}
+                teams deep with an iPad grand prize, monitors, Sony headphones,
+                projectors and more in play.
               </p>
               <div className="mt-6 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-4">
                 <Button asChild size="lg">
@@ -431,7 +432,9 @@ export default async function LandingPage() {
             Run by the PGPR Resident Assistants. Questions? Ask in your
             block&apos;s Telegram group or find any RA.
           </p>
-          <p className="font-bold">PGPals · PGP Residences, NUS</p>
+          <p className="font-bold">
+            PGPals: The Emerald Challenge · PGP Residences, NUS
+          </p>
         </div>
       </footer>
     </div>

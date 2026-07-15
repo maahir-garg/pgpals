@@ -386,7 +386,7 @@ export async function updateSettings(input: {
   const { error } = await supabase
     .from("event_settings")
     .update({
-      event_name: input.eventName.trim() || "PGPals",
+      event_name: input.eventName.trim() || "PGPals: The Emerald Challenge",
       start_at: sgtInputToUtc(input.startAtSgt),
       end_at: sgtInputToUtc(input.endAtSgt),
       leaderboard_hide_at: sgtInputToUtc(input.leaderboardHideAtSgt),

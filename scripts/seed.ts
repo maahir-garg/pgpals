@@ -183,7 +183,7 @@ async function main() {
     const { error } = await db
       .from("event_settings")
       .update({
-        event_name: "PGPals",
+        event_name: "PGPals: The Emerald Challenge",
         start_at: EVENT_START_AT,
         end_at: EVENT_END_AT,
         leaderboard_hide_at: LEADERBOARD_HIDE_AT,

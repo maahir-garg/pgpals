@@ -17,8 +17,12 @@ const outfit = Outfit({
 export const preferredRegion = "sin1";
 
 export const metadata: Metadata = {
-  title: { default: "PGPals", template: "%s · PGPals" },
-  description: "PGPR's 2-week buddy challenge: complete tasks, earn PGP Coins, top the board!",
+  title: {
+    default: "PGPals: The Emerald Challenge",
+    template: "%s · PGPals: The Emerald Challenge",
+  },
+  description:
+    "PGPals: The Emerald Challenge is PGPR's 2-week buddy challenge. Complete tasks, earn PGP Coins, and top the board!",
 };
 
 export const viewport: Viewport = {

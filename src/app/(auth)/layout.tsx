@@ -15,7 +15,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               className="size-14 rotate-[-3deg] rounded-2xl border-2 border-foreground shadow-pop"
             />
             <h1 className="font-heading text-2xl font-extrabold tracking-tight">
-              PGPals
+              PGPals: The Emerald Challenge
             </h1>
           </Link>
           <p className="mt-1 text-sm text-muted-foreground">
