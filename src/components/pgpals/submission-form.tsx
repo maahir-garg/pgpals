@@ -178,9 +178,13 @@ export function SubmissionForm({
           hidden
           onChange={(e) => addFiles(e.target.files)}
         />
-        <p className="text-xs text-muted-foreground">
-          1–5 photos · compressed on your phone before upload
-        </p>
+        <div className="space-y-1 text-xs text-muted-foreground">
+          <p>1–5 photos · compressed on your phone before upload</p>
+          <p className="font-semibold text-foreground">
+            AI-generated photos are not allowed. Every upload is screened by
+            our AI checker and may be rejected.
+          </p>
+        </div>
 
         <Textarea
           value={text}
