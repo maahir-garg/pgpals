@@ -112,7 +112,11 @@ local, and Vercel agree.
   compatibility column but is constrained to `1` for every task.
   The video attachment migration expands the private bucket to MP4/MOV/WebM,
   enforces 1–5 supported attachments with no more than 3 video paths, and sets
-  a 50 MB per-object bucket cap.
+  a 50 MB per-object bucket cap. The upload-reservation migration then removes
+  direct participant Storage inserts: `reserve_submission_uploads()` validates
+  the task and media budget, server actions issue path-specific signed upload
+  tokens, and the submission trigger verifies actual Storage metadata before
+  atomically consuming the batch.
 
 - `src/lib/prizes.ts`
   Hardcoded prize messaging and ceremony date, rendered by the landing page,
@@ -215,6 +219,16 @@ Treat Postgres as the source of truth and security layer.
 - The leaderboard hide date is enforced by `get_leaderboard()`, not just the UI.
 - Private submission photos and videos live in the `submissions` storage bucket. UI access
   goes through server-generated signed URLs after an RLS-checked read.
+- Participant uploads are reservation-only. The browser first calls
+  `reserve_submission_uploads()` through a server action; the database permits
+  one live batch per team, generates every object path, and enforces 1–5 files,
+  at most 3 videos, 50 MB per video, 100 MB combined video bytes, and 2 MB per
+  compressed photo. The server then issues short-lived signed upload tokens.
+  Direct authenticated Storage inserts are denied. At submission time the
+  trigger checks object existence, MIME/extension agreement, actual byte sizes,
+  task/team/pairing ownership, and the exact unexpired batch before consuming it.
+  Failed or expired batches are deleted with the server-only client; do not add
+  a broad participant delete policy or return to client-generated paths.
 - Hot server routes should keep payloads narrow. Use `get_my_profile()` for
   request profile loading, aggregate RPCs for admin counts, and batched signed
   URLs (`getSignedAttachmentUrlMap`) for media-heavy pages. Do not reintroduce broad
@@ -374,9 +388,12 @@ Workflow conventions:
   components for forms, uploads, and interactive controls.
 - Submission proof supports 1–5 total attachments: photos up to 15 MB before
   browser compression, and up to 3 MP4/MOV/WebM videos. Each video is at most
-  60 seconds / 50 MB and combined videos are at most 100 MB. Videos upload
-  directly to Supabase through TUS in 6 MB chunks; keep the standard upload
-  path only for compressed images.
+  60 seconds / 50 MB and combined videos are at most 100 MB. All media uses
+  database-reserved paths and short-lived signed upload tokens. The database
+  independently checks file count, MIME/extension agreement, 2 MB compressed
+  photos, 50 MB videos, 100 MB combined video bytes, object existence, and exact
+  batch ownership. Duration remains an RA review rule because Storage metadata
+  does not expose a trustworthy media duration; reject longer clips.
 - Use `formatSGT()` / `formatSGTDate()` for display times. Admin datetime inputs
   are interpreted as Singapore time.
 - Do not add marketing-style screens when the route is an app surface. The app
@@ -444,8 +461,11 @@ Clean account leftovers:
 - 2026-07-15: group challenges now support an exact 2, 3, or custom 4–20 teams,
   with acceptance required from every invited team.
 - 2026-07-15: removed repeat approvals; every task or group has one approval.
-- 2026-07-15: added mixed photo/video proof, resumable video uploads, RA video
-  playback, database-enforced media formats/counts, and seeded multi-video data.
+- 2026-07-15: added mixed photo/video proof, RA video playback,
+  database-enforced media formats/counts, and seeded multi-video data.
+- 2026-07-15: replaced direct participant media uploads with database-reserved
+  batches, signed upload tokens, actual Storage metadata verification, and
+  server-side cleanup for failed/expired batches.
 
 ## Validation Checklist
 

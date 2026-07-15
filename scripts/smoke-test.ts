@@ -112,19 +112,66 @@ async function main() {
     // valid submission works (rival team hasn't submitted to sweep)
     const { data: rivalProfile } = await admin.from("profiles").select("team_id").eq("email", "divya.pillai@u.nus.edu").single();
     const rivalTeam = rivalProfile!.team_id as string;
-    const { data: path } = await rival.storage.from("submissions").upload(`${rivalTeam}/smoke/1.jpg`, Buffer.from([0xff, 0xd8, 0xff, 0xdb]), { contentType: "image/jpeg" });
-    check("upload to own team folder works", !!path);
-    const { data: videoPath } = await rival.storage.from("submissions").upload(`${rivalTeam}/smoke/1.mp4`, Buffer.from([0, 0, 0, 24, 102, 116, 121, 112]), { contentType: "video/mp4" });
-    check("video upload to own team folder works", !!videoPath);
-    const { error: tooManyVideos } = await rival.rpc("create_submission", {
+    const { error: directUploadError } = await rival.storage
+      .from("submissions")
+      .upload(`${rivalTeam}/smoke/direct.jpg`, Buffer.from([0xff, 0xd8]), {
+        contentType: "image/jpeg",
+      });
+    check("direct upload without a reservation is blocked", !!directUploadError);
+
+    const { error: tooManyVideos } = await rival.rpc("reserve_submission_uploads", {
       p_task: sweep!.id,
-      p_text: "too many clips",
-      p_photos: [1, 2, 3, 4].map((n) => `${rivalTeam}/smoke/${n}.mp4`),
       p_pairing: null,
+      p_files: [1, 2, 3, 4].map(() => ({
+        content_type: "video/mp4",
+        size: 8,
+      })),
     });
-    check("more than three videos rejected", !!tooManyVideos);
+    check("reservation rejects more than three videos", !!tooManyVideos);
+
+    const imageBytes = Buffer.from([0xff, 0xd8, 0xff, 0xdb]);
+    const videoBytes = Buffer.from([0, 0, 0, 24, 102, 116, 121, 112]);
+    const { data: reservation, error: reservationError } = await rival
+      .rpc("reserve_submission_uploads", {
+        p_task: sweep!.id,
+        p_pairing: null,
+        p_files: [
+          { content_type: "image/jpeg", size: imageBytes.length },
+          { content_type: "video/mp4", size: videoBytes.length },
+        ],
+      })
+      .single<{ batch_id: string; paths: string[] }>();
+    check("valid attachment batch can be reserved", !reservationError && !!reservation);
+
+    const reservedPaths = (reservation?.paths ?? []) as string[];
+    let signedUploadsWorked = reservedPaths.length === 2;
+    for (const [index, bytes] of [imageBytes, videoBytes].entries()) {
+      const path = reservedPaths[index];
+      if (!path) {
+        signedUploadsWorked = false;
+        continue;
+      }
+      const { data: signed, error: signError } = await admin.storage
+        .from("submissions")
+        .createSignedUploadUrl(path);
+      if (signError || !signed?.token) {
+        signedUploadsWorked = false;
+        continue;
+      }
+      const { error: uploadError } = await rival.storage
+        .from("submissions")
+        .uploadToSignedUrl(path, signed.token, bytes, {
+          contentType: index === 0 ? "image/jpeg" : "video/mp4",
+        });
+      if (uploadError) signedUploadsWorked = false;
+    }
+    check("reserved signed photo/video uploads work", signedUploadsWorked);
+
     const { data: subId, error: okError } = await rival.rpc("create_submission", {
-      p_task: sweep!.id, p_text: "smoke test mixed-media submission", p_photos: [`${rivalTeam}/smoke/1.jpg`, `${rivalTeam}/smoke/1.mp4`], p_pairing: null,
+      p_task: sweep!.id,
+      p_text: "smoke test mixed-media submission",
+      p_photos: reservedPaths,
+      p_pairing: null,
     });
     check("valid mixed photo/video submission accepted", !okError && !!subId, okError?.message ?? "");
 
@@ -151,6 +198,12 @@ async function main() {
     check("upload to another folder blocked", !!error);
     const { error: unsupportedType } = await participant.storage.from("submissions").upload(`${myTeam}/hack/1.pdf`, Buffer.from([1]), { contentType: "application/pdf" });
     check("unsupported attachment MIME type blocked", !!unsupportedType);
+    const { error: oversizedReservation } = await participant.rpc("reserve_submission_uploads", {
+      p_task: (await admin.from("tasks").select("id").ilike("title", "%sweep%").single()).data!.id,
+      p_pairing: null,
+      p_files: [{ content_type: "video/mp4", size: 52_428_801 }],
+    });
+    check("oversized video reservation blocked server-side", !!oversizedReservation);
     const { data: rivalProfile } = await admin.from("profiles").select("team_id").eq("email", "divya.pillai@u.nus.edu").single();
     const { data: files, error: listError } = await participant.storage.from("submissions").list(`${rivalProfile!.team_id}/smoke`);
     check("cannot list another team's photos", !!listError || (files ?? []).length === 0);

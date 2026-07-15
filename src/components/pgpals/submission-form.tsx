@@ -3,11 +3,13 @@
 import { useRef, useState, useTransition } from "react";
 import { FileVideo, ImagePlus, Send, X } from "lucide-react";
 import imageCompression from "browser-image-compression";
-import * as tus from "tus-js-client";
 import { toast } from "sonner";
-import { submitTask } from "@/app/(app)/actions";
+import {
+  cancelSubmissionUploadBatch,
+  reserveSubmissionUploads,
+  submitTask,
+} from "@/app/(app)/actions";
 import { createClient } from "@/lib/supabase/client";
-import { supabaseUrl } from "@/lib/supabase/env";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +27,6 @@ type Preview = {
   url: string;
   kind: "image" | "video";
   contentType: string;
-  extension: "jpg" | "mp4" | "mov" | "webm";
 };
 
 function getVideoDuration(file: File): Promise<number> {
@@ -51,62 +52,14 @@ function getVideoDuration(file: File): Promise<number> {
   });
 }
 
-function resumableUploadEndpoint(): string {
-  if (!supabaseUrl) throw new Error("Storage is not configured.");
-  const url = new URL(supabaseUrl);
-  if (url.hostname === "127.0.0.1" || url.hostname === "localhost") {
-    return `${url.origin}/storage/v1/upload/resumable`;
-  }
-  const projectId = url.hostname.split(".")[0];
-  return `https://${projectId}.storage.supabase.co/storage/v1/upload/resumable`;
-}
-
-function uploadVideoResumable(
-  file: File,
-  path: string,
-  contentType: string,
-  accessToken: string,
-  onProgress: (percent: number) => void
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const upload = new tus.Upload(file, {
-      endpoint: resumableUploadEndpoint(),
-      retryDelays: [0, 3000, 5000, 10000, 20000],
-      headers: { authorization: `Bearer ${accessToken}` },
-      uploadDataDuringCreation: true,
-      removeFingerprintOnSuccess: true,
-      metadata: {
-        bucketName: "submissions",
-        objectName: path,
-        contentType,
-        cacheControl: "3600",
-      },
-      chunkSize: 6 * 1024 * 1024,
-      onError: (error) => reject(error),
-      onProgress: (uploaded, total) =>
-        onProgress(Math.round((uploaded / total) * 100)),
-      onSuccess: () => resolve(),
-    });
-
-    void upload.findPreviousUploads().then((previousUploads) => {
-      if (previousUploads.length > 0) {
-        upload.resumeFromPreviousUpload(previousUploads[0]);
-      }
-      upload.start();
-    }, reject);
-  });
-}
-
 // Mixed-media proof form. Images are compressed in the browser (~300 KB,
-// max 1600px); videos use resumable TUS uploads for unreliable mobile links.
+// max 1600px). Every file path and upload token is reserved server-side.
 export function SubmissionForm({
   taskId,
-  teamId,
   pairingId,
   resubmit,
 }: {
   taskId: string;
-  teamId: string;
   pairingId: string | null;
   resubmit: boolean;
 }) {
@@ -165,18 +118,11 @@ export function SubmissionForm({
             if (!Number.isFinite(duration) || duration > MAX_VIDEO_SECONDS) {
               throw new Error("Videos must be 60 seconds or shorter.");
             }
-            const extension =
-              file.type === "video/quicktime"
-                ? "mov"
-                : file.type === "video/webm"
-                  ? "webm"
-                  : "mp4";
             return {
               file,
               url: URL.createObjectURL(file),
               kind: "video",
               contentType: file.type,
-              extension,
             };
           }
           const compressed = await imageCompression(file, {
@@ -191,7 +137,6 @@ export function SubmissionForm({
             url: URL.createObjectURL(compressed),
             kind: "image",
             contentType: "image/jpeg",
-            extension: "jpg",
           };
         })
       );
@@ -221,45 +166,52 @@ export function SubmissionForm({
       return;
     }
     startTransition(async () => {
-      const uploadedPaths: string[] = [];
+      let uploadBatchId: string | null = null;
       const supabase = createClient();
       async function cleanupUploads() {
-        if (uploadedPaths.length === 0) return;
-        await supabase.storage.from("submissions").remove(uploadedPaths);
+        if (!uploadBatchId) return;
+        const batchId = uploadBatchId;
+        uploadBatchId = null;
+        const result = await cancelSubmissionUploadBatch(batchId);
+        if (!result.ok) throw new Error(result.error);
       }
 
       try {
-        const folder = crypto.randomUUID();
-        const paths: string[] = [];
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (!session) throw new Error("Your session expired. Log in and try again.");
+        const reservation = await reserveSubmissionUploads({
+          taskId,
+          pairingId,
+          files: previews.map((preview) => ({
+            contentType: preview.contentType,
+            size: preview.file.size,
+          })),
+        });
+        if (!reservation.ok) {
+          toast.error(reservation.error);
+          return;
+        }
+        if (reservation.uploads.length !== previews.length) {
+          throw new Error("The upload reservation did not match your attachments.");
+        }
+        uploadBatchId = reservation.batchId;
+
         for (let i = 0; i < previews.length; i++) {
           const preview = previews[i];
-          const path = `${teamId}/${folder}/${i + 1}.${preview.extension}`;
-          if (preview.kind === "video") {
-            await uploadVideoResumable(
-              preview.file,
-              path,
-              preview.contentType,
-              session.access_token,
-              (percent) => setUploadStatus(`Uploading video: ${percent}%`)
-            );
-          } else {
-            const { error } = await supabase.storage
-              .from("submissions")
-              .upload(path, preview.file, { contentType: preview.contentType });
-            if (error)
-              throw new Error("Upload failed. Check your connection and try again.");
+          const upload = reservation.uploads[i];
+          setUploadStatus(`Uploading ${i + 1} of ${previews.length}...`);
+          const { error } = await supabase.storage
+            .from("submissions")
+            .uploadToSignedUrl(upload.path, upload.token, preview.file, {
+              contentType: preview.contentType,
+              cacheControl: "3600",
+            });
+          if (error) {
+            throw new Error("Upload failed. Check your connection and try again.");
           }
-          paths.push(path);
-          uploadedPaths.push(path);
         }
         const result = await submitTask({
           taskId,
           text,
-          photoPaths: paths,
+          photoPaths: reservation.uploads.map((upload) => upload.path),
           pairingId,
         });
         if (!result.ok) {
@@ -267,13 +219,20 @@ export function SubmissionForm({
           toast.error(result.error);
           return;
         }
+        uploadBatchId = null;
         toast.success("Submitted. Your RAs will review it soon!");
         previews.forEach((p) => URL.revokeObjectURL(p.url));
         setPreviews([]);
         setText("");
       } catch (e) {
-        await cleanupUploads().catch(() => {});
-        toast.error(e instanceof Error ? e.message : "Something went wrong.");
+        const originalMessage =
+          e instanceof Error ? e.message : "Something went wrong.";
+        try {
+          await cleanupUploads();
+          toast.error(originalMessage);
+        } catch {
+          toast.error(`${originalMessage} Upload cleanup also failed; ask an RA.`);
+        }
       } finally {
         setUploadStatus(null);
       }
@@ -356,8 +315,8 @@ export function SubmissionForm({
             Each video: max 60 sec / 50 MB · videos combined: max 100 MB
           </p>
           <p>
-            Photos: max 15 MB each, compressed before upload · videos upload
-            resumably and unchanged
+            Photos: max 15 MB each, compressed before upload · every upload
+            uses a short-lived reserved URL
           </p>
           <p className="font-semibold text-foreground">
             AI-generated media is not allowed. Every upload is screened by

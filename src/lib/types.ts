@@ -78,6 +78,21 @@ export interface Submission {
   resubmission_of: string | null;
 }
 
+export interface SubmissionUploadBatch {
+  id: string;
+  created_by: string;
+  team_id: string;
+  task_id: string;
+  pairing_id: string | null;
+  paths: string[];
+  content_types: string[];
+  declared_sizes: number[];
+  created_at: string;
+  expires_at: string;
+  consumed_at: string | null;
+  cancelled_at: string | null;
+}
+
 export interface BonusAward {
   id: string;
   team_id: string;

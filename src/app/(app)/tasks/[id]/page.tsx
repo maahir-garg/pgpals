@@ -165,7 +165,6 @@ export default async function TaskDetailPage({
       {canSubmit && (
         <SubmissionForm
           taskId={task.id}
-          teamId={profile.team_id!}
           pairingId={task.type === "pair" ? (pairing?.id ?? null) : null}
           resubmit={wasRejected}
         />
