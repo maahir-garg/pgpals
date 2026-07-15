@@ -28,7 +28,7 @@ const playSteps = [
   {
     icon: ImageUp,
     title: "Complete it and submit proof",
-    body: "Add a caption and up to five photos or videos. You can include at most three videos, each up to 60 seconds and 50 MB.",
+    body: "Add a caption and up to five photos or videos. You can include at most three videos, each up to 60 seconds and 50 MB. For faster uploads, compress each video to under 5 MB when possible.",
   },
   {
     icon: ShieldCheck,
@@ -56,7 +56,7 @@ const helpItems = [
   {
     question: "My upload is failing.",
     answer:
-      "Check your connection and the limits shown on the submission form. Videos must be MP4, MOV, or WebM; keeping clips short and compressed makes mobile uploads faster.",
+      "Check your connection and the limits shown on the submission form. Videos must be MP4, MOV, or WebM. We recommend compressing each clip to under 5 MB for a faster, more reliable mobile upload.",
   },
   {
     question: "My submission was rejected.",
@@ -99,7 +99,7 @@ export default function GuidePage() {
             Start here
           </Badge>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight md:text-4xl">
-            How the Emerald Challenge works
+            How the Challenge works
           </h1>
           <p className="mt-3 max-w-xl text-sm font-medium text-primary-foreground/85 md:text-base">
             Tackle challenges with your pal, send genuine proof, and turn

@@ -414,8 +414,10 @@ Workflow conventions:
   components for forms, uploads, and interactive controls.
 - Submission proof supports 1–5 total attachments: photos up to 15 MB before
   browser compression, and up to 3 MP4/MOV/WebM videos. Each video is at most
-  60 seconds / 50 MB and combined videos are at most 100 MB. All media uses
-  database-reserved paths and short-lived signed upload tokens. The database
+  60 seconds / 50 MB and combined videos are at most 100 MB. Participant copy
+  recommends videos under 5 MB for upload reliability; this is guidance, not
+  an enforced limit. All media uses database-reserved paths and short-lived
+  signed upload tokens. The database
   independently checks file count, MIME/extension agreement, 2 MB compressed
   photos, 50 MB videos, 100 MB combined video bytes, object existence, and exact
   batch ownership. Duration remains an RA review rule because Storage metadata
@@ -487,6 +489,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-15: added an under-5-MB video compression recommendation to the
+  submission form and Guide without changing the enforced 50 MB limit.
 - 2026-07-15: split the desktop Guide FAQ into independent columns so opening
   one disclosure never stretches or distorts a closed card beside it.
 - 2026-07-15: removed completed signup/onboarding steps from the authenticated

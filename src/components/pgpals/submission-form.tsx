@@ -314,6 +314,10 @@ export function SubmissionForm({
           <p>
             Each video: max 60 sec / 50 MB · videos combined: max 100 MB
           </p>
+          <p className="font-semibold text-primary">
+            Recommended: compress each video to under 5 MB for a faster, more
+            reliable upload.
+          </p>
           <p>
             Photos: max 15 MB each, compressed before upload · every upload
             uses a short-lived reserved URL
