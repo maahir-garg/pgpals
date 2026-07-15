@@ -39,20 +39,6 @@ export function taskStatusMap(
   return result;
 }
 
-export function approvedCountMap(
-  submissions: SubmissionStatusRow[]
-): Map<string, number> {
-  const result = new Map<string, number>();
-  for (const submission of submissions) {
-    if (submission.status !== "approved") continue;
-    result.set(
-      submission.task_id,
-      (result.get(submission.task_id) ?? 0) + 1
-    );
-  }
-  return result;
-}
-
 export function isClosed(deadlineAt: string, now = new Date()): boolean {
   return new Date(deadlineAt).getTime() < now.getTime();
 }

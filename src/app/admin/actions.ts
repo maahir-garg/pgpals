@@ -68,7 +68,6 @@ export interface TaskInput {
   pairTeamCount: number;
   releaseAtSgt: string; // from <input type="datetime-local">, SGT
   deadlineAtSgt: string;
-  maxSubmissions: number;
   isPublished: boolean;
   bonusConfig: BonusConfig | null;
 }
@@ -82,7 +81,6 @@ function taskRow(input: TaskInput) {
     pair_team_count: input.pairTeamCount,
     release_at: sgtInputToUtc(input.releaseAtSgt),
     deadline_at: sgtInputToUtc(input.deadlineAtSgt),
-    max_submissions: input.maxSubmissions,
     is_published: input.isPublished,
     bonus_config: input.bonusConfig,
   };

@@ -39,9 +39,6 @@ export function TaskForm({ task }: { task: Task | null }) {
   const [deadlineAt, setDeadlineAt] = useState(
     task ? utcToSgtInput(task.deadline_at) : ""
   );
-  const [maxSubmissions, setMaxSubmissions] = useState(
-    String(task?.max_submissions ?? 1)
-  );
   const [isPublished, setIsPublished] = useState(task?.is_published ?? true);
 
   const existingBonus = task?.bonus_config ?? null;
@@ -89,7 +86,6 @@ export function TaskForm({ task }: { task: Task | null }) {
 
   function save() {
     const pts = Number(points);
-    const maxSubs = Number(maxSubmissions);
     const teamsInPair =
       pairSizeMode === "more" ? Number(pairTeamCount) : Number(pairSizeMode);
     if (!title.trim()) return void toast.error("Title is required.");
@@ -99,8 +95,6 @@ export function TaskForm({ task }: { task: Task | null }) {
       return void toast.error("Set both release and deadline times.");
     if (new Date(deadlineAt) <= new Date(releaseAt))
       return void toast.error("Deadline must be after release.");
-    if (!Number.isInteger(maxSubs) || maxSubs < 1)
-      return void toast.error("Max submissions must be ≥ 1.");
     if (
       type === "pair" &&
       (!Number.isInteger(teamsInPair) || teamsInPair < 2 || teamsInPair > 20)
@@ -118,7 +112,6 @@ export function TaskForm({ task }: { task: Task | null }) {
       pairTeamCount: type === "pair" ? teamsInPair : 2,
       releaseAtSgt: releaseAt,
       deadlineAtSgt: deadlineAt,
-      maxSubmissions: maxSubs,
       isPublished,
       bonusConfig,
     };
@@ -178,7 +171,7 @@ export function TaskForm({ task }: { task: Task | null }) {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="points">Base coins</Label>
             <Input
@@ -201,17 +194,6 @@ export function TaskForm({ task }: { task: Task | null }) {
               <option value="standard">Standard</option>
               <option value="pair">Pair / group</option>
             </select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="maxsubs">Max approvals</Label>
-            <Input
-              id="maxsubs"
-              type="number"
-              min={1}
-              value={maxSubmissions}
-              onChange={(e) => setMaxSubmissions(e.target.value)}
-              className={inputCls}
-            />
           </div>
         </div>
 

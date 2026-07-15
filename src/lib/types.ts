@@ -45,7 +45,6 @@ export interface Task {
   release_at: string;
   deadline_at: string;
   bonus_config: BonusConfig | null;
-  max_submissions: number;
   is_published: boolean;
   created_by: string | null;
   created_at: string;

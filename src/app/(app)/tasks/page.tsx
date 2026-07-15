@@ -2,12 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Shield, UserPlus } from "lucide-react";
 import { requireProfile } from "@/lib/data";
-import { approvedCountMap, taskStatusMap, isClosed } from "@/lib/status";
+import { taskStatusMap, isClosed } from "@/lib/status";
 import { isClosingSoon } from "@/lib/datetime";
 import { TaskCard, type TaskCardTask } from "@/components/pgpals/task-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Submission, Task } from "@/lib/types";
+import type { Submission } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Tasks" };
 
@@ -60,20 +60,14 @@ export default async function TasksPage() {
   const [{ data: tasks }, { data: submissions }] = await Promise.all([
     supabase
       .from("tasks")
-      .select("id, title, points, type, pair_team_count, deadline_at, bonus_config, max_submissions"),
+      .select("id, title, points, type, pair_team_count, deadline_at, bonus_config"),
     supabase.from("submissions").select("task_id, status"),
   ]);
 
-  type TaskListTask = TaskCardTask & Pick<Task, "max_submissions">;
-  const allTasks = (tasks ?? []) as TaskListTask[];
+  const allTasks = (tasks ?? []) as TaskCardTask[];
   const allSubs = (submissions ?? []) as Pick<Submission, "task_id" | "status">[];
   const statusByTask = taskStatusMap(allSubs);
-  const approvedByTask = approvedCountMap(allSubs);
-
-  // "Done" means no more points available: every allowed approval is used.
-  // Repeatable tasks (max_submissions > 1) stay open until then.
-  const isDone = (t: TaskListTask) =>
-    (approvedByTask.get(t.id) ?? 0) >= t.max_submissions;
+  const isDone = (t: TaskCardTask) => statusByTask.get(t.id) === "approved";
 
   const open = allTasks.filter((t) => !isClosed(t.deadline_at) && !isDone(t));
   const closingSoon = open

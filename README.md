@@ -262,7 +262,7 @@ leaderboard, and dashboard. Changing it is a code edit plus deploy, which
 keeps the advertising consistent everywhere.
 
 *Admin → Tasks*: release/deadline datetimes (entered in SGT), standard or
-pair/group type and team count, max approvals (e.g. 3 for a daily task), publish toggle
+pair/group type and team count, and publish toggle
 (unpublished = invisible draft), and optional bonus:
 
 | Bonus | Meaning |

@@ -65,6 +65,12 @@ async function main() {
     check("participant cannot see draft task", !titles.includes("Karaoke"));
     const { data: adminTasks } = await ra.from("tasks").select("title");
     check("admin sees all tasks incl. draft", (adminTasks ?? []).some((t) => t.title.includes("Karaoke")));
+    const { data: standardTask } = await admin.from("tasks").select("id").eq("type", "standard").limit(1).single();
+    const { error: repeatApprovalError } = await admin
+      .from("tasks")
+      .update({ max_submissions: 2 })
+      .eq("id", standardTask!.id);
+    check("all task types enforce one approval", !!repeatApprovalError);
   }
 
   console.log("\n— Submission isolation —");

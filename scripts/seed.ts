@@ -320,9 +320,8 @@ async function main() {
   });
   const tGratitude = await addTask({
     title: "Daily gratitude snap 🙏",
-    description: "Photo of one thing you're grateful for today, with a one-line caption. Can be approved up to **3 times** (once per day).",
+    description: "Photo of one thing you're grateful for today, with a one-line caption.",
     points: 5, type: "standard", release_at: days(-3), deadline_at: days(7),
-    max_submissions: 3,
   });
   const tPicnic = await addTask({
     title: "Pair picnic in the park 🧺",
@@ -449,10 +448,9 @@ async function main() {
     submittedH: -20, reviewedH: -12, photos: 1,
   });
 
-  // Gratitude (max 3): team 0 has 2 approved + 1 pending
+  // Gratitude: one approved submission and another team's pending submission.
   await addSub({ task: tGratitude, team: teamIds[0], status: "approved", points: 5, submittedH: -50, reviewedH: -45, photos: 1, text: "Grateful for kopi ☕" });
-  await addSub({ task: tGratitude, team: teamIds[0], status: "approved", points: 5, submittedH: -26, reviewedH: -20, photos: 1, text: "Grateful for aircon 🧊" });
-  await addSub({ task: tGratitude, team: teamIds[0], status: "pending", submittedH: -2, photos: 1, text: "Grateful for my pal 🥹" });
+  await addSub({ task: tGratitude, team: teamIds[1], status: "pending", submittedH: -2, photos: 1, text: "Grateful for my pal 🥹" });
 
   // Pairings for movie night: accepted+approved joint sub, pending invite, declined
   console.log("Pairings…");

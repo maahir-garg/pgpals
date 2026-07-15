@@ -84,7 +84,7 @@ export default async function TaskDetailPage({
     !!profile.team_id &&
     !closed &&
     !hasPending &&
-    approvedCount < task.max_submissions &&
+    approvedCount === 0 &&
     (task.type === "standard" || pairing?.status === "accepted");
 
   const photoUrlByPath = await getSignedPhotoUrlMap(
