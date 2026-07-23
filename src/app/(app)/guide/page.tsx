@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmergencyContactsCard } from "@/components/pgpals/emergency-contacts";
 
 export const metadata: Metadata = { title: "How it works" };
 
@@ -107,6 +108,8 @@ export default function GuidePage() {
           </p>
         </div>
       </section>
+
+      <EmergencyContactsCard />
 
       <section className="space-y-4" aria-labelledby="challenge-loop">
         <div>

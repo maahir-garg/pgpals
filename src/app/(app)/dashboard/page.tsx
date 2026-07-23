@@ -20,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CountdownBadge, PointsBadge } from "@/components/pgpals/badges";
+import { EmergencyContactsCard } from "@/components/pgpals/emergency-contacts";
 import { Markdown } from "@/components/pgpals/markdown";
 import { TeamNameEditor } from "@/components/pgpals/team-name-editor";
 import type {
@@ -180,6 +181,7 @@ export default async function DashboardPage() {
           )}
         </section>
         <GuideCard />
+        <EmergencyContactsCard />
         <AnnouncementsFeed
           announcements={(announcements ?? []) as Announcement[]}
         />
@@ -328,8 +330,9 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <div className="lg:hidden">
+      <div className="space-y-4 lg:hidden">
         <GuideCard />
+        <EmergencyContactsCard />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
@@ -433,6 +436,7 @@ export default async function DashboardPage() {
           <div className="hidden lg:block">
             <GuideCard />
           </div>
+          <EmergencyContactsCard />
           <Card>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between gap-3">

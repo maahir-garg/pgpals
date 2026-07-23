@@ -68,7 +68,7 @@ local, and Vercel agree.
   Participant app routes: dashboard, tasks, task detail, event guide,
   leaderboard, and participant server actions. `/guide` is the resident-facing
   source for challenge rules, media limits, multi-team behavior, reviews,
-  resubmissions, and common post-login troubleshooting.
+  resubmissions, common post-login troubleshooting, and emergency contacts.
 
 - `src/app/admin/`
   RA/admin routes and admin server actions: overview, teams, review queue,
@@ -394,6 +394,10 @@ comes from shapes, chunky borders, and hard shadows around them.
 Workflow conventions:
 
 - Participants are mobile-first, but layouts should scale to desktop.
+- Keep the shared emergency contact card visible on participant Home and near
+  the top of `/guide`. The numbers are tap-to-call links: NUS Campus Emergency
+  & Security at `+65 6874 1616` (24 hours), and outside campus ambulance/fire
+  at `995` and police at `999`.
 - Keep `/guide` help copy aligned with the actual submission, pairing, scoring,
   and deadline rules whenever those workflows change. Do not repeat NUSync,
   rostering, or account-creation onboarding after login; those prerequisites
@@ -491,6 +495,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-07-23: added tap-to-call on-campus and off-campus emergency contacts to
+  participant Home and the Guide.
 - 2026-07-15: reordered participant navigation to Home, Guide, Tasks, then
   Leaderboard on both mobile and desktop.
 - 2026-07-15: moved the participant Home guide card directly below the team

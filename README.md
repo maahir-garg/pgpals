@@ -21,8 +21,10 @@ Singapore Supabase database.
   for the event on NUSync first, then sign up with the exact email their RA
   entered on the team roster and get auto-linked to their pre-assigned team.
   The post-login **Guide** explains the challenge loop, media rules, multi-team
-  tasks, reviews/resubmissions, and common team/upload problems. Signup
-  prerequisites stay on the signup screen rather than being repeated after login.
+  tasks, reviews/resubmissions, common team/upload problems, and emergency
+  contacts. Home also keeps the on-campus 24-hour CES number and off-campus
+  emergency numbers one tap away. Signup prerequisites stay on the signup
+  screen rather than being repeated after login.
   Participants complete tasks, submit 1-5 photo/video attachments plus a caption, earn PGP Coins (the
   event currency; the database still calls them points) on approval.
   Group tasks let 2-20 teams submit jointly.
