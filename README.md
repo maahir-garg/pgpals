@@ -40,16 +40,10 @@ Singapore Supabase database.
   date. `scripts/smoke-test.ts` proves all of this against a live database.
 - All times display in **Asia/Singapore**; storage is UTC.
 
-Local demo data is seeded so you can click through everything immediately (see
-[Local development](#local-development)). These `.test` emails are for the
-local Supabase stack only; hosted Supabase Auth rejects `.test` addresses.
-
-| Local demo login | Email | Password |
-|---|---|---|
-| Admin (RA) | `ra@pgpals.test` | `pgpals123` |
-| Participant | `chloe.lim@u.nus.edu` | `pgpals123` |
-| Participant with a rejected, then resubmitted task | `shreya.iyer@u.nus.edu` | `pgpals123` |
-| Rostered but never signed up (try the signup flow!) | `hafiz.bin.salleh@u.nus.edu` | n/a |
+The repository now carries the final 2026 event seed: 100 published challenges,
+the final RA allowlist, and one shared teamless admin account. It intentionally
+contains no resident roster, teams, submissions, pairings, media, bonuses, or
+announcements. Teams are imported only after the final roster is ready.
 
 ---
 
@@ -61,7 +55,7 @@ Prereqs: Node 20+, Docker Desktop (running).
 npm install
 npx supabase start        # first run downloads images (~5 min)
 npx supabase db reset     # applies supabase/migrations/*
-npm run seed              # demo teams/tasks/submissions/photos/prize announcements
+npm run seed              # destructive final seed: tasks + RA access, no residents
 npm run dev               # http://localhost:3000
 ```
 
@@ -73,14 +67,14 @@ Useful:
 ```bash
 npx supabase status               # local URLs + keys
 open http://127.0.0.1:54323      # Supabase Studio (local)
-npx tsx scripts/smoke-test.ts    # 37 security/rules checks (after seed)
-npx tsx scripts/render-test.ts   # page render checks (needs npm run dev running)
-npx tsx scripts/walkthrough.ts   # screenshots of every page, phone + desktop
 npm run build && npm run lint    # what Vercel will run
 ```
 
-`npm run seed` is destructive and idempotent: it wipes all data and recreates
-the demo state. Never point it at production unless you mean it.
+`npm run seed` is destructive and idempotent: it wipes all event data and Auth
+users, then recreates the final tasks and admin access. It refuses non-local
+URLs. The shared admin password is read from the gitignored
+`.env.event.local` file through `PGPALS_SHARED_ADMIN_PASSWORD`; it is never
+printed by the seed or committed.
 
 ---
 
@@ -117,14 +111,14 @@ In *Dashboard → SQL Editor*, run (with your email):
 insert into admin_allowlist (email) values ('your.email@u.nus.edu');
 ```
 
-Then **sign up in the app** with that real email, and you'll be an admin. Do
-not use the local `ra@pgpals.test` demo address in production. Add every other
-RA's email in *Admin → Settings* **before** they sign up; being on that list is
-what makes an account an admin (an email that already has an account is
-promoted on the spot). Use **Demote & revoke** in the same screen to remove a
-signed-up RA: it removes the allowlist entry, changes the account to a
-participant, and revokes every active Auth session in one transaction. The app
-refuses to remove the last signed-up admin.
+Then **sign up in the app** with that real email, and you'll be an admin. The
+final seed installs the complete RA list before anyone signs up and creates the
+shared checker account. Being on `admin_allowlist` is what makes an account an
+admin (an email that already has an account is promoted on the spot). Use
+**Demote & revoke** in *Admin → Settings* to remove a signed-up RA: it removes
+the allowlist entry, changes the account to a participant, and revokes every
+active Auth session in one transaction. The app refuses to remove the last
+signed-up admin.
 
 ### 3. Vercel
 
@@ -157,24 +151,18 @@ must always point at the local Docker stack; **`.env.production.local`**
 holds the production values. Both are gitignored. `npm run seed` refuses to
 run against anything that isn't the local stack.
 
-### Dry runs against production
+### Final production seed
 
 ```bash
-npm run seed:prod        # wipe + reseed PRODUCTION with demo data (5s abort window)
+npm run seed:prod        # FINAL CUTOVER: destructive production seed, 5s abort window
 ```
 
-Use this for dress rehearsals on the real URL before the event: RAs can
-click through review, tasks, and announcements with realistic data. Two
-warnings: it deletes **everything** first (including real accounts, so RAs
-re-sign-up afterwards), and the demo accounts all share the password
-documented in this README. Production dry runs try to create
-`ra@pgpals.test / pgpals123` as the disposable RA account; if hosted Supabase
-rejects the reserved `.test` domain, the seed falls back to
-`ra.dryrun@u.nus.edu / pgpals123` and prints a warning. That's fine while
-testing; all demo accounts must be gone by D-day (see below). The seed sets
-the 2026 SGT defaults (31 August to 13 September, leaderboard dark around
-8 September) and demo announcements that advertise the S$5,000+ prize pool,
-top-8 tech prizes, participation goodie bags, and AirPods lucky draw.
+This is the one-time final cutover. It deletes **everything** first, including
+all Auth users and private submission media, then installs the 2026 event
+window, 100 final published challenges, the ten named RA emails, and the shared
+checker admin. It leaves teams, roster, submissions, pairings, upload batches,
+bonuses, and announcements empty so the real roster can be imported cleanly.
+The seed validates those counts before reporting success.
 
 Before any production reseed, take `npm run backup:prod -- --photos` unless
 you have explicitly decided to lose the current production media and rows.
@@ -204,27 +192,26 @@ media files are all in the backup and final standings can be recomputed from
 
 ### D-day: clean build of production
 
-Run this once, shortly before the event goes live, **before** creating the
-real tasks (about 30 minutes end to end):
+Run this once, shortly before the event goes live (about 30 minutes end to end):
 
 1. `npm run backup:prod -- --photos` — keep the final dry-run state.
 2. `npx supabase db push` — apply any pending migrations.
-3. `npm run seed:prod -- --wipe-only` — deletes all demo data and **every
-   auth user**. Real RA emails in `admin_allowlist` survive.
-4. *Supabase → SQL Editor*: check `admin_allowlist` lists every real RA
-   email (`select * from admin_allowlist;`), add any missing ones.
-5. Every RA signs up in the app with that email (they become admins
-   automatically).
-6. *Admin → Settings*: confirm event dates and the leaderboard hide date
-   (the prize messaging is hardcoded in the app, nothing to configure).
-7. *Admin → Teams*: import the real roster CSV.
-8. *Admin → Tasks*: create the real tasks (set release times; drafts are
-   invisible until published).
-9. *Admin → Announcements*: post the welcome message.
-10. Verify: log out and check the landing page shows the real dates; log
+3. Put the shared checker password in gitignored `.env.event.local` as
+   `PGPALS_SHARED_ADMIN_PASSWORD=...`.
+4. `npm run seed:prod` — performs the final destructive cutover and verifies
+   the clean state.
+5. Check *Admin → Settings* lists all ten named RAs plus the shared checker
+   account.
+6. Every individual RA signs up with their allowlisted email.
+7. *Admin → Settings*: confirm event dates and the leaderboard hide date.
+8. *Admin → Teams*: import the real roster CSV.
+9. *Admin → Tasks*: spot-check release dates, deadlines, descriptions, group
+   sizes, and the two judged-bonus instructions.
+10. *Admin → Announcements*: post the welcome message.
+11. Verify: log out and check the landing page shows the real dates; log
     back in and check the review queue is empty.
-11. `npm run backup:prod` — a clean baseline backup.
-12. From this moment, **never run `npm run seed:prod` again**.
+12. `npm run backup:prod` — a clean baseline backup after the roster import.
+13. From this moment, **never run `npm run seed:prod` again**.
 
 ---
 
@@ -235,7 +222,7 @@ real tasks (about 30 minutes end to end):
 
 ```csv
 team_name,member1_name,member1_email,member2_name,member2_email
-Waffle Warriors,Chloe Lim,chloe.lim@u.nus.edu,Wei Ling Tan,wei.ling.tan@u.nus.edu
+Prata Pioneers,Jamie Tan,jamie.tan@u.nus.edu,Yusuf Ahmad,yusuf.ahmad@u.nus.edu
 ```
 
 - Emails are case-insensitive and must be the ones residents will sign up with.
@@ -267,9 +254,7 @@ Email rules:
 - Resident signup works only for emails in *Admin → Teams* roster.
 - RA signup works only for emails in *Admin → Settings* admin list.
 - There is no allowed-domain shortcut; `@u.nus.edu` is common, not magical.
-- The normal signup and password-reset forms block `.test` demo emails.
-  Seed/admin-created `.test` users can log in if hosted Supabase accepts them,
-  but they cannot receive real reset emails.
+- The normal signup and password-reset forms block reserved `.test` emails.
 
 The **prize messaging is hardcoded** in `src/lib/prizes.ts` (S$5,000+ top 8
 tech prize pool led by an iPad, confirmed monitors, Sony headphones, and
@@ -376,7 +361,8 @@ task drops.
 
 ```
 supabase/migrations/   schema + RLS + RPCs (the security lives here)
-scripts/seed.ts        demo data (npm run seed / seed:prod, --wipe-only for D-day)
+scripts/final-event-data.ts  final 100 challenges and RA allowlist
+scripts/seed.ts        destructive final local/production cutover
 scripts/backup.ts      point-in-time backup (npm run backup:prod -- --photos)
 scripts/smoke-test.ts  security checks against a live DB
 scripts/render-test.ts page render checks against a running dev server
