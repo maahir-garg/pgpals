@@ -3,8 +3,13 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  supabasePublishableKey,
+  supabaseUrl,
+} from "@/lib/supabase/env";
 
 export type AuthState = { error?: string; message?: string } | null;
 
@@ -124,10 +129,25 @@ export async function requestPasswordReset(
     };
   }
 
-  const supabase = await createClient();
   const origin = await getSiteOrigin();
+  // Recovery emails may be opened in an email app or another browser. Using
+  // the implicit flow avoids tying the one-time link to a PKCE verifier stored
+  // in the browser that requested it. /auth/recovery converts the returned
+  // fragment tokens into the cookie-backed session used by the SSR app.
+  const supabase = createSupabaseClient(
+    supabaseUrl!,
+    supabasePublishableKey!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+        flowType: "implicit",
+        persistSession: false,
+      },
+    }
+  );
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+    redirectTo: `${origin}/auth/recovery`,
   });
 
   if (error) {

@@ -38,11 +38,12 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isAuthCallback = path.startsWith("/auth/callback");
+  const isAuthExchange =
+    path.startsWith("/auth/callback") || path.startsWith("/auth/recovery");
   const isPublic =
     path === "/" || PUBLIC_PATHS.some((p) => path.startsWith(p));
 
-  if (!user && !isPublic && !isAuthCallback) {
+  if (!user && !isPublic && !isAuthExchange) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

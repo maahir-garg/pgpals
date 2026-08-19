@@ -8,11 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ initialError }: { initialError?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(
     requestPasswordReset,
     null
   );
+  const error = state?.error ?? (state?.message ? undefined : initialError);
 
   return (
     <Card>
@@ -37,9 +38,9 @@ export function ForgotPasswordForm() {
               required
             />
           </div>
-          {state?.error && (
+          {error && (
             <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-              {state.error}
+              {error}
             </p>
           )}
           {state?.message && (
