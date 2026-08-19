@@ -26,7 +26,7 @@ boundary. The UI should be ergonomic, but it is not trusted.
 
 ## Current Production Shape
 
-- Live Vercel URL: `https://pgpals-seven.vercel.app`
+- Live Vercel URL: `https://pgpals.vercel.app`
 - Supabase project ref: `iobfzragbzqxmqnofvdj`
 - Vercel project: `maahir-gargs-projects/pgpals`
 - Vercel Web Analytics is enabled and `<Analytics />` is mounted in
@@ -204,9 +204,17 @@ out.
 
 Password reset:
 
-- `/forgot-password` calls `resetPasswordForEmail`.
-- Supabase sends a recovery link to `/auth/callback?next=/reset-password`.
-- `/auth/callback` exchanges the code into a session.
+- `/forgot-password` calls `resetPasswordForEmail` with a dedicated implicit-
+  flow client and redirects new recovery links to `/auth/recovery`. This avoids
+  tying a link to the PKCE verifier in the browser that requested it, so email
+  in-app browsers and other devices work without a custom hosted email template.
+- `/auth/recovery` validates the recovery fragment and converts its access and
+  refresh tokens into the cookie-backed session used by the SSR app, then opens
+  `/reset-password`.
+- `/auth/callback` still accepts legacy PKCE `code` links and server-verifiable
+  recovery `token_hash` links, rejects protocol-relative `next` paths, and sends
+  invalid or expired links back to the request form with an explicit retry
+  message.
 - `/reset-password` updates the password and redirects to `/dashboard`.
 
 If reset emails do not arrive, configure SMTP in Supabase Auth. The default
@@ -499,6 +507,11 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-19: made password recovery reliable across browsers and email apps
+  without requiring custom SMTP: reset requests now use an implicit-flow client,
+  `/auth/recovery` turns the returned fragment into an SSR cookie session, and
+  invalid or expired links show visible retry feedback. The callback retains
+  legacy PKCE and token-hash support.
 - 2026-08-19: replaced the demo seed with the final participant-free cutover:
   100 spreadsheet-sourced challenges with full proof descriptions, exact 2/3-
   team group sizes, the two subjective bonuses documented for manual RA award,
