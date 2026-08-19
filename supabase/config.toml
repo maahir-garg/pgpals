@@ -64,7 +64,7 @@ enabled = true
 schema_paths = []
 
 [db.seed]
-# Demo data is created by scripts/seed.ts after reset; there is no SQL seed.
+# Final event data is created by scripts/seed.ts after reset; there is no SQL seed.
 enabled = false
 
 [db.network_restrictions]

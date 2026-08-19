@@ -176,7 +176,8 @@ sequenceDiagram
 
 Rules:
 
-- `.test` demo emails are rejected in hosted signup flows.
+- Reserved `.test` emails are rejected in hosted signup flows; the final event
+  seed contains no `.test` accounts.
 - `signup_precheck(email)` gives user-friendly errors before creating an Auth
   user.
 - `handle_new_user()` is authoritative. It only creates a profile when the email
@@ -514,11 +515,11 @@ Domain components live in `src/components/pgpals`. Generic primitives live in
 | `npm run build` | Production build. |
 | `npm run lint` | ESLint. |
 | `npm run typecheck` | TypeScript check. |
-| `npm run seed` | Destructive local demo seed. |
-| `npm run seed:prod` | Deliberate destructive production seed or wipe flow. |
+| `npm run seed` | Destructive local final-event seed: 100 tasks and admin access, no participants. |
+| `npm run seed:prod` | One-time destructive production cutover to the same participant-free final state. |
 | `npm run backup` | Local backup. |
 | `npm run backup:prod` | Production backup. |
-| `npx tsx scripts/smoke-test.ts` | Security and rule checks against a seeded database. |
+| `npx tsx scripts/smoke-test.ts` | Legacy fixture-based security/rule checks; never run against production. |
 | `npx tsx scripts/render-test.ts` | Page render checks. |
 | `npx tsx scripts/walkthrough.ts` | Broad UI walkthrough and screenshots. |
 | `npx tsx scripts/e2e-browser.ts` | Browser-driven end-to-end flow. |

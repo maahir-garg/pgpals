@@ -133,14 +133,16 @@ local, and Vercel agree.
   Hardcoded prize messaging and ceremony date, rendered by the landing page,
   leaderboard, and dashboard.
 
-- `scripts/seed.ts`
-  Destructive demo seed. `npm run seed` targets the local stack via
-  `.env.local` and refuses non-local URLs; `npm run seed:prod` deliberately
-  wipes and reseeds production via `.env.production.local` (5-second abort
-  window) for dry runs; it sets the 2026 SGT event dates and prize-pool demo
-  announcements, trying `ra@pgpals.test` first and falling back to
-  `ra.dryrun@u.nus.edu` if hosted Auth rejects `.test`; `--wipe-only` is the
-  D-day clean build (see README).
+- `scripts/final-event-data.ts`, `scripts/seed.ts`
+  Final 2026 event data and destructive cutover seed. `npm run seed` targets
+  the local stack via `.env.local` and refuses non-local URLs;
+  `npm run seed:prod` deliberately wipes production via
+  `.env.production.local` after a 5-second abort window. Both commands create
+  the same final state: real event settings, 100 published challenges, the ten
+  named RA emails, and one shared teamless admin, with no resident roster,
+  teams, submissions, pairings, upload batches, bonuses, announcements, or
+  media. The shared admin password is loaded from the gitignored
+  `.env.event.local` file and is never printed or committed.
 
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
@@ -159,9 +161,8 @@ local, and Vercel agree.
 
 ## Auth And Accounts
 
-Hosted Supabase Auth can reject reserved `.test` emails. The demo seed now
-tries `ra@pgpals.test` for disposable dry runs and falls back if hosted Auth
-rejects it. Do not rely on `.test` for real production admins.
+Hosted Supabase Auth can reject reserved `.test` emails. Do not rely on
+`.test` for production admins. The final seed contains no `.test` accounts.
 
 Signup flow:
 
@@ -191,8 +192,9 @@ First production admin:
 insert into admin_allowlist (email) values ('real.email@u.nus.edu');
 ```
 
-Then sign up with that real email. Do not use `ra@pgpals.test` in production.
-Every later RA is added in Admin -> Settings, which writes to
+Then sign up with that real email. The final cutover seed normally bootstraps
+the complete RA allowlist and shared checker account instead. Every later RA
+is added in Admin -> Settings, which writes to
 `admin_allowlist` and promotes an already-existing account immediately. The
 same screen's **Demote & revoke** action calls `demote_admin(email)`, which
 atomically removes the allowlist entry, changes an existing profile back to a
@@ -337,10 +339,10 @@ npm run seed
 npm run dev
 ```
 
-`npm run seed` is destructive and idempotent. It is for local/demo data.
-
-Local demo accounts are documented in `README.md`. They use `.test` emails and
-are not valid hosted Supabase Auth accounts.
+`npm run seed` is destructive and idempotent. It creates the final participant-
+free event state locally. Use the shared teamless admin to inspect admin pages;
+import a temporary local roster only when explicitly testing participant flows,
+and do not copy that roster to production.
 
 ## UI And Design Conventions
 
@@ -470,12 +472,14 @@ Clean account leftovers:
   stack values; production credentials live in `.env.production.local` and
   are only used by the explicit `:prod` scripts. (This went wrong once:
   the seed wiped production because `.env.local` had been switched.)
-- Production reseeds happen only via `npm run seed:prod`, and never after
-  the D-day clean build (README → "Dry runs, backups, and D-day").
-- Production reseeds wipe auth users, event rows, submissions, storage media,
-  and demo/recreated data. Take `npm run backup:prod -- --photos` first unless
-  the user explicitly accepts losing current production data; backups contain
-  resident names, emails, photos, and videos, so treat them as private data.
+- The final production cutover happens only via `npm run seed:prod`, and never
+  again after the real roster is imported (README → "D-day: clean build of
+  production").
+- The production seed wipes Auth users, event rows, submissions, and storage
+  media before installing the final task/admin state. Take
+  `npm run backup:prod -- --photos` first unless the user explicitly accepts
+  losing current production data; backups contain resident names, emails,
+  photos, and videos, so treat them as private data.
 - Do not expose or commit `.env.local` or `.env.production.local`.
 - Do not import the service-role admin client into client components.
 - Do not rely on UI checks for security. Put access rules in RLS/RPCs.
@@ -495,6 +499,10 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-19: replaced the demo seed with the final participant-free cutover:
+  100 spreadsheet-sourced challenges with full proof descriptions, exact 2/3-
+  team group sizes, the two subjective bonuses documented for manual RA award,
+  ten named RA allowlist entries, and one shared teamless admin account.
 - 2026-07-23: added tap-to-call on-campus and off-campus emergency contacts to
   participant Home and the Guide.
 - 2026-07-15: reordered participant navigation to Home, Guide, Tasks, then
@@ -522,8 +530,8 @@ Clean account leftovers:
 - 2026-07-15: removed repeat approvals; every task or group has one approval.
 - 2026-07-15: removed the legacy `max_submissions`, `team_a`, and `team_b`
   columns; award previews now use the database's authoritative calculation.
-- 2026-07-15: added mixed photo/video proof, RA video playback,
-  database-enforced media formats/counts, and seeded multi-video data.
+- 2026-07-15: added mixed photo/video proof, RA video playback, and
+  database-enforced media formats/counts.
 - 2026-07-15: replaced direct participant media uploads with database-reserved
   batches, signed upload tokens, actual Storage metadata verification, and
   server-side cleanup for failed/expired batches.

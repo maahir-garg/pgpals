@@ -1,560 +1,279 @@
 /**
- * Seeds the database with realistic demo data:
- *  - 1 dry-run admin + 20 teams (40 rostered residents, most signed up)
- *  - tasks in every state (live, closing soon, closed, scheduled, draft,
- *    group, every bonus type, single-approval)
- *  - submissions in every status incl. a rejected→resubmitted chain
- *  - pairings (accepted / pending / declined), manual bonuses, announcements
+ * Seeds the final 2026 PGPals event configuration.
  *
- * Run: npm run seed   (idempotent: wipes and recreates demo data)
- * All demo passwords: pgpals123
+ * The operation is destructive and idempotent. It removes every existing
+ * participant, team, roster row, submission, pairing, upload reservation,
+ * bonus, announcement, task, Auth user, and submission media object. It then
+ * installs the final RA allowlist, creates the shared RA account, and inserts
+ * the 100 final challenges. No participant, team, submission, or demo fixture
+ * is created.
+ *
+ * Run locally: npm run seed
+ * Run against production: npm run seed:prod
  */
 import { createClient } from "@supabase/supabase-js";
-import sharp from "sharp";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
-  LUCKY_DRAW,
-  PARTICIPATION_REWARD,
-  PRIZE_CEREMONY_LABEL,
-  PRIZE_POOL_VALUE_LABEL,
-  PRIZE_REVEAL_TEASER,
-  PRIZE_TAGLINE,
-  PRIZE_WINNER_COUNT,
-} from "../src/lib/prizes";
+  FINAL_RA_ACCOUNTS,
+  FINAL_TASKS,
+  SHARED_ADMIN_EMAIL,
+  SHARED_ADMIN_NAME,
+  validateFinalEventData,
+} from "./final-event-data";
 
-// --- env -------------------------------------------------------------------
-// Default target is the LOCAL stack via .env.local, and anything that does
-// not look local is refused. `npm run seed:prod` (--prod) loads
-// .env.production.local instead, for deliberate dry-run reseeds of the live
-// project, with a 5-second abort window: this script WIPES its target.
 const PROD = process.argv.includes("--prod");
 const envFile = PROD ? ".env.production.local" : ".env.local";
+
 try {
-  const env = readFileSync(resolve(process.cwd(), envFile), "utf8");
-  for (const line of env.split("\n")) {
-    const m = line.match(/^([A-Z_]+)=(.*)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
+  for (const sourceFile of [envFile, ".env.event.local"]) {
+    const env = readFileSync(resolve(process.cwd(), sourceFile), "utf8");
+    for (const line of env.split("\n")) {
+      const match = line.match(/^([A-Z_]+)=(.*)$/);
+      if (match && !process.env[match[1]]) process.env[match[1]] = match[2];
+    }
   }
 } catch {
-  /* rely on process env */
+  // Environment variables may be supplied by the caller instead.
 }
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const sharedAdminPassword = process.env.PGPALS_SHARED_ADMIN_PASSWORD;
+
 if (!url || !serviceKey) {
-  console.error(`Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (${envFile})`);
+  console.error(
+    `Missing NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY (${envFile})`
+  );
+  process.exit(1);
+}
+if (!sharedAdminPassword) {
+  console.error(
+    "Missing PGPALS_SHARED_ADMIN_PASSWORD (.env.event.local or process environment)"
+  );
   process.exit(1);
 }
 if (!PROD && !/^https?:\/\/(127\.0\.0\.1|localhost)[:/]/.test(url)) {
   console.error(
     `${envFile} points at ${new URL(url).host}, which is not the local stack.\n` +
-      "The seed wipes its target. Use `npm run seed:prod` if you really mean it."
+      "The seed wipes its target. Use `npm run seed:prod` only for the deliberate production cutover."
   );
   process.exit(1);
 }
-async function confirmProdWipe() {
-  if (!PROD) return;
-  console.log(
-    `⚠️  WIPING AND RESEEDING ${new URL(url!).host} in 5 seconds - Ctrl-C to abort.`
-  );
-  await new Promise((r) => setTimeout(r, 5000));
-}
+
 const db = createClient(url, serviceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-const PASSWORD = "pgpals123";
-const LOCAL_ADMIN_EMAIL = "ra@pgpals.test";
-const PROD_FALLBACK_ADMIN_EMAIL = "ra.dryrun@u.nus.edu";
-const hours = (n: number) => new Date(Date.now() + n * 3600_000).toISOString();
-const days = (n: number) => hours(n * 24);
+const EVENT_SETTINGS = {
+  event_name: "PGPals: The Emerald Challenge",
+  start_at: "2026-08-31T00:00:00+08:00",
+  end_at: "2026-09-13T23:59:00+08:00",
+  leaderboard_hide_at: "2026-09-08T00:00:00+08:00",
+};
 
-// Real 2026 run defaults. Admins can still edit these in Settings; the seed
-// just avoids showing a confusing relative demo window on the landing page.
-const EVENT_START_AT = "2026-08-31T00:00:00+08:00";
-const EVENT_END_AT = "2026-09-13T23:59:00+08:00";
-const LEADERBOARD_HIDE_AT = "2026-09-08T00:00:00+08:00";
-const EVENT_START_LABEL = "31 August";
-const EVENT_END_LABEL = "13 September";
-const LEADERBOARD_HIDE_LABEL = "8 September";
-
-// --- demo data -------------------------------------------------------------
-const TEAM_NAMES = [
-  "Waffle Warriors", "Duck Duck Goose", "The Dumpling Duo", "Chicken Rice Champions",
-  "Kaya Toast Krew", "Milo Dinosaurs", "The Otter Pair", "Supper Club",
-  "Laksa Legends", "Bubble Tea Bandits", "The Mound Rats", "Roti Prata Party",
-  "Satay Squad", "Ice Kachang Icons", "Nasi Lemak Ninjas", "The PGP Penguins",
-  "Char Kway Teow Crew", "Kopi Kakis", "The Study Buddies", "Midnight Mamak",
-];
-
-const FIRST = ["Chloe", "Wei Ling", "Aisha", "Ryan", "Mei Hui", "Arjun", "Sarah",
-  "Jun Jie", "Priya", "Marcus", "Hui Min", "Daniel", "Nadia", "Kai", "Grace",
-  "Hafiz", "Xin Yi", "Ethan", "Divya", "Zhi Hao", "Amanda", "Irfan", "Yu Ting",
-  "Lucas", "Shreya", "Ming En", "Rachel", "Adam", "Li Ting", "Nikhil", "Cheryl",
-  "Farhan", "Jia Wen", "Ben", "Ananya", "Kok Wai", "Elly", "Tejas", "Si Qi", "Owen"];
-const LAST = ["Lim", "Tan", "Rahman", "Ng", "Chen", "Menon", "Wong", "Koh", "Nair",
-  "Lee", "Goh", "Ong", "Binte Yusof", "Teo", "Chua", "Bin Salleh", "Zhang", "Ho",
-  "Pillai", "Liu", "Yeo", "Hussain", "Sim", "Foo", "Iyer", "Toh", "Chan", "Low",
-  "Seah", "Sharma", "Ang", "Malik", "Peh", "Tay", "Rao", "Cheong", "Soh", "Patel",
-  "Quek", "Yap"];
-
-function residentName(i: number) {
-  return `${FIRST[i % FIRST.length]} ${LAST[i % LAST.length]}`;
-}
-function residentEmail(i: number) {
-  const slug = residentName(i).toLowerCase().replace(/[^a-z]+/g, ".");
-  return `${slug}@u.nus.edu`;
-}
-
-// Teams whose second member hasn't signed up yet (shows ⏳ in admin).
-const NOT_SIGNED_UP = new Set([7, 13, 18]);
-
-// --- placeholder photos ----------------------------------------------------
-const PALETTES: [string, string, string][] = [
-  ["#f97350", "#ffd166", "📸"], ["#06b6a4", "#bbf7d0", "🍜"],
-  ["#8b5cf6", "#fbcfe8", "🌅"], ["#f59e0b", "#fef3c7", "🧋"],
-  ["#3b82f6", "#dbeafe", "🎬"], ["#ef4444", "#fee2e2", "🧺"],
-];
-
-// Tiny valid H.264 MP4 used to exercise video playback in participant and RA
-// views without bloating local or production demo storage.
-const DEMO_VIDEO = Buffer.from(
-  "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAOMbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAAZAAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAArd0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAAZAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAKAAAAB4AAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAGQAAAEAAABAAAAAAIvbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAyAAAAFABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAAB2m1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAZpzdGJsAAAAwnN0c2QAAAAAAAAAAQAAALJhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAKAAeABIAAAASAAAAAAAAAABFUxhdmM2Mi4xMS4xMDAgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAAOGF2Y0MBZAAM/+EAGmdkAAyscgRChH5cBEAAAAMAQAAADIPFCmEYAQAHaOhDglLIsP34+AAAAAAQcGFzcAAAAAEAAAABAAAAFGJ0cnQAAAAAAABDHAAAAAAAAAAYc3R0cwAAAAAAAAABAAAACgAAAgAAAAAUc3RzcwAAAAAAAAABAAAAAQAAADhjdHRzAAAAAAAAAAUAAAABAAAEAAAAAAEAABQAAAAAAQAACAAAAAADAAAAAAAAAAQAAAIAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAAKAAAAAQAAADxzdHN6AAAAAAAAAAAAAAAKAAAC5gAAAA4AAAAMAAAADQAAAA0AAAANAAAADQAAAA0AAAANAAAADQAAABRzdGNvAAAAAAAAAAEAAAO8AAAAYXVkdGEAAABZbWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAAAsaWxzdAAAACSpdG9vAAAAHGRhdGEAAAABAAAAAExhdmY2Mi4zLjEwMAAAAAhmcmVlAAADY21kYXQAAAKwBgX//6zcRem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTY1IHIzMjIyIGIzNTYwNWEgLSBILjI2NC9NUEctNCBBVkMgQVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDI1IC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcveDI2NC5odG1sIC0gb3B0aW9uczogY2FiYWM9MSByZWY9MTYgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MzoweDEzMyBtZT11bWggc3VibWU9MTAgcHN5PTEgcHN5X3JkPTEuMDA6MC4wMCBtaXhlZF9yZWY9MSBtZV9yYW5nZT0yNCBjaHJvbWFfbWU9MSB0cmVsbGlzPTIgOHg4ZGN0PTEgY3FtPTAgZGVhZHpvbmU9MjEsMTEgZmFzdF9wc2tpcD0xIGNocm9tYV9xcF9vZmZzZXQ9LTIgdGhyZWFkcz00IGxvb2thaGVhZF90aHJlYWRzPTEgc2xpY2VkX3RocmVhZHM9MCBucj0wIGRlY2ltYXRlPTEgaW50ZXJsYWNlZD0wIGJsdXJheV9jb21wYXQ9MCBjb25zdHJhaW5lZF9pbnRyYT0wIGJmcmFtZXM9OCBiX3B5cmFtaWQ9MiBiX2FkYXB0PTIgYl9iaWFzPTAgZGlyZWN0PTMgd2VpZ2h0Yj0xIG9wZW5fZ29wPTAgd2VpZ2h0cD0yIGtleWludD0yNTAga2V5aW50X21pbj0yNSBzY2VuZWN1dD00MCBpbnRyYV9yZWZyZXNoPTAgcmNfbG9va2FoZWFkPTYwIHJjPWNyZiBtYnRyZWU9MSBjcmY9MzUuMCBxY29tcD0wLjYwIHFwbWluPTAgcXBtYXg9NjkgcXBzdGVwPTQgaXBfcmF0aW89MS40MCBhcT0xOjEuMDAAgAAAAC5liIEAB3/+bxH51sj8p/liD/Svd+HmliMj1rOjvibSWmBgR+BeALQAC6h2ST5pAAAACkGaCS2IV/8ABVQAAAAIQZ4QhxDfBbUAAAAJAZ4YJohX/wjYAAAACQGeGEaIV/8I2QAAAAkBnhhmiFf/CNkAAAAJAZ4YrUhX/wjZAAAACQGeGM1IV/8I2QAAAAkBnhjtSFf/CNgAAAAJAZ4ZDUhX/wjY",
-  "base64"
-);
-
-async function makePhoto(index: number): Promise<Buffer> {
-  const [bg, fg, emoji] = PALETTES[index % PALETTES.length];
-  const svg = `<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
-    <rect width="800" height="600" fill="${bg}"/>
-    <circle cx="650" cy="120" r="180" fill="${fg}" opacity="0.6"/>
-    <circle cx="120" cy="500" r="140" fill="${fg}" opacity="0.4"/>
-    <text x="400" y="330" font-size="160" text-anchor="middle">${emoji}</text>
-    <text x="400" y="470" font-size="42" text-anchor="middle" fill="white"
-      font-family="Helvetica, Arial" font-weight="bold">PGPals demo photo</text>
-  </svg>`;
-  return sharp(Buffer.from(svg)).jpeg({ quality: 70 }).toBuffer();
-}
-
-// --- helpers ---------------------------------------------------------------
 function die(step: string, error: unknown): never {
   console.error(`FAILED at ${step}:`, error);
   process.exit(1);
 }
 
+async function confirmProdWipe() {
+  if (!PROD) return;
+  console.log(
+    `⚠️  FINAL CUTOVER: wiping ${new URL(url!).host} in 5 seconds — Ctrl-C to abort.`
+  );
+  await new Promise((resolveDelay) => setTimeout(resolveDelay, 5000));
+}
+
 async function wipe() {
-  console.log("Wiping existing data…");
-  await db.storage.emptyBucket("submissions").catch(() => {});
-  for (const table of ["announcements", "bonus_awards", "submissions", "pairings", "tasks", "roster", "teams"]) {
+  console.log("Removing existing event data, users, and submission media…");
+
+  const { error: storageError } = await db.storage.emptyBucket("submissions");
+  if (storageError) die("empty submissions storage", storageError);
+
+  for (const table of [
+    "announcements",
+    "bonus_awards",
+    "submissions",
+    "submission_upload_batches",
+    "pairings",
+    "tasks",
+    "roster",
+    "teams",
+  ]) {
     const { error } = await db.from(table).delete().not("id", "is", null);
     if (error) die(`wipe ${table}`, error);
   }
-  // Delete all auth users (cascades to profiles). Always re-list page 1:
-  // deletions shift the remaining users forward.
+
+  // Always re-list page 1 because deletions shift later users forward.
   for (;;) {
     const { data, error } = await db.auth.admin.listUsers({ page: 1, perPage: 100 });
-    if (error) die("listUsers", error);
+    if (error) die("list Auth users", error);
     if (data.users.length === 0) break;
     for (const user of data.users) {
-      await db.auth.admin.deleteUser(user.id);
+      const { error: deleteError } = await db.auth.admin.deleteUser(user.id);
+      if (deleteError) die("delete Auth user", deleteError);
     }
-    if (data.users.length < 100) break;
+  }
+
+  const { error: allowlistError } = await db
+    .from("admin_allowlist")
+    .delete()
+    .not("email", "is", null);
+  if (allowlistError) die("reset admin allowlist", allowlistError);
+}
+
+async function seedAdminAccess() {
+  console.log("Installing the final RA allowlist and shared admin account…");
+  const allowlist = [
+    ...FINAL_RA_ACCOUNTS.map((ra) => ({ email: ra.email })),
+    { email: SHARED_ADMIN_EMAIL },
+  ];
+  const { error: allowlistError } = await db.from("admin_allowlist").insert(allowlist);
+  if (allowlistError) die("insert final admin allowlist", allowlistError);
+
+  const { data: authData, error: authError } = await db.auth.admin.createUser({
+    email: SHARED_ADMIN_EMAIL,
+    password: sharedAdminPassword,
+    email_confirm: true,
+    user_metadata: { full_name: SHARED_ADMIN_NAME },
+  });
+  if (authError) die("create shared admin Auth user", authError);
+
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("id, role, team_id")
+    .eq("id", authData.user.id)
+    .single();
+  if (profileError) die("load shared admin profile", profileError);
+  if (profile.role !== "admin" || profile.team_id !== null) {
+    die("verify shared admin profile", "Shared account was not created as a teamless admin.");
+  }
+
+  return profile.id;
+}
+
+async function seedTasks(createdBy: string) {
+  console.log("Inserting 100 final challenges…");
+  const rows = FINAL_TASKS.map((item) => ({
+    title: item.title,
+    description: item.description,
+    points: item.points,
+    type: item.type,
+    pair_team_count: item.pairTeamCount,
+    release_at: `${item.startDate}T00:00:00+08:00`,
+    deadline_at: `${item.endDate}T23:59:00+08:00`,
+    bonus_config: item.bonusConfig,
+    is_published: true,
+    created_by: createdBy,
+  }));
+
+  const { data, error } = await db.from("tasks").insert(rows).select("id");
+  if (error) die("insert final tasks", error);
+  if (data.length !== FINAL_TASKS.length) {
+    die("verify inserted tasks", `Expected ${FINAL_TASKS.length}; inserted ${data.length}.`);
+  }
+}
+
+async function verifyFinalState() {
+  const expectedEmptyTables = [
+    "teams",
+    "roster",
+    "submissions",
+    "pairings",
+    "submission_upload_batches",
+    "bonus_awards",
+    "announcements",
+  ];
+  for (const table of expectedEmptyTables) {
+    const { count, error } = await db
+      .from(table)
+      .select("id", { count: "exact", head: true });
+    if (error) die(`count ${table}`, error);
+    if (count !== 0) die(`verify ${table}`, `Expected 0 rows; found ${count}.`);
+  }
+
+  const { data: taskRows, count: taskCount, error: taskError } = await db
+    .from("tasks")
+    .select("type, pair_team_count, bonus_config, is_published", { count: "exact" });
+  if (taskError) die("count tasks", taskError);
+  if (taskCount !== 100) die("verify tasks", `Expected 100 rows; found ${taskCount}.`);
+  if (taskRows.some((task) => !task.is_published)) {
+    die("verify tasks", "Every final task must be published.");
+  }
+  if (taskRows.filter((task) => task.type === "pair").length !== 10) {
+    die("verify tasks", "Expected exactly 10 group tasks.");
+  }
+  if (
+    taskRows.some(
+      (task) =>
+        (task.type === "pair" && ![2, 3].includes(task.pair_team_count)) ||
+        task.bonus_config !== null
+    )
+  ) {
+    die("verify tasks", "Unexpected group size or automatic bonus configuration.");
+  }
+
+  const { data: allowlistRows, count: allowlistCount, error: allowlistError } = await db
+    .from("admin_allowlist")
+    .select("email", { count: "exact" });
+  if (allowlistError) die("count admin allowlist", allowlistError);
+  if (allowlistCount !== FINAL_RA_ACCOUNTS.length + 1) {
+    die(
+      "verify admin allowlist",
+      `Expected ${FINAL_RA_ACCOUNTS.length + 1} rows; found ${allowlistCount}.`
+    );
+  }
+  const expectedEmails = [
+    ...FINAL_RA_ACCOUNTS.map((ra) => ra.email),
+    SHARED_ADMIN_EMAIL,
+  ].sort();
+  const actualEmails = allowlistRows.map((row) => row.email).sort();
+  if (JSON.stringify(actualEmails) !== JSON.stringify(expectedEmails)) {
+    die("verify admin allowlist", "The allowlist emails do not match the final list.");
+  }
+
+  const { data: authUsers, error: authError } = await db.auth.admin.listUsers({
+    page: 1,
+    perPage: 100,
+  });
+  if (authError) die("verify Auth users", authError);
+  if (
+    authUsers.users.length !== 1 ||
+    authUsers.users[0]?.email?.toLowerCase() !== SHARED_ADMIN_EMAIL
+  ) {
+    die("verify Auth users", "Expected the shared admin to be the only Auth user.");
   }
 }
 
 async function main() {
+  validateFinalEventData();
   await confirmProdWipe();
   await wipe();
 
-  // --wipe-only: clean build for the real event (see README "D-day").
-  // Leaves event_settings and real admin_allowlist emails in place, but
-  // removes the demo admin; RAs sign up again and configure via the UI.
-  if (process.argv.includes("--wipe-only")) {
-    await db
-      .from("admin_allowlist")
-      .delete()
-      .in("email", [LOCAL_ADMIN_EMAIL, PROD_FALLBACK_ADMIN_EMAIL]);
-    console.log(
-      "\nWiped clean (no demo data). Next: check Admin → Settings lists the",
-      "\nreal RA emails, have them sign up, confirm the event dates, then",
-      "\nimport the real roster CSV. See README → D-day."
-    );
-    return;
-  }
+  console.log("Applying final event settings…");
+  const { error: settingsError } = await db
+    .from("event_settings")
+    .update(EVENT_SETTINGS)
+    .eq("id", 1);
+  if (settingsError) die("update event settings", settingsError);
 
-  // Event window defaults use the real 2026 run in SGT. Task timings below
-  // remain relative so local/demo workflows still have live tasks.
-  console.log("Event settings…");
-  {
-    const { error } = await db
-      .from("event_settings")
-      .update({
-        event_name: "PGPals: The Emerald Challenge",
-        start_at: EVENT_START_AT,
-        end_at: EVENT_END_AT,
-        leaderboard_hide_at: LEADERBOARD_HIDE_AT,
-      })
-      .eq("id", 1);
-    if (error) die("event_settings", error);
-  }
-
-  // Teams + roster
-  console.log("Teams & roster…");
-  const teamIds: string[] = [];
-  for (let t = 0; t < TEAM_NAMES.length; t++) {
-    const { data: team, error } = await db
-      .from("teams")
-      .insert({ name: TEAM_NAMES[t] })
-      .select("id")
-      .single();
-    if (error) die(`team ${TEAM_NAMES[t]}`, error);
-    teamIds.push(team.id);
-    const { error: rosterError } = await db.from("roster").insert([
-      { team_id: team.id, full_name: residentName(t * 2), email: residentEmail(t * 2) },
-      { team_id: team.id, full_name: residentName(t * 2 + 1), email: residentEmail(t * 2 + 1) },
-    ]);
-    if (rosterError) die("roster", rosterError);
-  }
-
-  // Users: dry-run admin + participants (roster-linked by trigger). We prefer
-  // ra@pgpals.test for prod dry runs too, but hosted Auth can reject reserved
-  // .test domains, so prod falls back instead of leaving a half-seeded DB.
-  console.log("Users (this takes ~30s)…");
-  async function createSeedAdmin(email: string): Promise<
-    | { ok: true; id: string; email: string }
-    | { ok: false; error: string }
-  > {
-    const { error: allowError } = await db
-      .from("admin_allowlist")
-      .upsert({ email });
-    if (allowError) return { ok: false, error: allowError.message };
-
-    const { error: adminError } = await db.auth.admin.createUser({
-      email,
-      password: PASSWORD,
-      email_confirm: true,
-      user_metadata: { full_name: "RA R3" },
-    });
-    if (adminError) return { ok: false, error: adminError.message };
-
-    const { data: adminProfile, error: profileError } = await db
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .single();
-    if (profileError || !adminProfile) {
-      return {
-        ok: false,
-        error: profileError?.message ?? "Admin profile was not created.",
-      };
-    }
-    return { ok: true, id: adminProfile.id, email };
-  }
-
-  let adminResult = await createSeedAdmin(LOCAL_ADMIN_EMAIL);
-  if (!adminResult.ok && PROD) {
-    console.warn(
-      `Could not create ${LOCAL_ADMIN_EMAIL} on hosted Auth: ${adminResult.error}`
-    );
-    console.warn(`Falling back to ${PROD_FALLBACK_ADMIN_EMAIL}.`);
-    await db.from("admin_allowlist").delete().eq("email", LOCAL_ADMIN_EMAIL);
-    adminResult = await createSeedAdmin(PROD_FALLBACK_ADMIN_EMAIL);
-  }
-  if (!adminResult.ok) die("admin user", adminResult.error);
-
-  const profileIdByEmail = new Map<string, string>();
-  for (let i = 0; i < TEAM_NAMES.length * 2; i++) {
-    const teamIndex = Math.floor(i / 2);
-    if (NOT_SIGNED_UP.has(teamIndex) && i % 2 === 1) continue; // second member never signed up
-    const { data, error } = await db.auth.admin.createUser({
-      email: residentEmail(i),
-      password: PASSWORD,
-      email_confirm: true,
-      user_metadata: { full_name: residentName(i) },
-    });
-    if (error) die(`user ${residentEmail(i)}`, error);
-    profileIdByEmail.set(residentEmail(i), data.user.id);
-  }
-  const adminId = adminResult.id;
-
-  // Tasks
-  console.log("Tasks…");
-  async function addTask(row: Record<string, unknown>): Promise<string> {
-    const { data, error } = await db
-      .from("tasks")
-      .insert({ created_by: adminId, ...row })
-      .select("id")
-      .single();
-    if (error) die(`task ${row.title}`, error);
-    return data.id;
-  }
-
-  const tPenguin = await addTask({
-    title: "Find the hidden penguin 🐧",
-    description:
-      "Somewhere in PGPR there's a tiny penguin statue. Find it and snap a photo of **both of you** with it!\n\n- Both faces visible\n- No spoilers in the group chat!",
-    points: 10, type: "standard", release_at: days(-5), deadline_at: days(-2),
-  });
-  const tSunrise = await addTask({
-    title: "Sunrise mission 🌅",
-    description: "Catch the sunrise together from anywhere on campus. Photo must show the sky AND both of you (bed hair encouraged).",
-    points: 15, type: "standard", release_at: days(-5), deadline_at: days(-1),
-  });
-  const tDinner = await addTask({
-    title: "Dinner date with your pal 🍜",
-    description: "Have a meal together somewhere neither of you has eaten before. Show us the food and the new spot!",
-    points: 10, type: "standard", release_at: days(-3), deadline_at: days(4),
-    bonus_config: { kind: "first_n", n: 10, bonus: 5 },
-  });
-  const tSweep = await addTask({
-    title: "Supermarket sweep 🛒",
-    description: "Recreate a famous album cover using only items from the supermarket. Bonus coins for commitment.",
-    points: 20, type: "standard", release_at: days(-2), deadline_at: days(5),
-    bonus_config: { kind: "before", cutoff: days(1), bonus: 10 },
-  });
-  const tMovie = await addTask({
-    title: "Movie night squad 🎬",
-    description: "**Group video task!** Link up with two other teams for a movie night: 6 people, 1 screen, snacks mandatory. Submit two short clips as one shared submission for all three teams.",
-    points: 25, type: "pair", release_at: days(-2), deadline_at: days(6),
-    pair_team_count: 3,
-    bonus_config: { kind: "multiplier_before", cutoff: days(2), multiplier: 1.5 },
-  });
-  await addTask({
-    title: "Golden hour at the Mound ✨",
-    description: "Sunset photo at the PGP Mound. Golden hour is roughly 6.45pm to 7.15pm, so time it right!",
-    points: 15, type: "standard", release_at: days(-1), deadline_at: hours(20),
-  });
-  const tGratitude = await addTask({
-    title: "Daily gratitude snap 🙏",
-    description: "Photo of one thing you're grateful for today, with a one-line caption.",
-    points: 5, type: "standard", release_at: days(-3), deadline_at: days(7),
-  });
-  const tPicnic = await addTask({
-    title: "Pair picnic in the park 🧺",
-    description: "**Pair task!** Two teams, one picnic, zero phones (except for the proof photo).",
-    points: 20, type: "pair", release_at: days(-1), deadline_at: days(7),
-  });
-  await addTask({
-    title: "Weekend mystery challenge 🎁",
-    description: "Releasing this weekend. Keep your Saturday free!",
-    points: 30, type: "standard", release_at: days(2), deadline_at: days(6),
-  });
-  await addTask({
-    title: "(Draft) Karaoke showdown 🎤",
-    description: "Still planning this one.",
-    points: 20, type: "standard", release_at: days(3), deadline_at: days(8),
-    is_published: false,
-  });
-
-  // Photos
-  console.log("Uploading demo media…");
-  const photoBuffers = await Promise.all(PALETTES.map((_, i) => makePhoto(i)));
-  let photoCounter = 0;
-  async function uploadPhotos(teamId: string, count: number): Promise<string[]> {
-    const folder = crypto.randomUUID();
-    const paths: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const path = `${teamId}/${folder}/${i + 1}.jpg`;
-      const { error } = await db.storage
-        .from("submissions")
-        .upload(path, photoBuffers[photoCounter++ % photoBuffers.length], {
-          contentType: "image/jpeg",
-        });
-      if (error) die(`upload ${path}`, error);
-      paths.push(path);
-    }
-    return paths;
-  }
-
-  async function uploadVideos(teamId: string, folder: string, count: number) {
-    const paths: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const path = `${teamId}/${folder}/video-${i + 1}.mp4`;
-      const { error } = await db.storage
-        .from("submissions")
-        .upload(path, DEMO_VIDEO, { contentType: "video/mp4" });
-      if (error) die(`upload ${path}`, error);
-      paths.push(path);
-    }
-    return paths;
-  }
-
-  // Submissions
-  console.log("Submissions…");
-  interface SubSpec {
-    task: string; team: string; status: "pending" | "approved" | "rejected" | "superseded";
-    points?: number; note?: string; submittedH: number; reviewedH?: number;
-    pairing?: string; resubOf?: string; photos?: number; videos?: number; text?: string;
-  }
-  async function addSub(spec: SubSpec): Promise<string> {
-    const paths = await uploadPhotos(spec.team, spec.photos ?? 2);
-    if (spec.videos) {
-      paths.push(...await uploadVideos(spec.team, crypto.randomUUID(), spec.videos));
-    }
-    const { data, error } = await db
-      .from("submissions")
-      .insert({
-        task_id: spec.task,
-        team_id: spec.team,
-        pairing_id: spec.pairing ?? null,
-        text_content: spec.text ?? "Done! That was so fun 😄",
-        photo_paths: paths,
-        status: spec.status,
-        points_awarded: spec.status === "approved" ? (spec.points ?? 0) : null,
-        reviewer_id: spec.status === "pending" ? null : adminId,
-        review_note: spec.note ?? null,
-        submitted_at: hours(spec.submittedH),
-        reviewed_at: spec.reviewedH != null ? hours(spec.reviewedH) : null,
-        resubmission_of: spec.resubOf ?? null,
-      })
-      .select("id")
-      .single();
-    if (error) die("submission", error);
-    return data.id;
-  }
-
-  // Closed task: 12 teams approved, varying review times (tie-break variety)
-  for (let t = 0; t < 12; t++) {
-    await addSub({
-      task: tPenguin, team: teamIds[t], status: "approved", points: 10,
-      submittedH: -100 - t, reviewedH: -95 - t,
-      text: "Found the little guy! 🐧",
-    });
-  }
-  // Sunrise: mix of approved and a rejected that never got resubmitted (closed now)
-  for (let t = 0; t < 6; t++) {
-    await addSub({
-      task: tSunrise, team: teamIds[t], status: "approved", points: 15,
-      submittedH: -80 - t, reviewedH: -70 - t, text: "5:45am club ☀️",
-    });
-  }
-  await addSub({
-    task: tSunrise, team: teamIds[6], status: "rejected",
-    note: "That's clearly a sunset, nice try! 😂", submittedH: -60, reviewedH: -55,
-  });
-
-  // Dinner (first_n bonus): 8 approved with +5 bonus, some pending, 1 rejected chain
-  for (let t = 0; t < 8; t++) {
-    await addSub({
-      task: tDinner, team: teamIds[t], status: "approved", points: 15,
-      submittedH: -40 - t, reviewedH: -30 - t, text: "New stall unlocked 🍜",
-    });
-  }
-  for (let t = 8; t < 12; t++) {
-    await addSub({
-      task: tDinner, team: teamIds[t], status: "pending",
-      submittedH: -6 - t, text: "Dinner adventure complete!",
-    });
-  }
-  const rejectedDinner = await addSub({
-    task: tDinner, team: teamIds[12], status: "superseded",
-    note: "We can't see the food. Resubmit with the dishes visible please!",
-    submittedH: -30, reviewedH: -26,
-  });
-  await addSub({
-    task: tDinner, team: teamIds[12], status: "pending",
-    resubOf: rejectedDinner, submittedH: -3,
-    text: "Take two, full spread this time 🍽️",
-  });
-
-  // Sweep (before-cutoff bonus): pending queue + one rejected needing action
-  for (let t = 2; t < 6; t++) {
-    await addSub({
-      task: tSweep, team: teamIds[t], status: "pending",
-      submittedH: -2 - t, text: "Abbey Road, aisle 4 🛒", photos: 3,
-    });
-  }
-  await addSub({
-    task: tSweep, team: teamIds[6], status: "rejected",
-    note: "Love it, but we need all 4 grid photos. Add the close-up!",
-    submittedH: -20, reviewedH: -12, photos: 1,
-  });
-
-  // Gratitude: one approved submission and another team's pending submission.
-  await addSub({ task: tGratitude, team: teamIds[0], status: "approved", points: 5, submittedH: -50, reviewedH: -45, photos: 1, text: "Grateful for kopi ☕" });
-  await addSub({ task: tGratitude, team: teamIds[1], status: "pending", submittedH: -2, photos: 1, text: "Grateful for my pal 🥹" });
-
-  // Pairings for movie night: accepted+approved joint sub, pending invite, declined
-  console.log("Pairings…");
-  async function addPairing(
-    task: string, teamIds: string[],
-    status: "pending" | "accepted" | "declined"
-  ): Promise<string> {
-    const acceptedTeamIds = status === "accepted" ? teamIds : [teamIds[0]];
-    const { data, error } = await db
-      .from("pairings")
-      .insert({
-        task_id: task,
-        team_ids: teamIds,
-        accepted_team_ids: acceptedTeamIds,
-        status,
-        created_by_team: teamIds[0],
-      })
-      .select("id")
-      .single();
-    if (error) die("pairing", error);
-    return data.id;
-  }
-
-  const movieAccepted = await addPairing(tMovie, [teamIds[0], teamIds[1], teamIds[2]], "accepted");
-  await addSub({
-    task: tMovie, team: teamIds[0], pairing: movieAccepted,
-    status: "approved", points: 38, // 25 × 1.5 rounded
-    submittedH: -10, reviewedH: -5, photos: 3,
-    text: "Double date movie night, 10/10 would recommend 🍿",
-  });
-  const moviePending2 = await addPairing(tMovie, [teamIds[3], teamIds[4], teamIds[5]], "accepted");
-  await addSub({
-    task: tMovie, team: teamIds[3], pairing: moviePending2,
-    status: "pending", submittedH: -1, photos: 1, videos: 2,
-    text: "Two short clips from our horror movie night 👻",
-  });
-  await addPairing(tMovie, [teamIds[6], teamIds[7], teamIds[8]], "pending");
-  await addPairing(tMovie, [teamIds[9], teamIds[10], teamIds[11]], "declined");
-  await addPairing(tPicnic, [teamIds[8], teamIds[2]], "pending");
-
-  // Manual bonuses
-  console.log("Bonuses…");
-  const { error: bonusError } = await db.from("bonus_awards").insert([
-    { team_id: teamIds[1], points: 10, reason: "Best team spirit at the ice cream social", awarded_by: adminId },
-    { team_id: teamIds[4], points: 5, reason: "Helped set up movie night for everyone", awarded_by: adminId },
-    { team_id: teamIds[9], points: -5, reason: "Late to the scavenger briefing (sorry!)", awarded_by: adminId },
-  ]);
-  if (bonusError) die("bonus_awards", bonusError);
-
-  // Announcements
-  console.log("Announcements…");
-  const { error: annError } = await db.from("announcements").insert([
-    {
-      title: "Welcome to PGPals! 🎉", pinned: true, created_by: adminId,
-      body: `PGPals runs ${EVENT_START_LABEL} to ${EVENT_END_LABEL}, all times SGT.\n\nHere's how it works:\n\n1. Complete tasks with your pal\n2. Capture photo or video proof\n3. Earn PGP Coins and climb the board\n\n${PRIZE_TAGLINE}\n\nNew tasks drop through the event, so check back often! Questions? Find any RA at the lounge.`,
-    },
-    {
-      title: `${PRIZE_POOL_VALUE_LABEL} prize pool is in play 🎁`, pinned: false, created_by: adminId,
-      body: `Top ${PRIZE_WINNER_COUNT} teams win from the tech pool, led by the iPad grand prize. ${PRIZE_REVEAL_TEASER} ${PARTICIPATION_REWARD.blurb} ${LUCKY_DRAW.blurb}`,
-    },
-    {
-      title: "Movie night pair task is live 🎬", pinned: false, created_by: adminId,
-      body: "Team up with two other resident teams for **1.5× coins** if you submit in the next two days. The group feature is on the task page!",
-    },
-    {
-      title: `Leaderboard goes dark around ${LEADERBOARD_HIDE_LABEL} 🤫`, pinned: false, created_by: adminId,
-      body: `The board hides before the final stretch, and final standings are revealed live at the prize ceremony on ${PRIZE_CEREMONY_LABEL}. Make those last coins count!`,
-    },
-  ]);
-  if (annError) die("announcements", annError);
+  const adminId = await seedAdminAccess();
+  await seedTasks(adminId);
+  await verifyFinalState();
 
   console.log(`
-✅ Seed complete!
+✅ Final event seed complete.
 
-  Admin:        ${adminResult.email} / ${PASSWORD}
-  Participant:  ${residentEmail(0)} / ${PASSWORD}   (team "${TEAM_NAMES[0]}")
-  Participant:  ${residentEmail(24)} / ${PASSWORD}   (team "${TEAM_NAMES[12]}", has a resubmission)
-  Not signed up yet (to demo signup): ${residentEmail(15)}
+  Final challenges: 100 (50 in Week 1, 50 in Week 2)
+  RA allowlist:     ${FINAL_RA_ACCOUNTS.length} named RAs + 1 shared admin
+  Auth users:       1 shared admin
+  Teams/roster:     empty and ready for the final import
+  Activity data:    empty
 
-  All ${TEAM_NAMES.length} teams, ${TEAM_NAMES.length * 2 - NOT_SIGNED_UP.size} users share the password ${PASSWORD}.
+  Shared admin email: ${SHARED_ADMIN_EMAIL}
+  The password is loaded from PGPALS_SHARED_ADMIN_PASSWORD and is not printed.
 `);
 }
 
-main().catch((e) => die("main", e));
+main().catch((error) => die("main", error));
