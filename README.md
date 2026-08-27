@@ -334,7 +334,8 @@ Participant copy recommends compressing each video below 5 MB for faster, more
 reliable mobile uploads; this is guidance, not an additional rejection limit.
 Before processing, the browser checks the original file name and sampled
 metadata regions for common AI-generator signatures. Matches are blocked and a
-clean check is shown to the participant, but this lightweight deterrent is not
+generic AI-check failure is shown; successful checks stay silent. Participant
+copy does not disclose the metadata signals. This lightweight deterrent is not
 a content classifier and RA review remains authoritative.
 Before upload, the database reserves one fixed batch for the team and the app
 server issues short-lived signed upload tokens for those exact paths. Direct

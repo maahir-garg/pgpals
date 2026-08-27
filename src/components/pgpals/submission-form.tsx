@@ -119,10 +119,12 @@ export function SubmissionForm({
           match: await findAiMetadata(file),
         }))
       );
-      const flagged = metadataChecks.find(({ match }) => match !== null);
-      if (flagged) {
+      const flaggedFile = metadataChecks.find(
+        ({ match }) => match !== null
+      )?.file;
+      if (flaggedFile) {
         throw new Error(
-          `AI-generation metadata (${flagged.match}) was found in “${flagged.file.name}”. Use original camera media.`
+          `AI check failed for “${flaggedFile.name}”. Use original camera media.`
         );
       }
 
@@ -156,7 +158,6 @@ export function SubmissionForm({
         })
       );
       setPreviews((prev) => [...prev, ...processed]);
-      toast.success("Media metadata check passed.");
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -335,8 +336,8 @@ export function SubmissionForm({
             reliable upload.
           </p>
           <p className="font-semibold text-foreground">
-            AI-generated media is not allowed. Files are checked for known
-            AI-generation metadata and may still be rejected by an RA.
+            AI-generated media is not allowed. Files that fail our AI check
+            cannot be uploaded, and suspicious proof may be rejected by an RA.
           </p>
         </div>
 
