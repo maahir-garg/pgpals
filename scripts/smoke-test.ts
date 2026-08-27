@@ -278,7 +278,21 @@ async function main() {
   console.log("\n— Leaderboard hiding —");
   {
     const { data: before } = await participant.rpc("get_leaderboard");
-    check("leaderboard visible before hide date", (before ?? []).length > 0);
+    const participantBoard = (before ?? []) as Array<{
+      team_id: string;
+      rank: number;
+      is_mine: boolean;
+    }>;
+    check("leaderboard visible before hide date", participantBoard.length > 0);
+    check(
+      "participant leaderboard exposes only the top 20 and own team",
+      participantBoard.every((row) => row.rank <= 20 || row.is_mine) &&
+        participantBoard.filter((row) => row.rank > 20).length <= 1
+    );
+    check(
+      "participant leaderboard includes own team position",
+      participantBoard.some((row) => row.is_mine && row.team_id === myTeam)
+    );
     // temporarily move hide date into the past
     await admin.from("event_settings").update({ leaderboard_hide_at: new Date(Date.now() - 60_000).toISOString() }).eq("id", 1);
     const { data: after } = await participant.rpc("get_leaderboard");
