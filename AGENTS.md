@@ -480,10 +480,12 @@ Workflow conventions:
   does not expose a trustworthy media duration; reject longer clips.
 - Before compression or upload, the participant form samples the original
   file's first/last metadata regions and filename for common AI-generator
-  signatures. A match blocks that selection and a clean scan produces visible
-  feedback. This client-side check is an advisory deterrent, can be bypassed or
-  miss stripped metadata, and never replaces RA review; do not describe it as
-  a reliable content classifier or a database security boundary.
+  signatures. A match blocks that selection with only a generic “AI check
+  failed” message; successful checks stay silent, and participant-facing copy
+  must not disclose metadata or signature details. This client-side check is an
+  advisory deterrent, can be bypassed or miss stripped metadata, and never
+  replaces RA review; do not describe it as a reliable content classifier or a
+  database security boundary.
 - Use `formatSGT()` / `formatSGTDate()` for display times. Admin datetime inputs
   are interpreted as Singapore time.
 - Do not add marketing-style screens when the route is an app surface. The app
@@ -553,13 +555,16 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-28: made successful AI checks silent and replaced detailed detection
+  feedback with a generic failure message so participant copy does not reveal
+  the lightweight check's metadata signals.
 - 2026-08-28: kept participant navigation in the bottom bar through tablet
   widths, delayed the desktop header tabs until 1024px, and delayed the long
   brand suffix until 1280px, preventing the Home button from overlapping the
   PGPals icon on the dashboard.
 - 2026-08-28: added a lightweight pre-compression media metadata scan that
-  blocks common AI-generator signatures, confirms clean checks to participants,
-  and keeps RA review authoritative for generated or misleading proof.
+  blocks common AI-generator signatures and keeps RA review authoritative for
+  generated or misleading proof.
 - 2026-08-28: made announcement pinning actions visually unambiguous by using
   separate pin and unpin icons while retaining the pinned-state title marker.
 - 2026-08-28: added confirmed removal of individual manual bonus awards on the

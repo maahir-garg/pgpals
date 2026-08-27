@@ -163,9 +163,8 @@ export default function GuidePage() {
             <Bot className="size-6" strokeWidth={2.5} aria-hidden />
             <h2 className="mt-3 text-lg font-extrabold">Keep proof genuine</h2>
             <p className="mt-1 text-sm text-foreground/75">
-              Uploads are checked for known AI-generation markers, and RAs may
-              reject suspicious or misleading media. Submit real moments from
-              your team.
+              Uploads go through an AI check, and RAs may reject suspicious or
+              misleading media. Submit real moments from your team.
             </p>
           </CardContent>
         </Card>
