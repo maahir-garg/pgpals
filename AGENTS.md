@@ -260,6 +260,10 @@ Treat Postgres as the source of truth and security layer.
   manual bonuses so standings do not require one score query per team. Before
   the hide date, participants receive only the top 20 rows plus their own team
   if it is below the cutoff; admins retain the complete result for operations.
+- Admins can remove an individual mistaken manual bonus from the team-detail
+  page after a confirmation. The existing admin-only `bonus_awards` RLS policy
+  protects deletion, and computed team/leaderboard totals update immediately;
+  participants can still only read their own team's bonus history.
 - The leaderboard hide date is enforced by `get_leaderboard()`, not just the UI.
 - Private submission photos and videos live in the `submissions` storage bucket. UI access
   goes through server-generated signed URLs after an RLS-checked read.
@@ -535,6 +539,9 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-28: added confirmed removal of individual manual bonus awards on the
+  admin team-detail page so accidental awards or penalties can be reversed and
+  computed scores update immediately.
 - 2026-08-28: repaired the admin team-name editor so its Rename action remains
   usable for valid names, validates the same 2–40 character range as the
   participant editor, handles duplicates clearly, and refreshes team displays.

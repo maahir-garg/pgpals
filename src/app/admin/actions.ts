@@ -341,6 +341,25 @@ export async function grantBonus(input: {
   return { ok: true, message: "Bonus granted." };
 }
 
+export async function removeBonusAward(input: {
+  teamId: string;
+  bonusId: string;
+}): Promise<ActionResult> {
+  const supabase = await adminClient();
+  const { data, error } = await supabase
+    .from("bonus_awards")
+    .delete()
+    .eq("id", input.bonusId)
+    .eq("team_id", input.teamId)
+    .select("id")
+    .maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: "Bonus award not found." };
+  revalidateAdmin();
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Bonus award removed." };
+}
+
 // -------------------------------------------------------- announcements ---
 
 export async function saveAnnouncement(input: {
