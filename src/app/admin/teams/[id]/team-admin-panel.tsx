@@ -66,20 +66,33 @@ export function TeamAdminPanel({
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="team-name">Team name</Label>
-            <div className="flex gap-2">
+            <form
+              className="flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                run(
+                  () => renameTeamAdmin(team.id, name),
+                  () => {
+                    setName(name.trim());
+                    router.refresh();
+                  }
+                );
+              }}
+            >
               <Input
                 id="team-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                maxLength={40}
                 className="h-10"
               />
               <Button
-                disabled={pending || name.trim() === team.name}
-                onClick={() => run(() => renameTeamAdmin(team.id, name))}
+                type="submit"
+                disabled={pending || name.trim().length < 2}
               >
-                Rename
+                {pending ? "Renaming..." : "Rename"}
               </Button>
-            </div>
+            </form>
           </div>
 
           <div className="space-y-2">
