@@ -23,7 +23,9 @@ export function ReviewCard({
   teamLabel,
   submittedAt,
   reviewedAt,
+  reviewedBy,
   status,
+  prioritizeMedia,
 }: {
   submission: Submission;
   attachments: SignedAttachment[];
@@ -34,7 +36,9 @@ export function ReviewCard({
   teamLabel: string;
   submittedAt: string;
   reviewedAt: string | null;
+  reviewedBy: string | null;
   status: SubmissionStatus;
+  prioritizeMedia: boolean;
 }) {
   const [points, setPoints] = useState(String(preview));
   const [note, setNote] = useState("");
@@ -72,7 +76,7 @@ export function ReviewCard({
   }
 
   return (
-    <Card>
+    <Card className="review-card-viewport">
       <CardContent className="space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -82,6 +86,11 @@ export function ReviewCard({
               Submitted {submittedAt}
               {reviewedAt ? ` · reviewed ${reviewedAt}` : ""}
             </p>
+            {status === "approved" && reviewedBy && (
+              <p className="mt-1 text-xs font-semibold text-foreground">
+                Approved by {reviewedBy}
+              </p>
+            )}
           </div>
           <StatusBadge status={submission.status} />
         </div>
@@ -94,7 +103,7 @@ export function ReviewCard({
                   key={attachment.path}
                   src={attachment.url}
                   controls
-                  preload="metadata"
+                  preload="none"
                   playsInline
                   className="aspect-video w-full rounded-md bg-foreground object-contain"
                 >
@@ -111,6 +120,9 @@ export function ReviewCard({
                   <img
                     src={attachment.url}
                     alt={`Photo ${i + 1}`}
+                    loading={prioritizeMedia && i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    fetchPriority={prioritizeMedia && i === 0 ? "high" : "auto"}
                     className="aspect-video w-full rounded-md object-cover transition-transform hover:scale-[1.02]"
                   />
                 </button>

@@ -6,6 +6,7 @@ import {
   Inbox,
   Megaphone,
   Target,
+  Trophy,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -181,6 +182,7 @@ export default async function AdminOverviewPage() {
               { href: "/admin/tasks/new", label: "Create a task", icon: Target },
               { href: "/admin/announcements", label: "Post announcement", icon: Megaphone },
               { href: "/admin/teams", label: "Manage teams", icon: Users },
+              { href: "/leaderboard", label: "View / export leaderboard", icon: Trophy },
             ].map((action) => (
               <Link
                 key={action.href}

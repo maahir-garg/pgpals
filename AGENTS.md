@@ -144,6 +144,16 @@ local, and Vercel agree.
   media. The shared admin password is loaded from the gitignored
   `.env.event.local` file and is never printed or committed.
 
+- `scripts/seed-review-test.ts`
+  Additive, idempotent, local-only review-load fixture run with
+  `npm run seed:review-test` after the final seed. It refuses non-loopback
+  Supabase URLs, replaces only `[Review Test]` rows and `_review-load` private
+  media, and creates 50 pending five-attachment submissions plus approved and
+  rejected examples. It also creates fixed local RA, top-20 participant, and
+  outside-top-20 participant credentials documented in README, and verifies
+  their leaderboard scopes. `--clean` removes only these fixtures; the command
+  never reads `.env.production.local`.
+
 - `scripts/backup.ts`
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
   `--photos` to include all storage media; the flag name is legacy) into the
@@ -247,7 +257,9 @@ Treat Postgres as the source of truth and security layer.
   resubmitted before the deadline.
 - Scores are computed, not stored. `team_score()` derives one team's score;
   `get_leaderboard()` uses a set-based aggregate over approved submissions and
-  manual bonuses so standings do not require one score query per team.
+  manual bonuses so standings do not require one score query per team. Before
+  the hide date, participants receive only the top 20 rows plus their own team
+  if it is below the cutoff; admins retain the complete result for operations.
 - The leaderboard hide date is enforced by `get_leaderboard()`, not just the UI.
 - Private submission photos and videos live in the `submissions` storage bucket. UI access
   goes through server-generated signed URLs after an RLS-checked read.
@@ -344,13 +356,15 @@ npm install
 npx supabase start
 npx supabase db reset
 npm run seed
+npm run seed:review-test
 npm run dev
 ```
 
 `npm run seed` is destructive and idempotent. It creates the final participant-
 free event state locally. Use the shared teamless admin to inspect admin pages;
-import a temporary local roster only when explicitly testing participant flows,
-and do not copy that roster to production.
+run `npm run seed:review-test` when testing the 50-card media-heavy review queue
+or participant flows. The review fixture is local-only and must never be copied
+to production.
 
 ## UI And Design Conventions
 
@@ -419,11 +433,21 @@ Workflow conventions:
   "Up next" renders at most six open tasks and links to the rest.
 - The tasks page groups Closing soon / Open / Done / Closed. "Done" means the
   team or accepted group has one approved submission for the task.
+- The leaderboard displays only the top 20 teams. A participant whose team is
+  outside that group still sees a separate row with their exact rank and coin
+  total; no other teams below the cutoff are shown. RAs get an **Export CSV**
+  action on the leaderboard whose admin-only route downloads the complete
+  standings, including teams below the display cutoff.
 - Admin views are desktop-oriented and should be dense, scannable, and
   practical. The review queue is the primary surface: status tabs with counts,
   task/team filters preserved across tabs, and 50 review cards per page with
   Previous/Next pagination. The 50-card limit is a render guardrail, not a
-  cap on tasks or submissions.
+  cap on tasks or submissions. Only the first photo in each of the first two
+  cards receives eager/high loading priority; later photos lazy-load and decode
+  asynchronously, videos do not preload, and offscreen cards use
+  `content-visibility` to avoid unnecessary rendering work. Approved-tab cards
+  show the approving RA profile name and email; that attribution is admin-only
+  and is not added to participant submission history.
 - Keep using the existing shadcn/radix primitives in `src/components/ui`.
 - Keep domain components under `src/components/pgpals`.
 - Use server components for read-heavy pages when possible; use client
@@ -507,6 +531,18 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-27: added approving-RA name and email attribution to the admin-only
+  Approved review tab.
+- 2026-08-27: added an RA-only full-leaderboard CSV export while keeping the
+  on-page leaderboard limited to the top 20 teams.
+- 2026-08-27: added an isolated local-only review-load seed with 50 pending
+  five-attachment submissions, reviewed examples, representative private media,
+  fixed RA/top-20/outside-top-20 test accounts, idempotent fixture cleanup, and
+  a strict loopback URL guard; production seeding remains unchanged.
+- 2026-08-27: made the RA review queue media-aware: only the first photo in each
+  of the first two cards gets eager/high loading priority, later photos
+  lazy-load and decode asynchronously, videos wait for playback before loading,
+  and offscreen cards skip rendering work.
 - 2026-08-19: made password recovery reliable across browsers and email apps
   without requiring custom SMTP: reset requests now use an implicit-flow client,
   `/auth/recovery` turns the returned fragment into an SSR cookie session, and

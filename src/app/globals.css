@@ -135,6 +135,12 @@
   animation: wiggle 0.4s ease-in-out;
 }
 
+/* Keep long RA review queues cheap until each card approaches the viewport. */
+.review-card-viewport {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .transition-bouncy {
     transition: none;

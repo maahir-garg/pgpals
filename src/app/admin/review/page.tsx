@@ -10,7 +10,7 @@ import { formatSGT } from "@/lib/datetime";
 import { describeBonus } from "@/lib/bonus";
 import { cn } from "@/lib/utils";
 import { ReviewCard } from "./review-card";
-import type { Pairing, Submission, Task, Team } from "@/lib/types";
+import type { Pairing, Profile, Submission, Task, Team } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Review queue" };
 
@@ -72,6 +72,14 @@ export default async function ReviewPage({
   const pairingIds = [
     ...new Set(submissions.map((s) => s.pairing_id).filter(Boolean)),
   ] as string[];
+  const reviewerIds =
+    status === "approved"
+      ? [
+          ...new Set(
+            submissions.map((submission) => submission.reviewer_id).filter(Boolean)
+          ),
+        ] as string[]
+      : [];
   const previewPromise =
     status === "pending" && submissions.length > 0
       ? supabase.rpc("admin_submission_award_previews", {
@@ -84,12 +92,21 @@ export default async function ReviewPage({
     { data: pairingsData },
     attachmentUrlByPath,
     { data: previewData },
+    { data: reviewersData },
   ] = await Promise.all([
     pairingIds.length > 0
       ? supabase.from("pairings").select("*").in("id", pairingIds)
       : Promise.resolve({ data: [] as Pairing[] }),
     getSignedAttachmentUrlMap(submissions.flatMap((s) => s.photo_paths)),
     previewPromise,
+    reviewerIds.length > 0
+      ? supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", reviewerIds)
+      : Promise.resolve({
+          data: [] as Pick<Profile, "id" | "full_name" | "email">[],
+        }),
   ]);
   const pairings = (pairingsData ?? []) as Pairing[];
   const countByStatus = new Map<(typeof STATUSES)[number], number>(
@@ -107,6 +124,11 @@ export default async function ReviewPage({
   const taskById = new Map(tasks.map((t) => [t.id, t]));
   const teamName = new Map(teams.map((t) => [t.id, t.name]));
   const pairingById = new Map(pairings.map((p) => [p.id, p]));
+  const reviewerById = new Map(
+    ((reviewersData ?? []) as Pick<Profile, "id" | "full_name" | "email">[]).map(
+      (reviewer) => [reviewer.id, reviewer]
+    )
+  );
   const previewBySubmission = new Map<string, number>(
     ((previewData ?? []) as { submission_id: string; points: number }[]).map(
       (row) => [row.submission_id, Number(row.points)]
@@ -117,6 +139,7 @@ export default async function ReviewPage({
     const task = taskById.get(s.task_id);
     const pairing = s.pairing_id ? pairingById.get(s.pairing_id) : null;
     const creditedTeamIds = pairing?.team_ids ?? [s.team_id];
+    const reviewer = s.reviewer_id ? reviewerById.get(s.reviewer_id) : null;
     return {
       submission: s,
       attachments: signedAttachments(s.photo_paths, attachmentUrlByPath),
@@ -127,6 +150,12 @@ export default async function ReviewPage({
       teamLabel: creditedTeamIds.map((id) => teamName.get(id) ?? "?").join(" + "),
       submittedAt: formatSGT(s.submitted_at),
       reviewedAt: s.reviewed_at ? formatSGT(s.reviewed_at) : null,
+      reviewedBy:
+        status === "approved"
+          ? reviewer
+            ? `${reviewer.full_name} (${reviewer.email})`
+            : "Unknown or deleted RA account"
+          : null,
     };
   });
 
@@ -235,8 +264,13 @@ export default async function ReviewPage({
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {cards.map((card) => (
-            <ReviewCard key={card.submission.id} {...card} status={status} />
+          {cards.map((card, index) => (
+            <ReviewCard
+              key={card.submission.id}
+              {...card}
+              status={status}
+              prioritizeMedia={index < 2}
+            />
           ))}
         </div>
       )}

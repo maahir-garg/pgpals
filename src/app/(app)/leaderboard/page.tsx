@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Gift, Lock, Trophy } from "lucide-react";
+import { Download, Gift, Lock, Trophy } from "lucide-react";
 import { requireProfile, getEventSettings } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
 import {
@@ -12,10 +12,13 @@ import {
   PRIZE_WINNER_COUNT,
 } from "@/lib/prizes";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { LeaderboardRow } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Leaderboard" };
+
+const LEADERBOARD_DISPLAY_LIMIT = 20;
 
 export default async function LeaderboardPage() {
   const { supabase, profile } = await requireProfile();
@@ -53,8 +56,13 @@ export default async function LeaderboardPage() {
   }
 
   const mine = rows.find((r) => r.is_mine);
-  const prizeRows = rows.slice(0, PRIZE_WINNER_COUNT);
-  const rest = rows.slice(PRIZE_WINNER_COUNT);
+  const visibleRows = rows.slice(0, LEADERBOARD_DISPLAY_LIMIT);
+  const mineOutsideTop =
+    mine && !visibleRows.some((row) => row.team_id === mine.team_id)
+      ? mine
+      : undefined;
+  const prizeRows = visibleRows.slice(0, PRIZE_WINNER_COUNT);
+  const rest = visibleRows.slice(PRIZE_WINNER_COUNT);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -64,12 +72,22 @@ export default async function LeaderboardPage() {
             Leaderboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Team standings by PGP Coins earned.
+            Top {LEADERBOARD_DISPLAY_LIMIT} teams by PGP Coins earned.
           </p>
         </div>
-        <span className="grid size-11 shrink-0 rotate-3 place-items-center rounded-xl border-2 border-foreground bg-accent shadow-pop-sm">
-          <Trophy className="size-5 text-accent-foreground" strokeWidth={2.5} aria-hidden />
-        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          {profile.role === "admin" && (
+            <Button asChild size="sm" variant="outline">
+              <a href="/leaderboard/export">
+                <Download className="size-4" aria-hidden />
+                Export CSV
+              </a>
+            </Button>
+          )}
+          <span className="grid size-11 shrink-0 rotate-3 place-items-center rounded-xl border-2 border-foreground bg-accent shadow-pop-sm">
+            <Trophy className="size-5 text-accent-foreground" strokeWidth={2.5} aria-hidden />
+          </span>
+        </div>
       </div>
 
       <div className="rounded-xl border-2 border-foreground bg-secondary/25 px-4 py-4">
@@ -109,14 +127,25 @@ export default async function LeaderboardPage() {
           </p>
         )}
 
-      {mine && (
+      {mineOutsideTop ? (
+        <div className="space-y-2">
+          <h2 className="text-sm font-extrabold uppercase tracking-wide text-muted-foreground">
+            Your position
+          </h2>
+          <Card className="bg-primary/10">
+            <CardContent>
+              <LeaderRow row={mineOutsideTop} />
+            </CardContent>
+          </Card>
+        </div>
+      ) : mine ? (
         <div className="flex items-center justify-between gap-3 rounded-xl border-2 border-foreground bg-primary px-4 py-3 text-sm text-primary-foreground shadow-pop md:hidden">
           <span className="font-bold">Your team is #{mine.rank}</span>
           <span className="shrink-0 font-heading font-extrabold">
             {mine.points} coins
           </span>
         </div>
-      )}
+      ) : null}
 
       {rows.length === 0 ? (
         <Card>
@@ -125,16 +154,21 @@ export default async function LeaderboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="divide-y-2 divide-dashed divide-border">
-            {prizeRows.map((row) => (
-              <LeaderRow key={row.team_id} row={row} highlight />
-            ))}
-            {rest.map((row) => (
-              <LeaderRow key={row.team_id} row={row} />
-            ))}
-          </CardContent>
-        </Card>
+        <div className="space-y-2">
+          <h2 className="text-sm font-extrabold uppercase tracking-wide text-muted-foreground">
+            Top {LEADERBOARD_DISPLAY_LIMIT} teams
+          </h2>
+          <Card>
+            <CardContent className="divide-y-2 divide-dashed divide-border">
+              {prizeRows.map((row) => (
+                <LeaderRow key={row.team_id} row={row} highlight />
+              ))}
+              {rest.map((row) => (
+                <LeaderRow key={row.team_id} row={row} />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

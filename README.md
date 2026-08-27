@@ -56,6 +56,7 @@ npm install
 npx supabase start        # first run downloads images (~5 min)
 npx supabase db reset     # applies supabase/migrations/*
 npm run seed              # destructive final seed: tasks + RA access, no residents
+npm run seed:review-test  # local-only 50-card media-heavy review fixture
 npm run dev               # http://localhost:3000
 ```
 
@@ -75,6 +76,21 @@ users, then recreates the final tasks and admin access. It refuses non-local
 URLs. The shared admin password is read from the gitignored
 `.env.event.local` file through `PGPALS_SHARED_ADMIN_PASSWORD`; it is never
 printed by the seed or committed.
+
+For RA review and participant-flow testing, run `npm run seed:review-test`
+after the normal seed. It refuses non-loopback Supabase URLs and replaces only
+its own `[Review Test]` rows and `_review-load` private media. It creates 50
+pending five-attachment submissions, five approved and five rejected examples,
+and these local-only accounts:
+
+| Role | Email | Password |
+|---|---|---|
+| RA | `review.ra@pgpals.local` | `LocalReviewRA2026!` |
+| Top-20 participant | `review.participant@pgpals.local` | `LocalReviewPlayer2026!` |
+| Outside-top-20 participant | `review.outside20@pgpals.local` | `LocalOutside20Player2026!` |
+
+Remove only these fixtures with `npm run seed:review-test -- --clean`. The
+production seed and production environment file are never used by this command.
 
 ---
 
@@ -291,6 +307,8 @@ queue shows the auto amount and lets you override it.
   the residents, they see it verbatim.
 - The review queue shows 50 submissions per page. Use Next/Previous to move
   through a backlog; 50 is a rendering guardrail, not a task/submission cap.
+- The admin-only **Approved** tab identifies the RA account that approved each
+  submission by name and email.
 - Approve = coins auto-computed (bonus included). Only override the number
   for special cases.
 - Misclicked? *Review → Approved or Rejected tab → Undo review* puts it back
@@ -346,8 +364,9 @@ task drops.
 
 ## After the event
 
-- Export final standings: log in as admin, screenshot/copy the leaderboard
-  (or Studio → SQL: `select * from get_leaderboard();`).
+- Export final standings: log in as an RA, open the leaderboard, and select
+  **Export CSV**. The page shows the top 20, but the RA-only download contains
+  every team. The SQL fallback is `select * from get_leaderboard();` in Studio.
 - Photos: keep them for the montage, or reclaim storage in *Studio → SQL*:
   ```sql
   -- ⚠️ permanently deletes every submission photo
@@ -363,6 +382,7 @@ task drops.
 supabase/migrations/   schema + RLS + RPCs (the security lives here)
 scripts/final-event-data.ts  final 100 challenges and RA allowlist
 scripts/seed.ts        destructive final local/production cutover
+scripts/seed-review-test.ts  local-only media-heavy RA review fixture
 scripts/backup.ts      point-in-time backup (npm run backup:prod -- --photos)
 scripts/smoke-test.ts  security checks against a live DB
 scripts/render-test.ts page render checks against a running dev server
@@ -386,7 +406,9 @@ Design notes worth knowing before editing:
 - **Scores are computed, never stored**: `team_score()` still gives one-team
   totals, while `get_leaderboard()` uses a set-based aggregate over approved
   submissions and bonus awards so the leaderboard does not call `team_score()`
-  once per team. The leaderboard RPC wraps this with the hide-date check.
+  once per team. Before the hide date, participant calls return the top 20 plus
+  their own team when it falls below the cutoff; admin calls retain the complete
+  standings. The RPC also enforces the hide date.
 - **Performance-sensitive reads stay narrow**: app pages load profile via
   `get_my_profile()`, admin count cards use aggregate RPCs, and review/task
   attachment URLs are signed in batches. Do not reintroduce broad `select("*")`
