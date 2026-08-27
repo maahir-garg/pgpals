@@ -223,13 +223,26 @@ export async function renameTeamAdmin(
   teamId: string,
   name: string
 ): Promise<ActionResult> {
+  const trimmed = name.trim();
+  if (trimmed.length < 2 || trimmed.length > 40) {
+    return { ok: false, error: "Team name must be 2–40 characters." };
+  }
   const supabase = await adminClient();
   const { error } = await supabase
     .from("teams")
-    .update({ name: name.trim() })
+    .update({ name: trimmed })
     .eq("id", teamId);
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    return {
+      ok: false,
+      error:
+        error.code === "23505"
+          ? "That team name is already in use."
+          : error.message,
+    };
+  }
   revalidateAdmin();
+  revalidatePath("/dashboard");
   return { ok: true, message: "Team renamed." };
 }
 

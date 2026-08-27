@@ -448,6 +448,10 @@ Workflow conventions:
   `content-visibility` to avoid unnecessary rendering work. Approved-tab cards
   show the approving RA profile name and email; that attribution is admin-only
   and is not added to participant submission history.
+- The admin team-detail name field is an immediately editable 2–40 character
+  form. Its Rename action stays available for valid text, supports Enter,
+  reports duplicate names clearly, and refreshes both admin and participant
+  team-name displays after saving.
 - Keep using the existing shadcn/radix primitives in `src/components/ui`.
 - Keep domain components under `src/components/pgpals`.
 - Use server components for read-heavy pages when possible; use client
@@ -531,6 +535,9 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-28: repaired the admin team-name editor so its Rename action remains
+  usable for valid names, validates the same 2–40 character range as the
+  participant editor, handles duplicates clearly, and refreshes team displays.
 - 2026-08-27: added approving-RA name and email attribution to the admin-only
   Approved review tab.
 - 2026-08-27: added an RA-only full-leaderboard CSV export while keeping the
