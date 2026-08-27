@@ -456,6 +456,9 @@ Workflow conventions:
   form. Its Rename action stays available for valid text, supports Enter,
   reports duplicate names clearly, and refreshes both admin and participant
   team-name displays after saving.
+- Announcement action buttons use `Pin` for an unpinned announcement and
+  `PinOff` for a pinned announcement so the next action is visually distinct;
+  the small `Pin` beside a title remains the current-state indicator.
 - Keep using the existing shadcn/radix primitives in `src/components/ui`.
 - Keep domain components under `src/components/pgpals`.
 - Use server components for read-heavy pages when possible; use client
@@ -539,6 +542,8 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-28: made announcement pinning actions visually unambiguous by using
+  separate pin and unpin icons while retaining the pinned-state title marker.
 - 2026-08-28: added confirmed removal of individual manual bonus awards on the
   admin team-detail page so accidental awards or penalties can be reversed and
   computed scores update immediately.

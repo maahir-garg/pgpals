@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Pin, Trash2 } from "lucide-react";
+import { Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { deleteAnnouncement, saveAnnouncement, togglePin } from "../actions";
 import { formatSGT } from "@/lib/datetime";
@@ -127,7 +127,11 @@ export function AnnouncementsManager({
                     aria-label={a.pinned ? "Unpin announcement" : "Pin announcement"}
                     title={a.pinned ? "Unpin" : "Pin"}
                   >
-                    <Pin className="size-4" aria-hidden />
+                    {a.pinned ? (
+                      <PinOff className="size-4" aria-hidden />
+                    ) : (
+                      <Pin className="size-4" aria-hidden />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"
