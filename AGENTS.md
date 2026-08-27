@@ -473,6 +473,12 @@ Workflow conventions:
   photos, 50 MB videos, 100 MB combined video bytes, object existence, and exact
   batch ownership. Duration remains an RA review rule because Storage metadata
   does not expose a trustworthy media duration; reject longer clips.
+- Before compression or upload, the participant form samples the original
+  file's first/last metadata regions and filename for common AI-generator
+  signatures. A match blocks that selection and a clean scan produces visible
+  feedback. This client-side check is an advisory deterrent, can be bypassed or
+  miss stripped metadata, and never replaces RA review; do not describe it as
+  a reliable content classifier or a database security boundary.
 - Use `formatSGT()` / `formatSGTDate()` for display times. Admin datetime inputs
   are interpreted as Singapore time.
 - Do not add marketing-style screens when the route is an app surface. The app
@@ -542,6 +548,9 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-28: added a lightweight pre-compression media metadata scan that
+  blocks common AI-generator signatures, confirms clean checks to participants,
+  and keeps RA review authoritative for generated or misleading proof.
 - 2026-08-28: made announcement pinning actions visually unambiguous by using
   separate pin and unpin icons while retaining the pinned-state title marker.
 - 2026-08-28: added confirmed removal of individual manual bonus awards on the
