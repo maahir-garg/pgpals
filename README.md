@@ -324,7 +324,7 @@ queue shows the auto amount and lets you override it.
 | Team wants a name change | They can rename themselves on their dashboard (✏️ next to the name) |
 | Submitted the wrong proof | Reject with a note; they can resubmit until the deadline |
 | Pair invite stuck | Either team can cancel/decline on the task page; admins can delete pairings in Studio if truly wedged |
-| Extra coins for event participation | *Admin → Teams → (team) → Grant bonus* (negative numbers work as penalties) |
+| Extra coins for event participation | *Admin → Teams → (team) → Grant bonus* (negative numbers work as penalties; mistaken awards can be removed from the same page) |
 
 **Storage budget (the one thing that can bite)**
 Photos start at up to 15 MB and are compressed on-device to roughly 300 KB.

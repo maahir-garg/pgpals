@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/data";
 import { formatSGT } from "@/lib/datetime";
 import { StatusBadge } from "@/components/pgpals/badges";
 import { Card, CardContent } from "@/components/ui/card";
+import { BonusAwardsList } from "./bonus-awards-list";
 import { TeamAdminPanel } from "./team-admin-panel";
 import type {
   BonusAward,
@@ -90,28 +91,7 @@ export default async function AdminTeamPage({
 
       <section className="space-y-2">
         <h2 className="font-bold">Bonus coins</h2>
-        {bonuses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No manual bonuses yet.</p>
-        ) : (
-          <Card>
-            <CardContent className="divide-y">
-              {bonuses.map((b) => (
-                <div key={b.id} className="flex items-center justify-between py-2 text-sm">
-                  <div>
-                    <div className="font-semibold">{b.reason}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {formatSGT(b.created_at)}
-                    </div>
-                  </div>
-                  <span className="font-bold text-primary">
-                    {b.points > 0 ? "+" : ""}
-                    {b.points}
-                  </span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+        <BonusAwardsList teamId={team.id} bonuses={bonuses} />
       </section>
 
       <section className="space-y-2">
