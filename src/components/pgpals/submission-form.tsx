@@ -9,6 +9,7 @@ import {
   reserveSubmissionUploads,
   submitTask,
 } from "@/app/(app)/actions";
+import { findAiMetadata } from "@/lib/ai-metadata";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,7 +53,8 @@ function getVideoDuration(file: File): Promise<number> {
   });
 }
 
-// Mixed-media proof form. Images are compressed in the browser (~300 KB,
+// Mixed-media proof form. Original file metadata is screened for common AI
+// generator signatures before images are compressed in the browser (~300 KB,
 // max 1600px). Every file path and upload token is reserved server-side.
 export function SubmissionForm({
   taskId,
@@ -111,6 +113,19 @@ export function SubmissionForm({
     }
     setCompressing(true);
     try {
+      const metadataChecks = await Promise.all(
+        files.map(async (file) => ({
+          file,
+          match: await findAiMetadata(file),
+        }))
+      );
+      const flagged = metadataChecks.find(({ match }) => match !== null);
+      if (flagged) {
+        throw new Error(
+          `AI-generation metadata (${flagged.match}) was found in “${flagged.file.name}”. Use original camera media.`
+        );
+      }
+
       const processed = await Promise.all(
         files.map(async (file): Promise<Preview> => {
           if (VIDEO_TYPES.has(file.type)) {
@@ -141,6 +156,7 @@ export function SubmissionForm({
         })
       );
       setPreviews((prev) => [...prev, ...processed]);
+      toast.success("Media metadata check passed.");
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -292,7 +308,7 @@ export function SubmissionForm({
               aria-label="Add photos or videos"
             >
               {compressing ? (
-                <span className="text-sm font-semibold">...</span>
+                <span className="text-xs font-semibold">Checking...</span>
               ) : (
                 <ImagePlus className="size-6" aria-hidden />
               )}
@@ -319,8 +335,8 @@ export function SubmissionForm({
             reliable upload.
           </p>
           <p className="font-semibold text-foreground">
-            AI-generated media is not allowed. Every upload is screened by
-            our AI checker and may be rejected.
+            AI-generated media is not allowed. Files are checked for known
+            AI-generation metadata and may still be rejected by an RA.
           </p>
         </div>
 

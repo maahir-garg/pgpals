@@ -332,6 +332,10 @@ Each submission accepts five total attachments, including up to three videos;
 each video is capped at 60 seconds and 50 MB, with a 100 MB combined video cap.
 Participant copy recommends compressing each video below 5 MB for faster, more
 reliable mobile uploads; this is guidance, not an additional rejection limit.
+Before processing, the browser checks the original file name and sampled
+metadata regions for common AI-generator signatures. Matches are blocked and a
+clean check is shown to the participant, but this lightweight deterrent is not
+a content classifier and RA review remains authoritative.
 Before upload, the database reserves one fixed batch for the team and the app
 server issues short-lived signed upload tokens for those exact paths. Direct
 browser uploads outside a reservation are blocked. Final submission checks the
