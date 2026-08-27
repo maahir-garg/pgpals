@@ -422,6 +422,11 @@ comes from shapes, chunky borders, and hard shadows around them.
 Workflow conventions:
 
 - Participants are mobile-first, but layouts should scale to desktop.
+- Participant navigation stays in the fixed bottom bar through tablet widths
+  and moves into the header only at the `lg` breakpoint (1024px), preventing
+  the Home tab from crowding the PGPals brand and account actions. The full
+  “The Emerald Challenge” brand suffix appears at `xl` (1280px), after the
+  desktop navigation already has comfortable space.
 - Keep the shared emergency contact card visible on participant Home and near
   the top of `/guide`. The numbers are tap-to-call links: NUS Campus Emergency
   & Security at `+65 6874 1616` (24 hours), and outside campus ambulance/fire
@@ -548,6 +553,10 @@ Clean account leftovers:
 
 ## Recent Changes
 
+- 2026-08-28: kept participant navigation in the bottom bar through tablet
+  widths, delayed the desktop header tabs until 1024px, and delayed the long
+  brand suffix until 1280px, preventing the Home button from overlapping the
+  PGPals icon on the dashboard.
 - 2026-08-28: added a lightweight pre-compression media metadata scan that
   blocks common AI-generator signatures, confirms clean checks to participants,
   and keeps RA review authoritative for generated or misleading proof.
