@@ -15,14 +15,14 @@ export default async function AppLayout({
   const score = profile.team_id ? await getMyScore(supabase) : 0;
 
   return (
-    <div className="flex min-h-dvh w-full flex-col overflow-x-clip bg-background pb-20 md:pb-8">
+    <div className="flex min-h-dvh w-full flex-col overflow-x-clip bg-background pb-20 lg:pb-8">
       <header className="sticky top-0 z-30 border-b-2 border-foreground bg-background/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-lg items-center justify-between gap-3 px-4 py-2 md:max-w-6xl">
           <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon.svg" alt="" className="size-8 rounded-lg" />
             <span className="font-heading text-lg font-extrabold tracking-tight">
-              PGPals<span className="hidden lg:inline">: The Emerald Challenge</span>
+              PGPals<span className="hidden xl:inline">: The Emerald Challenge</span>
             </span>
           </Link>
           <TopNav />

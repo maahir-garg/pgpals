@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { NAV_TABS } from "@/components/pgpals/nav-tabs";
 
-// Desktop counterpart of the bottom tab bar; hidden on phones.
+// Desktop counterpart of the bottom tab bar; tablet widths keep the bottom
+// navigation so the full tab row cannot crowd the brand and account actions.
 export function TopNav() {
   const pathname = usePathname();
   return (
-    <nav className="hidden items-center gap-1 md:flex">
+    <nav className="hidden items-center gap-1 lg:flex">
       {NAV_TABS.map((tab) => {
         const active =
           pathname === tab.href || pathname.startsWith(tab.href + "/");
