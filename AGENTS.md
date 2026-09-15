@@ -158,7 +158,14 @@ local, and Vercel agree.
   Read-only point-in-time backup (`npm run backup` / `backup:prod`,
   `--photos` to include all storage media; the flag name is legacy) into the
   gitignored `backups/` directory. It includes upload-reservation rows and exits
-  unsuccessfully if any requested media object cannot be downloaded.
+  unsuccessfully if any requested media object cannot be downloaded. Media
+  exports are grouped into Drive-friendly team/group, task, submission-time,
+  and review-status folders. `media-manifest.csv` maps each exported file to
+  its original Storage path and includes all participating teams for group
+  challenges; `README.txt` explains the contents and private-data handling. An
+  interrupted or partially failed media export can be repaired with `--resume
+  <backup-folder>`; it reuses the point-in-time table snapshot and downloads
+  only missing or empty files.
 
 - `scripts/smoke-test.ts`
   Security and rules checks against a seeded database.

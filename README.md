@@ -190,12 +190,18 @@ Git and move it only to an approved private location.
 ```bash
 npm run backup:prod -- --photos    # full backup incl. all submission media (legacy flag name)
 npm run backup:prod                # tables + auth users only (fast)
+# retry only missing media after an interrupted/failed full backup:
+npx tsx scripts/backup.ts --prod --photos --resume backups/<host>/<timestamp>
 ```
 
 Writes `backups/<host>/<timestamp>/` containing `tables.json` (every table,
-all rows), `auth-users.json`, and `photos/` (both photos and videos; legacy
-folder name). A requested media backup exits with an error if even one object
-cannot be downloaded. Passwords can't be exported, so
+all rows), `auth-users.json`, `media/`, `media-manifest.csv`, and `README.txt`.
+Media is organized into human-readable team/group, task, submission-time, and
+review-status folders. The CSV maps every exported file back to its original
+Storage path and records the submission, task, submitting team, and every team
+in a group challenge. A requested media backup exits with an error if even one
+object cannot be downloaded. The `--resume` form reuses the backup's original
+table snapshot and downloads only missing or empty media files. Passwords can't be exported, so
 a worst-case restore means users reset passwords; scores, submissions, and
 media files are all in the backup and final standings can be recomputed from
 `tables.json` alone.
