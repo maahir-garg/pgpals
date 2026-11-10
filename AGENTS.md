@@ -26,9 +26,8 @@ boundary. The UI should be ergonomic, but it is not trusted.
 
 ## Current Production Shape
 
-- Live Vercel URL: `https://pgpals.vercel.app`
-- Supabase project ref: `iobfzragbzqxmqnofvdj`
-- Vercel project: `maahir-gargs-projects/pgpals`
+- The 2026 event is over and the deployed site is offline. The notes below
+  describe how it was deployed while it ran.
 - Vercel Web Analytics is enabled and `<Analytics />` is mounted in
   `src/app/layout.tsx`.
 - `next.config.ts` applies CSP/frame protections, `nosniff`, Referrer-Policy,
@@ -45,8 +44,8 @@ boundary. The UI should be ergonomic, but it is not trusted.
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
 
-Vercel has been deployed with `vercel deploy --prod` from the local working
-tree. That means production can include uncommitted local changes. Before doing
+The production site was deployed with `vercel deploy --prod` from the local
+working tree, so production could include uncommitted local changes. Before
 GitHub-driven deployments, commit and push the current source state so GitHub,
 local, and Vercel agree.
 
